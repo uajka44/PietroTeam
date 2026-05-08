@@ -31,7 +31,6 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 5 C20 5 15 12 15 18 C15 24 20 27 25 28 C20 29 15 32 15 38 C15 44 20 51 30 51 C40 51 45 44 45 38 C45 32 40 29 35 28 C40 27 45 24 45 18 C45 12 40 5 30 5Z M30 10 C37 10 41 15 41 18 C41 22 37 25 30 27 C23 25 19 22 19 18 C19 15 23 10 30 10Z M30 33 C37 33 41 36 41 38 C41 42 37 47 30 47 C23 47 19 42 19 38 C19 36 23 33 30 33Z' fill='%23A61B22' opacity='0.06'/%3E%3C/svg%3E");
   }
 
-  /* ── HEADER ── */
   .header {
     background: var(--surface);
     padding: 20px 20px 0;
@@ -64,7 +63,6 @@
     text-transform: uppercase;
   }
 
-  /* ── SEARCH BAR ── */
   .search-wrap {
     display: flex;
     gap: 10px;
@@ -114,7 +112,6 @@
     50%       { box-shadow: 0 0 0 8px rgba(224,80,80,0); }
   }
 
-  /* ── CATEGORIES ── */
   .cats {
     display: flex;
     gap: 8px;
@@ -144,7 +141,6 @@
     font-weight: 500;
   }
 
-  /* ── LIST VIEW ── */
   #list-view {
     padding: 16px;
     display: flex;
@@ -177,24 +173,10 @@
     transition: opacity .15s;
   }
 
-  .drink-card:active,
-  .drink-card:hover {
-    background: #341018;
-    border-color: var(--accent);
-  }
+  .drink-card:active, .drink-card:hover { background: #341018; border-color: var(--accent); }
+  .drink-card:active::before, .drink-card:hover::before { opacity: 1; }
 
-  .drink-card:active::before,
-  .drink-card:hover::before {
-    opacity: 1;
-  }
-
-  .drink-icon {
-    font-size: 32px;
-    flex-shrink: 0;
-    width: 44px;
-    text-align: center;
-  }
-
+  .drink-icon { font-size: 32px; flex-shrink: 0; width: 44px; text-align: center; }
   .drink-info { flex: 1; min-width: 0; }
 
   .drink-name {
@@ -225,28 +207,13 @@
     color: var(--accent);
   }
 
-  .drink-arrow {
-    color: var(--muted);
-    font-size: 18px;
-    flex-shrink: 0;
-  }
+  .drink-arrow { color: var(--muted); font-size: 18px; flex-shrink: 0; }
 
-  /* ── EMPTY STATE ── */
-  .empty {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--muted);
-  }
-
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
   .empty-icon { font-size: 48px; margin-bottom: 12px; }
   .empty-text { font-size: 15px; }
 
-  /* ── DETAIL VIEW ── */
-  #detail-view {
-    display: none;
-    flex-direction: column;
-    min-height: 100vh;
-  }
+  #detail-view { display: none; flex-direction: column; min-height: 100vh; }
 
   .detail-header {
     background: var(--surface);
@@ -296,15 +263,9 @@
     white-space: nowrap;
   }
 
-  .tts-btn.playing {
-    background: #e05050;
-    color: #fff;
-  }
+  .tts-btn.playing { background: #e05050; color: #fff; }
 
-  /* ── VARIANT TOGGLE ── */
-  .variant-wrap {
-    padding: 16px 20px 0;
-  }
+  .variant-wrap { padding: 16px 20px 0; }
 
   .variant-toggle {
     display: flex;
@@ -329,18 +290,9 @@
     transition: all .15s;
   }
 
-  .var-btn.active {
-    background: var(--accent);
-    color: #F2E5D0;
-  }
+  .var-btn.active { background: var(--accent); color: #F2E5D0; }
 
-  /* ── DETAIL CONTENT ── */
-  .detail-body {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
+  .detail-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
 
   .section-label {
     font-size: 11px;
@@ -351,7 +303,6 @@
     margin-bottom: 10px;
   }
 
-  /* Ingredients */
   .ingredients-box {
     background: var(--card);
     border: 1px solid #3D1418;
@@ -380,12 +331,7 @@
     margin-top: 7px;
   }
 
-  /* Steps */
-  .steps-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+  .steps-list { display: flex; flex-direction: column; gap: 10px; }
 
   .step-item {
     background: var(--step-bg);
@@ -412,21 +358,10 @@
     margin-top: 1px;
   }
 
-  .step-text {
-    font-size: 15px;
-    line-height: 1.55;
-    color: var(--cream);
-  }
+  .step-text { font-size: 15px; line-height: 1.55; color: var(--cream); }
 
-  /* ── HIGHLIGHT ── */
-  mark {
-    background: rgba(200, 144, 42, 0.3);
-    color: var(--accent2);
-    border-radius: 3px;
-    padding: 0 1px;
-  }
+  mark { background: rgba(200,144,42,0.3); color: var(--accent2); border-radius: 3px; padding: 0 1px; }
 
-  /* ── GRAIN OVERLAY ── */
   body::after {
     content: '';
     position: fixed;
@@ -440,7 +375,6 @@
 </head>
 <body>
 
-<!-- ══════════ LIST VIEW ══════════ -->
 <div id="list-view-wrapper">
   <div class="header">
     <div class="logo">
@@ -448,15 +382,9 @@
       <span class="logo-sub">Przepisy</span>
     </div>
     <div class="search-wrap">
-      <input
-        class="search-box"
-        id="searchInput"
-        type="search"
+      <input class="search-box" id="searchInput" type="search"
         placeholder="Szukaj napoju lub składnika…"
-        autocomplete="off"
-        autocorrect="off"
-        spellcheck="false"
-      >
+        autocomplete="off" autocorrect="off" spellcheck="false">
       <button class="mic-btn" id="micBtn" title="Szukaj głosowo">🎙️</button>
     </div>
     <div class="cats" id="catBar">
@@ -471,7 +399,6 @@
   <div id="list-view"></div>
 </div>
 
-<!-- ══════════ DETAIL VIEW ══════════ -->
 <div id="detail-view">
   <div class="detail-header">
     <button class="back-btn" id="backBtn">←</button>
@@ -484,106 +411,47 @@
 
 <script>
 // ══════════════════════════════════════════
-//  DANE — PRZEPISY
+//  DANE
 // ══════════════════════════════════════════
 const DRINKS = [
   {
-    id: 1,
-    name: "Espresso",
-    category: "kawy",
-    icon: "☕",
+    id: 1, name: "Espresso", category: "kawy", icon: "☕",
     tags: ["shot", "klasyczne"],
-    variants: [
-      {
-        label: null,
-        ingredients: [
-          "Filiżanka na espresso z talerzykiem",
-          "1 shot espresso",
-          "Mała szklanka letniej wody",
-          "1 saszetka cukru",
-          "Łyżeczka"
-        ],
-        steps: [
-          "Podajemy wraz ze szklanką wody."
-        ]
-      }
-    ]
+    variants: [{
+      label: null,
+      ingredients: ["Filiżanka na espresso z talerzykiem","1 shot espresso","Mała szklanka letniej wody","1 saszetka cukru","Łyżeczka"],
+      steps: ["Podajemy wraz ze szklanką wody."]
+    }]
   },
   {
-    id: 2,
-    name: "Cappuccino",
-    category: "kawy",
-    icon: "☕",
+    id: 2, name: "Cappuccino", category: "kawy", icon: "☕",
     tags: ["mleko", "pianka", "klasyczne"],
     variants: [
       {
         label: "Małe",
-        ingredients: [
-          "Filiżanka 150ml z talerzykiem",
-          "1 shot espresso",
-          "Mocno spienione mleko",
-          "2 saszetki cukru",
-          "Łyżeczka"
-        ],
-        steps: [
-          "Espresso zalewamy mlekiem bardziej spienionym niż do latte. Pianka powinna mieć około 1 cm."
-        ]
+        ingredients: ["Filiżanka 150ml z talerzykiem","1 shot espresso","Mocno spienione mleko","2 saszetki cukru","Łyżeczka"],
+        steps: ["Espresso zalewamy mlekiem bardziej spienionym niż do latte. Pianka powinna mieć około 1 cm."]
       },
       {
         label: "Duże",
-        ingredients: [
-          "Filiżanka 300ml z talerzykiem",
-          "2 shoty espresso",
-          "Mocno spienione mleko",
-          "2 saszetki cukru",
-          "Łyżeczka"
-        ],
-        steps: [
-          "Espresso zalewamy mlekiem bardziej spienionym niż do latte. Pianka powinna mieć około 1 cm."
-        ]
+        ingredients: ["Filiżanka 300ml z talerzykiem","2 shoty espresso","Mocno spienione mleko","2 saszetki cukru","Łyżeczka"],
+        steps: ["Espresso zalewamy mlekiem bardziej spienionym niż do latte. Pianka powinna mieć około 1 cm."]
       }
     ]
   },
   {
-    id: 3,
-    name: "Carmelove Latte",
-    category: "kawy",
-    icon: "🍮",
+    id: 3, name: "Carmelove Latte", category: "kawy", icon: "🍮",
     tags: ["karmel", "bita śmietana", "sos"],
     variants: [
       {
         label: "Małe",
-        ingredients: [
-          "Filiżanka 300ml z talerzykiem",
-          "1,5 dozy sosu karmelowego",
-          "1 shot espresso",
-          "Lekko spienione mleko",
-          "Bita śmietana",
-          "1 saszetka cukru",
-          "Łyżeczka"
-        ],
-        steps: [
-          "Do kubka wlewamy sos karmelowy, następnie espresso.",
-          "Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.",
-          "Dodajemy bitą śmietanę. Niecałe pół pompki sosu wyciskamy na łyżeczkę, następnie polewamy nim bitą śmietanę."
-        ]
+        ingredients: ["Filiżanka 300ml z talerzykiem","1,5 dozy sosu karmelowego","1 shot espresso","Lekko spienione mleko","Bita śmietana","1 saszetka cukru","Łyżeczka"],
+        steps: ["Do kubka wlewamy sos karmelowy, następnie espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Dodajemy bitą śmietanę. Niecałe pół pompki sosu wyciskamy na łyżeczkę, następnie polewamy nim bitą śmietanę."]
       },
       {
         label: "Duże",
-        ingredients: [
-          "Filiżanka 500ml z talerzykiem",
-          "2 dozy sosu karmelowego",
-          "2 shoty espresso",
-          "Lekko spienione mleko",
-          "Bita śmietana",
-          "1 saszetka cukru",
-          "Łyżeczka"
-        ],
-        steps: [
-          "Do kubka wlewamy sos karmelowy, następnie espresso.",
-          "Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.",
-          "Dodajemy bitą śmietanę. Niecałe pół pompki sosu wyciskamy na łyżeczkę, następnie polewamy nim bitą śmietanę."
-        ]
+        ingredients: ["Filiżanka 500ml z talerzykiem","2 dozy sosu karmelowego","2 shoty espresso","Lekko spienione mleko","Bita śmietana","1 saszetka cukru","Łyżeczka"],
+        steps: ["Do kubka wlewamy sos karmelowy, następnie espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Dodajemy bitą śmietanę. Niecałe pół pompki sosu wyciskamy na łyżeczkę, następnie polewamy nim bitą śmietanę."]
       }
     ]
   }
@@ -592,15 +460,12 @@ const DRINKS = [
 // ══════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════
-let currentQuery    = '';
-let currentCategory = 'all';
-let currentDrinkId  = null;
-let currentVariant  = 0;
-let ttsActive       = false;
-let recognition     = null;
+let currentQuery = '', currentCategory = 'all';
+let currentDrinkId = null, currentVariant = 0;
+let ttsActive = false, recognition = null;
 
 // ══════════════════════════════════════════
-//  SEARCH & FILTER
+//  SEARCH
 // ══════════════════════════════════════════
 function normalize(str) {
   return str.toLowerCase()
@@ -611,33 +476,25 @@ function normalize(str) {
 
 function matches(drink, query) {
   if (!query) return true;
-  const q  = normalize(query);
-  const haystack = normalize([
-    drink.name,
-    ...(drink.tags || []),
-    ...drink.variants.flatMap(v => [...v.ingredients, ...v.steps])
-  ].join(' '));
-  return q.split(' ').every(part => haystack.includes(part));
+  const q = normalize(query);
+  const hay = normalize([drink.name, ...(drink.tags||[]),
+    ...drink.variants.flatMap(v=>[...v.ingredients,...v.steps])].join(' '));
+  return q.split(' ').every(p => hay.includes(p));
 }
 
 function highlight(text, query) {
   if (!query) return text;
-  const words = query.trim().split(/\s+/).filter(Boolean);
-  let result = text;
-  words.forEach(word => {
-    const norm = normalize(word);
-    if (norm.length < 2) return;
+  query.trim().split(/\s+/).filter(w=>normalize(w).length>1).forEach(word => {
     const re = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
-    result = result.replace(re, '<mark>$1</mark>');
+    text = text.replace(re, '<mark>$1</mark>');
   });
-  return result;
+  return text;
 }
 
 function getFiltered() {
-  return DRINKS.filter(d => {
-    const catOk = currentCategory === 'all' || d.category === currentCategory;
-    return catOk && matches(d, currentQuery);
-  });
+  return DRINKS.filter(d =>
+    (currentCategory === 'all' || d.category === currentCategory) && matches(d, currentQuery)
+  );
 }
 
 // ══════════════════════════════════════════
@@ -646,53 +503,32 @@ function getFiltered() {
 function renderList() {
   const list = document.getElementById('list-view');
   const filtered = getFiltered();
-
-  if (filtered.length === 0) {
-    list.innerHTML = `
-      <div class="empty">
-        <div class="empty-icon">🔍</div>
-        <div class="empty-text">Brak wyników dla "<strong>${currentQuery}</strong>"</div>
-      </div>`;
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Brak wyników dla "<strong>${currentQuery}</strong>"</div></div>`;
     return;
   }
-
   list.innerHTML = filtered.map(drink => {
-    const hasVariants = drink.variants.length > 1;
-    const variantsText = hasVariants
-      ? drink.variants.map(v => v.label).join(' / ')
-      : '';
-    const tagsHTML = (drink.tags || []).slice(0,3).map(t =>
-      `<span class="tag">${t}</span>`
-    ).join('');
-
-    return `
-      <div class="drink-card" data-id="${drink.id}" onclick="openDrink(${drink.id})">
-        <div class="drink-icon">${drink.icon}</div>
-        <div class="drink-info">
-          <div class="drink-name">${highlight(drink.name, currentQuery)}</div>
-          <div class="drink-meta">
-            ${variantsText ? `<span>${variantsText}</span>` : ''}
-            ${tagsHTML}
-          </div>
-        </div>
-        <div class="drink-arrow">›</div>
-      </div>`;
+    const varText = drink.variants.length > 1 ? drink.variants.map(v=>v.label).join(' / ') : '';
+    const tags = (drink.tags||[]).slice(0,3).map(t=>`<span class="tag">${t}</span>`).join('');
+    return `<div class="drink-card" onclick="openDrink(${drink.id})">
+      <div class="drink-icon">${drink.icon}</div>
+      <div class="drink-info">
+        <div class="drink-name">${highlight(drink.name, currentQuery)}</div>
+        <div class="drink-meta">${varText?`<span>${varText}</span>`:''}${tags}</div>
+      </div>
+      <div class="drink-arrow">›</div>
+    </div>`;
   }).join('');
 }
 
 // ══════════════════════════════════════════
-//  OPEN DRINK
+//  DETAIL
 // ══════════════════════════════════════════
 function openDrink(id) {
-  stopTTS();
-  currentDrinkId = id;
-  currentVariant = 0;
-  const drink = DRINKS.find(d => d.id === id);
-
+  stopTTS(); currentDrinkId = id; currentVariant = 0;
+  const drink = DRINKS.find(d=>d.id===id);
   document.getElementById('list-view-wrapper').style.display = 'none';
-  const dv = document.getElementById('detail-view');
-  dv.style.display = 'flex';
-
+  document.getElementById('detail-view').style.display = 'flex';
   document.getElementById('detailTitle').textContent = drink.name;
   renderDetail(drink);
 }
@@ -701,173 +537,99 @@ function renderDetail(drink) {
   const vw = document.getElementById('variantWrap');
   if (drink.variants.length > 1) {
     vw.style.display = 'block';
-    vw.innerHTML = `
-      <div class="variant-toggle">
-        ${drink.variants.map((v,i) => `
-          <button class="var-btn ${i === currentVariant ? 'active' : ''}"
-                  onclick="setVariant(${i})">
-            ${v.label}
-          </button>`).join('')}
-      </div>`;
-  } else {
-    vw.style.display = 'none';
-  }
+    vw.innerHTML = `<div class="variant-toggle">${drink.variants.map((v,i)=>
+      `<button class="var-btn ${i===currentVariant?'active':''}" onclick="setVariant(${i})">${v.label}</button>`
+    ).join('')}</div>`;
+  } else { vw.style.display = 'none'; }
 
-  const variant = drink.variants[currentVariant];
-  const body = document.getElementById('detailBody');
-
-  body.innerHTML = `
+  const v = drink.variants[currentVariant];
+  document.getElementById('detailBody').innerHTML = `
     <div>
       <div class="section-label">Składniki</div>
-      <div class="ingredients-box">
-        ${variant.ingredients.map(ing => `
-          <div class="ingredient-item">
-            <div class="ingredient-dot"></div>
-            <span>${ing}</span>
-          </div>`).join('')}
-      </div>
+      <div class="ingredients-box">${v.ingredients.map(ing=>
+        `<div class="ingredient-item"><div class="ingredient-dot"></div><span>${ing}</span></div>`
+      ).join('')}</div>
     </div>
     <div>
       <div class="section-label">Przygotowanie</div>
-      <div class="steps-list">
-        ${variant.steps.map((step, i) => `
-          <div class="step-item">
-            <div class="step-num">${i + 1}</div>
-            <div class="step-text">${step}</div>
-          </div>`).join('')}
-      </div>
+      <div class="steps-list">${v.steps.map((s,i)=>
+        `<div class="step-item"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`
+      ).join('')}</div>
     </div>`;
 }
 
 function setVariant(idx) {
-  stopTTS();
-  currentVariant = idx;
-  const drink = DRINKS.find(d => d.id === currentDrinkId);
-  renderDetail(drink);
+  stopTTS(); currentVariant = idx;
+  renderDetail(DRINKS.find(d=>d.id===currentDrinkId));
 }
 
 function goBack() {
-  stopTTS();
-  currentDrinkId = null;
+  stopTTS(); currentDrinkId = null;
   document.getElementById('detail-view').style.display = 'none';
   document.getElementById('list-view-wrapper').style.display = 'block';
 }
 
 // ══════════════════════════════════════════
-//  TTS — LEKTOR
+//  TTS
 // ══════════════════════════════════════════
 function buildTTSText() {
-  const drink = DRINKS.find(d => d.id === currentDrinkId);
-  const variant = drink.variants[currentVariant];
-  const varLabel = variant.label ? ` — ${variant.label}` : '';
-  let text = `${drink.name}${varLabel}. `;
-  text += 'Składniki: ';
-  text += variant.ingredients.join(', ') + '. ';
-  text += 'Przygotowanie: ';
-  text += variant.steps.map((s, i) => `Krok ${i+1}. ${s}`).join(' ');
-  return text;
+  const drink = DRINKS.find(d=>d.id===currentDrinkId);
+  const v = drink.variants[currentVariant];
+  const lbl = v.label ? ` — ${v.label}` : '';
+  return `${drink.name}${lbl}. Składniki: ${v.ingredients.join(', ')}. Przygotowanie: ${v.steps.map((s,i)=>`Krok ${i+1}. ${s}`).join(' ')}`;
 }
 
 function startTTS() {
-  if (!('speechSynthesis' in window)) {
-    alert('Twoja przeglądarka nie obsługuje lektora. Użyj Chrome.');
-    return;
-  }
+  if (!('speechSynthesis' in window)) { alert('Użyj Chrome.'); return; }
   stopTTS();
   const utt = new SpeechSynthesisUtterance(buildTTSText());
-  utt.lang = 'pl-PL';
-  utt.rate = 0.9;
-  utt.pitch = 1;
-  const voices = window.speechSynthesis.getVoices();
-  const plVoice = voices.find(v => v.lang.startsWith('pl'));
+  utt.lang = 'pl-PL'; utt.rate = 0.9;
+  const plVoice = window.speechSynthesis.getVoices().find(v=>v.lang.startsWith('pl'));
   if (plVoice) utt.voice = plVoice;
-  utt.onstart = () => {
-    ttsActive = true;
-    const btn = document.getElementById('ttsBtn');
-    btn.textContent = '⏹ Stop';
-    btn.classList.add('playing');
-  };
-  utt.onend = utt.onerror = () => {
-    ttsActive = false;
-    const btn = document.getElementById('ttsBtn');
-    btn.textContent = '▶ Czytaj';
-    btn.classList.remove('playing');
-  };
+  utt.onstart = () => { ttsActive=true; const b=document.getElementById('ttsBtn'); b.textContent='⏹ Stop'; b.classList.add('playing'); };
+  utt.onend = utt.onerror = () => { ttsActive=false; const b=document.getElementById('ttsBtn'); b.textContent='▶ Czytaj'; b.classList.remove('playing'); };
   window.speechSynthesis.speak(utt);
 }
 
 function stopTTS() {
-  window.speechSynthesis?.cancel();
-  ttsActive = false;
-  const btn = document.getElementById('ttsBtn');
-  if (btn) { btn.textContent = '▶ Czytaj'; btn.classList.remove('playing'); }
+  window.speechSynthesis?.cancel(); ttsActive=false;
+  const b=document.getElementById('ttsBtn');
+  if (b) { b.textContent='▶ Czytaj'; b.classList.remove('playing'); }
 }
 
-document.getElementById('ttsBtn').addEventListener('click', () => {
-  ttsActive ? stopTTS() : startTTS();
-});
+document.getElementById('ttsBtn').addEventListener('click', ()=>{ ttsActive?stopTTS():startTTS(); });
 
 // ══════════════════════════════════════════
 //  AUDIO BEEPS
 // ══════════════════════════════════════════
 let audioCtx = null;
-
 function getAudioCtx() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
   return audioCtx;
 }
-
-function playBeep(freq, duration, type = 'sine', volume = 0.3) {
+function playBeep(freq, dur, type='sine', vol=0.3) {
   try {
-    const ctx = getAudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, ctx.currentTime);
-    gain.gain.setValueAtTime(volume, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + duration);
-  } catch(e) {}
+    const ctx=getAudioCtx(), osc=ctx.createOscillator(), gain=ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type=type; osc.frequency.setValueAtTime(freq,ctx.currentTime);
+    gain.gain.setValueAtTime(vol,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+dur);
+  } catch(e){}
 }
-
-function beepStart() {
-  playBeep(660, 0.12);
-  setTimeout(() => playBeep(880, 0.18), 110);
-}
-
-function beepStop() {
-  playBeep(880, 0.08);
-  setTimeout(() => playBeep(550, 0.2), 70);
-}
-
-function beepError() {
-  playBeep(300, 0.3, 'sawtooth', 0.15);
-}
+function beepStart() { playBeep(660,.12); setTimeout(()=>playBeep(880,.18),110); }
+function beepStop()  { playBeep(880,.08); setTimeout(()=>playBeep(550,.2),70); }
+function beepError() { playBeep(300,.3,'sawtooth',.15); }
 
 // ══════════════════════════════════════════
 //  VOICE RECOGNITION
+//  Kluczowa zmiana: NIE wywołujemy getUserMedia z góry.
+//  Pozwalamy recognition.start() samemu wywołać dialog
+//  uprawnień — to działa poprawnie na Android Chrome
+//  bo jest bezpośrednią odpowiedzią na gest użytkownika.
 // ══════════════════════════════════════════
 const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
 const micBtn = document.getElementById('micBtn');
-let micPermissionGranted = false;
-
-async function requestMicPermission() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    stream.getTracks().forEach(t => t.stop());
-    micPermissionGranted = true;
-    micBtn.title = 'Szukaj głosowo';
-    micBtn.style.opacity = '1';
-  } catch(e) {
-    micPermissionGranted = false;
-    micBtn.title = 'Brak dostępu do mikrofonu';
-    micBtn.style.opacity = '0.35';
-    micBtn.style.cursor = 'not-allowed';
-  }
-}
 
 if (SpeechRec) {
   recognition = new SpeechRec();
@@ -876,9 +638,9 @@ if (SpeechRec) {
   recognition.interimResults = false;
 
   recognition.onresult = (e) => {
-    const transcript = e.results[0][0].transcript;
-    document.getElementById('searchInput').value = transcript;
-    currentQuery = transcript;
+    const t = e.results[0][0].transcript;
+    document.getElementById('searchInput').value = t;
+    currentQuery = t;
     renderList();
     beepStop();
     micBtn.classList.remove('listening');
@@ -893,17 +655,14 @@ if (SpeechRec) {
 
   recognition.onerror = (e) => {
     micBtn.classList.remove('listening');
+    beepError();
     if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-      beepError();
-      micBtn.style.opacity = '0.35';
-      micBtn.title = 'Brak uprawnień do mikrofonu';
       showMicHint();
-    } else {
-      beepError();
     }
   };
 
-  micBtn.addEventListener('click', async () => {
+  micBtn.addEventListener('click', () => {
+    // Odblokuj AudioContext po interakcji użytkownika
     try { getAudioCtx().resume(); } catch(e) {}
 
     if (micBtn.classList.contains('listening')) {
@@ -913,11 +672,8 @@ if (SpeechRec) {
       return;
     }
 
-    if (!micPermissionGranted) {
-      await requestMicPermission();
-      if (!micPermissionGranted) return;
-    }
-
+    // Bezpośrednio startujemy — Chrome Android sam pokaże
+    // dialog uprawnień jako reakcja na ten gest tapnięcia
     micBtn.classList.add('listening');
     beepStart();
     try {
@@ -928,8 +684,6 @@ if (SpeechRec) {
     }
   });
 
-  requestMicPermission();
-
 } else {
   micBtn.title = 'Wyszukiwanie głosowe niedostępne (użyj Chrome)';
   micBtn.style.opacity = '0.35';
@@ -937,51 +691,40 @@ if (SpeechRec) {
 }
 
 function showMicHint() {
-  const existing = document.getElementById('micHint');
-  if (existing) return;
+  if (document.getElementById('micHint')) return;
   const hint = document.createElement('div');
   hint.id = 'micHint';
-  hint.style.cssText = `
-    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-    background: #3D1418; border: 1px solid var(--accent); border-radius: 12px;
-    padding: 14px 18px; color: var(--cream); font-size: 13px; line-height: 1.5;
-    max-width: 300px; text-align: center; z-index: 500;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  `;
-  hint.innerHTML = `
-    🎙️ Brak dostępu do mikrofonu.<br>
-    <strong>Android:</strong> Kliknij 🔒 w pasku adresu → Uprawnienia → Mikrofon → Zezwól<br>
-    <strong>Desktop:</strong> Kliknij ikonę 🎙️/🔒 w pasku Chrome → Zezwól zawsze
-    <br><br><button onclick="document.getElementById('micHint').remove()"
-      style="background:var(--accent);border:none;border-radius:8px;padding:6px 16px;
-             color:#F2E5D0;cursor:pointer;font-size:13px;">OK</button>
-  `;
+  hint.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:#3D1418;border:1px solid var(--accent);border-radius:12px;
+    padding:14px 18px;color:var(--cream);font-size:13px;line-height:1.6;
+    max-width:300px;text-align:center;z-index:500;box-shadow:0 4px 20px rgba(0,0,0,.5);`;
+  hint.innerHTML = `🎙️ Brak uprawnień do mikrofonu.<br>
+    Kliknij ikonę 🔒 w pasku adresu przeglądarki → <strong>Mikrofon</strong> → <strong>Zezwól</strong>,
+    a następnie odśwież stronę.<br><br>
+    <button onclick="document.getElementById('micHint').remove()"
+      style="background:var(--accent);border:none;border-radius:8px;padding:6px 16px;color:#F2E5D0;cursor:pointer;font-size:13px;">OK</button>`;
   document.body.appendChild(hint);
-  setTimeout(() => hint?.remove(), 10000);
+  setTimeout(()=>hint?.remove(), 12000);
 }
 
 // ══════════════════════════════════════════
 //  EVENTS
 // ══════════════════════════════════════════
-document.getElementById('searchInput').addEventListener('input', (e) => {
-  currentQuery = e.target.value;
-  renderList();
+document.getElementById('searchInput').addEventListener('input', e => {
+  currentQuery = e.target.value; renderList();
 });
-
 document.getElementById('backBtn').addEventListener('click', goBack);
-
-document.getElementById('catBar').addEventListener('click', (e) => {
+document.getElementById('catBar').addEventListener('click', e => {
   const btn = e.target.closest('.cat-btn');
   if (!btn) return;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   currentCategory = btn.dataset.cat;
   renderList();
 });
 
 window.speechSynthesis?.getVoices();
-window.speechSynthesis?.addEventListener?.('voiceschanged', () => {});
-
+window.speechSynthesis?.addEventListener?.('voiceschanged', ()=>{});
 renderList();
 </script>
 </body>
