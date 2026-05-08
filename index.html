@@ -276,7 +276,8 @@ function renderDetail(drink){
   const img=v.image||drink.image||null;
   document.getElementById('detailBody').innerHTML=`
     <div><div class="section-label">Składniki</div><div class="ingredients-box">${v.ingredients.map(ing=>`<div class="ingredient-item"><div class="ingredient-dot"></div><span>${ing}</span></div>`).join('')}</div></div>
-    <div><div class="steps-label-row"><div class="section-label">Przygotowanie</div><button class="steps-play-btn" id="stepsPlayBtn" onclick="toggleStepsTTS()">▶ Czytaj kroki</button></div><div class="steps-list">${v.steps.map((s,i)=>`<div class="step-item"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('')}</div></div>`;
+    <div><div class="steps-label-row"><div class="section-label">Przygotowanie</div><button class="steps-play-btn" id="stepsPlayBtn" onclick="toggleStepsTTS()">▶ Czytaj kroki</button></div><div class="steps-list">${v.steps.map((s,i)=>`<div class="step-item"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('')}</div></div>
+    ${img?`<div class="photo-wrap"><img class="drink-photo" src="${img}" alt="" loading="lazy"></div>`:''}  `;
 }
 function setVariant(idx){stopTTS();currentVariant=idx;renderDetail(DRINKS.find(d=>d.id===currentDrinkId));}
 function goBack(){stopTTS();currentDrinkId=null;document.getElementById('detail-view').style.display='none';document.getElementById('list-view-wrapper').style.display='block';}
