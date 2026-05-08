@@ -19,9 +19,7 @@
     --step-bg:   #200A0C;
     --radius:    16px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
   body {
     background: var(--bg);
     color: var(--cream);
@@ -30,347 +28,57 @@
     overscroll-behavior: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 5 C20 5 15 12 15 18 C15 24 20 27 25 28 C20 29 15 32 15 38 C15 44 20 51 30 51 C40 51 45 44 45 38 C45 32 40 29 35 28 C40 27 45 24 45 18 C45 12 40 5 30 5Z M30 10 C37 10 41 15 41 18 C41 22 37 25 30 27 C23 25 19 22 19 18 C19 15 23 10 30 10Z M30 33 C37 33 41 36 41 38 C41 42 37 47 30 47 C23 47 19 42 19 38 C19 36 23 33 30 33Z' fill='%23A61B22' opacity='0.06'/%3E%3C/svg%3E");
   }
-
-  .header {
-    background: var(--surface);
-    padding: 20px 20px 0;
-    border-bottom: 1px solid #3D1418;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .logo {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-
-  .logo-main {
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--accent2);
-    letter-spacing: 0.5px;
-  }
-
-  .logo-sub {
-    font-size: 12px;
-    font-weight: 300;
-    color: var(--muted);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .search-wrap {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-
-  .search-box {
-    flex: 1;
-    background: var(--card);
-    border: 1.5px solid #3D1418;
-    border-radius: 12px;
-    padding: 13px 16px;
-    color: var(--cream);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 16px;
-    outline: none;
-    transition: border-color .2s;
-  }
-
+  .header { background: var(--surface); padding: 20px 20px 0; border-bottom: 1px solid #3D1418; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: baseline; gap: 8px; margin-bottom: 16px; }
+  .logo-main { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--accent2); letter-spacing: 0.5px; }
+  .logo-sub { font-size: 12px; font-weight: 300; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  .search-wrap { display: flex; gap: 10px; margin-bottom: 16px; }
+  .search-box { flex: 1; background: var(--card); border: 1.5px solid #3D1418; border-radius: 12px; padding: 13px 16px; color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 16px; outline: none; transition: border-color .2s; }
   .search-box::placeholder { color: var(--muted); }
   .search-box:focus { border-color: var(--accent); }
-
-  .mic-btn {
-    background: var(--card);
-    border: 1.5px solid #3D1418;
-    border-radius: 12px;
-    width: 50px;
-    flex-shrink: 0;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all .2s;
-    color: var(--muted);
-    font-size: 20px;
-  }
-
-  .mic-btn.listening {
-    border-color: #e05050;
-    background: #3a1010;
-    color: #e05050;
-    animation: pulse 1s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(224,80,80,.4); }
-    50%       { box-shadow: 0 0 0 8px rgba(224,80,80,0); }
-  }
-
-  .cats {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 14px;
-    scrollbar-width: none;
-  }
+  .mic-btn { background: var(--card); border: 1.5px solid #3D1418; border-radius: 12px; width: 50px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; color: var(--muted); font-size: 20px; }
+  .mic-btn.listening { border-color: #e05050; background: #3a1010; color: #e05050; animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(224,80,80,.4)} 50%{box-shadow:0 0 0 8px rgba(224,80,80,0)} }
+  .cats { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 14px; scrollbar-width: none; }
   .cats::-webkit-scrollbar { display: none; }
-
-  .cat-btn {
-    background: transparent;
-    border: 1.5px solid #3D1418;
-    border-radius: 20px;
-    padding: 6px 14px;
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all .15s;
-  }
-
-  .cat-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #F2E5D0;
-    font-weight: 500;
-  }
-
-  #list-view {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .drink-card {
-    background: var(--card);
-    border: 1px solid #3D1418;
-    border-radius: var(--radius);
-    padding: 18px 18px 16px;
-    cursor: pointer;
-    transition: all .15s;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .drink-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    background: var(--accent);
-    border-radius: 3px 0 0 3px;
-    opacity: 0;
-    transition: opacity .15s;
-  }
-
-  .drink-card:active, .drink-card:hover { background: #341018; border-color: var(--accent); }
-  .drink-card:active::before, .drink-card:hover::before { opacity: 1; }
-
-  .drink-icon { font-size: 32px; flex-shrink: 0; width: 44px; text-align: center; }
-  .drink-info { flex: 1; min-width: 0; }
-
-  .drink-name {
-    font-family: 'Playfair Display', serif;
-    font-size: 17px;
-    font-weight: 500;
-    color: var(--cream);
-    margin-bottom: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .drink-meta {
-    font-size: 12px;
-    color: var(--muted);
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .tag {
-    background: #3D1418;
-    border-radius: 6px;
-    padding: 2px 7px;
-    font-size: 11px;
-    color: var(--accent);
-  }
-
-  .drink-arrow { color: var(--muted); font-size: 18px; flex-shrink: 0; }
-
-  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
-  .empty-icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-text { font-size: 15px; }
-
-  #detail-view { display: none; flex-direction: column; min-height: 100vh; }
-
-  .detail-header {
-    background: var(--surface);
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid #3D1418;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .back-btn {
-    background: none;
-    border: none;
-    color: var(--accent);
-    font-size: 24px;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-  }
-
-  .detail-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--cream);
-    flex: 1;
-  }
-
-  .tts-btn {
-    background: var(--accent);
-    border: none;
-    border-radius: 10px;
-    padding: 8px 14px;
-    color: #F2E5D0;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all .15s;
-    white-space: nowrap;
-  }
-
-  .tts-btn.playing { background: #e05050; color: #fff; }
-
-  .variant-wrap { padding: 16px 20px 0; }
-
-  .variant-toggle {
-    display: flex;
-    background: var(--card);
-    border: 1px solid #3D1418;
-    border-radius: 12px;
-    padding: 4px;
-    gap: 4px;
-  }
-
-  .var-btn {
-    flex: 1;
-    background: none;
-    border: none;
-    border-radius: 9px;
-    padding: 10px;
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all .15s;
-  }
-
-  .var-btn.active { background: var(--accent); color: #F2E5D0; }
-
-  .detail-body { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-
-  .section-label {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 10px;
-  }
-
-  .ingredients-box {
-    background: var(--card);
-    border: 1px solid #3D1418;
-    border-radius: var(--radius);
-    padding: 16px 18px;
-  }
-
-  .ingredient-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid #3D1418;
-    font-size: 15px;
-    line-height: 1.4;
-  }
-
-  .ingredient-item:last-child { border-bottom: none; }
-
-  .ingredient-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--accent);
-    border-radius: 50%;
-    flex-shrink: 0;
-    margin-top: 7px;
-  }
-
-  .steps-list { display: flex; flex-direction: column; gap: 10px; }
-
-  .step-item {
-    background: var(--step-bg);
-    border: 1px solid #3D1418;
-    border-radius: 12px;
-    padding: 14px 16px;
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-  }
-
-  .step-num {
-    background: var(--accent);
-    color: #F2E5D0;
-    font-weight: 700;
-    font-size: 13px;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  .step-text { font-size: 15px; line-height: 1.55; color: var(--cream); }
-
-  mark { background: rgba(200,144,42,0.3); color: var(--accent2); border-radius: 3px; padding: 0 1px; }
-
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-    opacity: 0.025;
-    z-index: 999;
-  }
+  .cat-btn { background: transparent; border: 1.5px solid #3D1418; border-radius: 20px; padding: 6px 14px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; white-space: nowrap; cursor: pointer; transition: all .15s; }
+  .cat-btn.active { background: var(--accent); border-color: var(--accent); color: #F2E5D0; font-weight: 500; }
+  #list-view { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .drink-card { background: var(--card); border: 1px solid #3D1418; border-radius: var(--radius); padding: 18px 18px 16px; cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 14px; position: relative; overflow: hidden; }
+  .drink-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--accent); border-radius:3px 0 0 3px; opacity:0; transition:opacity .15s; }
+  .drink-card:active,.drink-card:hover { background:#341018; border-color:var(--accent); }
+  .drink-card:active::before,.drink-card:hover::before { opacity:1; }
+  .drink-icon { font-size:32px; flex-shrink:0; width:44px; text-align:center; }
+  .drink-info { flex:1; min-width:0; }
+  .drink-name { font-family:'Playfair Display',serif; font-size:17px; font-weight:500; color:var(--cream); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .drink-meta { font-size:12px; color:var(--muted); display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .tag { background:#3D1418; border-radius:6px; padding:2px 7px; font-size:11px; color:var(--accent); }
+  .drink-arrow { color:var(--muted); font-size:18px; flex-shrink:0; }
+  .empty { text-align:center; padding:60px 20px; color:var(--muted); }
+  .empty-icon { font-size:48px; margin-bottom:12px; }
+  .empty-text { font-size:15px; }
+  #detail-view { display:none; flex-direction:column; min-height:100vh; }
+  .detail-header { background:var(--surface); padding:16px 20px; display:flex; align-items:center; gap:12px; border-bottom:1px solid #3D1418; position:sticky; top:0; z-index:100; }
+  .back-btn { background:none; border:none; color:var(--accent); font-size:24px; cursor:pointer; padding:4px; display:flex; align-items:center; }
+  .detail-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; color:var(--cream); flex:1; }
+  .tts-btn { background:var(--accent); border:none; border-radius:10px; padding:8px 14px; color:#F2E5D0; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; display:flex; align-items:center; gap:6px; transition:all .15s; white-space:nowrap; }
+  .tts-btn.playing { background:#e05050; color:#fff; }
+  .variant-wrap { padding:16px 20px 0; }
+  .variant-toggle { display:flex; background:var(--card); border:1px solid #3D1418; border-radius:12px; padding:4px; gap:4px; }
+  .var-btn { flex:1; background:none; border:none; border-radius:9px; padding:10px; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500; cursor:pointer; transition:all .15s; }
+  .var-btn.active { background:var(--accent); color:#F2E5D0; }
+  .detail-body { padding:20px; display:flex; flex-direction:column; gap:20px; }
+  .section-label { font-size:11px; font-weight:500; letter-spacing:2px; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+  .ingredients-box { background:var(--card); border:1px solid #3D1418; border-radius:var(--radius); padding:16px 18px; }
+  .ingredient-item { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid #3D1418; font-size:15px; line-height:1.4; }
+  .ingredient-item:last-child { border-bottom:none; }
+  .ingredient-dot { width:6px; height:6px; background:var(--accent); border-radius:50%; flex-shrink:0; margin-top:7px; }
+  .steps-list { display:flex; flex-direction:column; gap:10px; }
+  .step-item { background:var(--step-bg); border:1px solid #3D1418; border-radius:12px; padding:14px 16px; display:flex; gap:14px; align-items:flex-start; }
+  .step-num { background:var(--accent); color:#F2E5D0; font-weight:700; font-size:13px; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+  .step-text { font-size:15px; line-height:1.55; color:var(--cream); }
+  mark { background:rgba(200,144,42,0.3); color:var(--accent2); border-radius:3px; padding:0 1px; }
+  body::after { content:''; position:fixed; inset:0; pointer-events:none; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E"); opacity:0.025; z-index:999; }
 </style>
 </head>
 <body>
@@ -382,18 +90,21 @@
       <span class="logo-sub">Przepisy</span>
     </div>
     <div class="search-wrap">
-      <input class="search-box" id="searchInput" type="search"
-        placeholder="Szukaj napoju lub składnika…"
-        autocomplete="off" autocorrect="off" spellcheck="false">
+      <input class="search-box" id="searchInput" type="search" placeholder="Szukaj napoju lub składnika…" autocomplete="off" autocorrect="off" spellcheck="false">
       <button class="mic-btn" id="micBtn" title="Szukaj głosowo">🎙️</button>
     </div>
     <div class="cats" id="catBar">
       <button class="cat-btn active" data-cat="all">Wszystkie</button>
       <button class="cat-btn" data-cat="kawy">☕ Kawy</button>
-      <button class="cat-btn" data-cat="kawy_mrozone">🧊 Kawy mrożone</button>
+      <button class="cat-btn" data-cat="kawy_mrozone">🧊 Mrożone</button>
       <button class="cat-btn" data-cat="herbaty">🍵 Herbaty</button>
+      <button class="cat-btn" data-cat="herbaty_mrozone">🫙 Herbaty mrożone</button>
+      <button class="cat-btn" data-cat="lemoniady">🍋 Lemoniady</button>
+      <button class="cat-btn" data-cat="soki_smoothie">🥤 Soki & Smoothie</button>
       <button class="cat-btn" data-cat="czekolady">🍫 Czekolady</button>
       <button class="cat-btn" data-cat="koktajle">🍹 Koktajle</button>
+      <button class="cat-btn" data-cat="grzance">🔥 Grzańce</button>
+      <button class="cat-btn" data-cat="shoty">🥃 Shoty</button>
     </div>
   </div>
   <div id="list-view"></div>
@@ -411,50 +122,941 @@
 
 <script>
 // ══════════════════════════════════════════
-//  DANE
+//  DANE — PRZEPISY
 // ══════════════════════════════════════════
 const DRINKS = [
-  {
-    id: 1, name: "Espresso", category: "kawy", icon: "☕",
-    tags: ["shot", "klasyczne"],
-    variants: [{
-      label: null,
-      ingredients: ["Filiżanka na espresso z talerzykiem","1 shot espresso","Mała szklanka letniej wody","1 saszetka cukru","Łyżeczka"],
-      steps: ["Podajemy wraz ze szklanką wody."]
-    }]
-  },
-  {
-    id: 2, name: "Cappuccino", category: "kawy", icon: "☕",
-    tags: ["mleko", "pianka", "klasyczne"],
-    variants: [
-      {
-        label: "Małe",
-        ingredients: ["Filiżanka 150ml z talerzykiem","1 shot espresso","Mocno spienione mleko","2 saszetki cukru","Łyżeczka"],
-        steps: ["Espresso zalewamy mlekiem bardziej spienionym niż do latte. Pianka powinna mieć około 1 cm."]
-      },
-      {
-        label: "Duże",
-        ingredients: ["Filiżanka 300ml z talerzykiem","2 shoty espresso","Mocno spienione mleko","2 saszetki cukru","Łyżeczka"],
-        steps: ["Espresso zalewamy mlekiem bardziej spienionym niż do latte. Pianka powinna mieć około 1 cm."]
-      }
+
+// ── KAWY GORĄCE ──────────────────────────
+{
+  id:1, name:"Espresso", category:"kawy", icon:"☕", tags:["shot","klasyczne"],
+  variants:[{label:null,
+    ingredients:["Filiżanka na espresso z talerzykiem","1 shot espresso","Mała szklanka letniej wody","1 saszetka cukru","Łyżeczka"],
+    steps:["Podajemy wraz ze szklanką wody."]
+  }]
+},
+{
+  id:2, name:"VBB Doppio", category:"kawy", icon:"☕", tags:["doppio","double","klasyczne"],
+  variants:[{label:null,
+    ingredients:["Filiżanka na espresso/doppio 120ml z talerzykiem","2 shoty espresso","Mała szklanka letniej wody","1 saszetka cukru","Łyżeczka"],
+    steps:["Podajemy wraz ze szklanką wody."]
+  }]
+},
+{
+  id:3, name:"Americano", category:"kawy", icon:"☕", tags:["woda","klasyczne"],
+  variants:[
+    {label:"Małe",
+      ingredients:["Filiżanka 120ml z talerzykiem","Wrzątek 100ml","1 shot espresso","2 saszetki cukru","Łyżeczka"],
+      steps:["Espresso zalewamy wrzątkiem."]
+    },
+    {label:"Duże",
+      ingredients:["Filiżanka 200ml z talerzykiem","Wrzątek 200ml","2 shoty espresso","2 saszetki cukru","Łyżeczka"],
+      steps:["Espresso zalewamy wrzątkiem."]
+    }
+  ]
+},
+{
+  id:4, name:"Flat White", category:"kawy", icon:"☕", tags:["mleko","klasyczne"],
+  variants:[{label:null,
+    ingredients:["Filiżanka biała 250ml z talerzykiem","2 shoty espresso","Delikatnie spienione mleko","2 saszetki cukru","Łyżeczka"],
+    steps:["Espresso zalewamy lekko spienionym mlekiem."]
+  }]
+},
+{
+  id:5, name:"Cafe Latte", category:"kawy", icon:"☕", tags:["mleko","klasyczne","latte"],
+  variants:[
+    {label:"Małe",
+      ingredients:["Filiżanka 300ml z talerzykiem","1 shot espresso","Lekko spienione mleko","2 saszetki cukru","Łyżeczka"],
+      steps:["Espresso zalewamy lekko spienionym mlekiem."]
+    },
+    {label:"Duże",
+      ingredients:["Filiżanka 500ml z talerzykiem","2 shoty espresso","Lekko spienione mleko","2 saszetki cukru","Łyżeczka"],
+      steps:["Espresso zalewamy lekko spienionym mlekiem."]
+    }
+  ]
+},
+{
+  id:6, name:"Cappuccino", category:"kawy", icon:"☕", tags:["mleko","pianka","klasyczne"],
+  variants:[
+    {label:"Małe",
+      ingredients:["Filiżanka 150ml z talerzykiem","1 shot espresso","Mocno spienione mleko","2 saszetki cukru","Łyżeczka"],
+      steps:["Espresso zalewamy mlekiem bardziej spienionym niż do latte. Pianka powinna mieć około 1 cm."]
+    },
+    {label:"Duże",
+      ingredients:["Filiżanka 300ml z talerzykiem","2 shoty espresso","Mocno spienione mleko","2 saszetki cukru","Łyżeczka"],
+      steps:["Espresso zalewamy mlekiem bardziej spienionym niż do latte. Pianka powinna mieć około 1 cm."]
+    }
+  ]
+},
+{
+  id:7, name:"Latte Macchiato", category:"kawy", icon:"☕", tags:["mleko","warstwy","pianka"],
+  variants:[
+    {label:"Małe",
+      ingredients:["Szklanka w kształcie stożka 300ml","1 shot espresso","Mocno spienione mleko (jak na cappuccino)","Serwetka","Długa łyżeczka","2 saszetki cukru"],
+      steps:[
+        "Wlewamy spienione mleko do wysokości ⅘ szklanki.",
+        "Czekamy około 30 sek — pianka MUSI się oddzielić od mleka.",
+        "Przelewamy espresso do małego dzbanka i powoli wlewamy po ściankach szklanki tworząc warstwy. Dziurkę po kawie maskujemy nakładając łyżeczką spienione mleko.",
+        "Podajemy z długą łyżeczką deserową zawiniętą w serwetkę wraz z 2 saszetkami cukru."
+      ]
+    },
+    {label:"Duże",
+      ingredients:["Szklanka Hurricane 400ml","2 shoty espresso","Spienione mleko jak na cappuccino (pianka ok 1cm)","Serwetka","Długa łyżeczka","2 saszetki cukru"],
+      steps:[
+        "Wlewamy spienione mleko do wysokości ⅘ szklanki.",
+        "Czekamy około 30 sek — pianka MUSI się oddzielić od mleka.",
+        "Przelewamy espresso do małego dzbanka i powoli wlewamy po ściankach szklanki tworząc warstwy. Dziurkę po kawie maskujemy nakładając łyżeczką spienione mleko.",
+        "Podajemy z długą łyżeczką deserową zawiniętą w serwetkę wraz z 2 saszetkami cukru."
+      ]
+    }
+  ]
+},
+{
+  id:8, name:"Latte Cynamonowe", category:"kawy", icon:"🍂", tags:["cynamon","speculoos","bita śmietana"],
+  variants:[
+    {label:"Małe",
+      ingredients:["Filiżanka 300ml z talerzykiem","1,5 dozy / 15ml syropu Speculoos/korzennego","1 shot espresso","Lekko spienione mleko","Bita śmietana","Puder cynamonowy (cukier puder z cynamonem 1:1)","1 saszetka cukru","Łyżeczka"],
+      steps:["Do kubka wlewamy syrop, następnie espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Na górę wyciskamy bitą śmietanę i posypujemy pudrem cynamonowym."]
+    },
+    {label:"Duże",
+      ingredients:["Filiżanka 500ml z talerzykiem","2 dozy / 20ml syropu Speculoos/korzennego","2 shoty espresso","Lekko spienione mleko","Bita śmietana","Puder cynamonowy (cukier puder z cynamonem 1:1)","1 saszetka cukru","Łyżeczka"],
+      steps:["Do kubka wlewamy syrop, następnie espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Na górę wyciskamy bitą śmietanę i posypujemy pudrem cynamonowym."]
+    }
+  ]
+},
+{
+  id:9, name:"Latte Smakowe", category:"kawy", icon:"🫙", tags:["syrop","monin","smakowe"],
+  variants:[
+    {label:"Małe",
+      ingredients:["Filiżanka 300ml z talerzykiem","2 pompki syropu Monin (20ml) — wybrany smak","1 shot espresso","Lekko spienione mleko","1 saszetka cukru","Łyżeczka"],
+      steps:["Do kubka wlewamy syrop, dodajemy espresso.","Mieszamy i zalewamy mlekiem.","Dostępne syropy: karmel, orzech laskowy, czekolada, pierniczki belgijskie, amaretto, żurawina, brzoskwinia, wanilia, banan, truskawka, kiwi, fiołek, lawenda, czarny bez, cynamon, pomarańcza."]
+    },
+    {label:"Duże",
+      ingredients:["Filiżanka 500ml z talerzykiem","2,5 pompki syropu Monin (25ml) — wybrany smak","2 shoty espresso","Lekko spienione mleko","1 saszetka cukru","Łyżeczka"],
+      steps:["Do kubka wlewamy syrop, dodajemy espresso.","Mieszamy i zalewamy mlekiem.","Dostępne syropy: karmel, orzech laskowy, czekolada, pierniczki belgijskie, amaretto, żurawina, brzoskwinia, wanilia, banan, truskawka, kiwi, fiołek, lawenda, czarny bez, cynamon, pomarańcza."]
+    }
+  ]
+},
+{
+  id:10, name:"Apple Pie Latte", category:"kawy", icon:"🍎", tags:["jabłko","cynamon","bita śmietana"],
+  variants:[
+    {label:"Małe",
+      ingredients:["Filiżanka 300ml z talerzykiem","1,5 dozy / 15ml syropu Apple Pie","1 shot espresso","Lekko spienione mleko","Bita śmietana","Cynamon","Kawałki suszonego jabłka","1 saszetka cukru","Łyżeczka"],
+      steps:["Do kubka wlewamy syrop, następnie espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Na górę wyciskamy bitą śmietanę i posypujemy cynamonem i suszonym jabłkiem."]
+    },
+    {label:"Duże",
+      ingredients:["Filiżanka 500ml z talerzykiem","2 dozy / 20ml syropu Apple Pie","2 shoty espresso","Lekko spienione mleko","Bita śmietana","Cynamon","Kawałki suszonego jabłka","1 saszetka cukru","Łyżeczka"],
+      steps:["Do kubka wlewamy syrop, następnie espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Na górę wyciskamy bitą śmietanę i posypujemy cynamonem i suszonym jabłkiem."]
+    }
+  ]
+},
+{
+  id:11, name:"Carmelove Latte", category:"kawy", icon:"🍮", tags:["karmel","sos","bita śmietana"],
+  variants:[
+    {label:"Małe",
+      ingredients:["Filiżanka 300ml z talerzykiem","1,5 dozy sosu karmelowego","1 shot espresso","Lekko spienione mleko","Bita śmietana","1 saszetka cukru","Łyżeczka"],
+      steps:["Do kubka wlewamy sos karmelowy, następnie espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Dodajemy bitą śmietanę. Niecałe pół pompki sosu wyciskamy na łyżeczkę, następnie polewamy nim bitą śmietanę."]
+    },
+    {label:"Duże",
+      ingredients:["Filiżanka 500ml z talerzykiem","2 dozy sosu karmelowego","2 shoty espresso","Lekko spienione mleko","Bita śmietana","1 saszetka cukru","Łyżeczka"],
+      steps:["Do kubka wlewamy sos karmelowy, następnie espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Dodajemy bitą śmietanę. Niecałe pół pompki sosu wyciskamy na łyżeczkę, następnie polewamy nim bitą śmietanę."]
+    }
+  ]
+},
+{
+  id:12, name:"Mocha Latte", category:"kawy", icon:"🍫", tags:["czekolada","mocha","sos"],
+  variants:[
+    {label:"Małe",
+      ingredients:["Filiżanka 300ml z talerzykiem","1,5 dozy sosu mocha czarnego","1 shot espresso","Lekko spienione mleko","1 saszetka cukru","Łyżeczka"],
+      steps:["Do kubka wlewamy sos mocha, następnie espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki."]
+    },
+    {label:"Duże",
+      ingredients:["Filiżanka 500ml z talerzykiem","2 dozy sosu mocha czarnego","2 shoty espresso","Lekko spienione mleko","1 saszetka cukru","Łyżeczka"],
+      steps:["Do kubka wlewamy sos mocha, następnie espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki."]
+    }
+  ]
+},
+{
+  id:13, name:"Orange Mocha Latte", category:"kawy", icon:"🍊", tags:["czekolada","pomarańcza","bita śmietana"],
+  variants:[
+    {label:"Małe",
+      ingredients:["Filiżanka 300ml z talerzykiem","1,5 dozy sosu mocha czarnego","10ml syropu pomarańczowego","1 shot espresso","Lekko spienione mleko","Bita śmietana","Skórka z pomarańczy","1 saszetka cukru","Łyżeczka"],
+      steps:["Do kubka wlewamy sos mocha, syrop, espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Na górę wyciskamy bitą śmietanę i posypujemy startą skórką pomarańczy."]
+    },
+    {label:"Duże",
+      ingredients:["Filiżanka 500ml z talerzykiem","2 dozy sosu mocha czarnego","20ml syropu pomarańczowego","2 shoty espresso","Lekko spienione mleko","Bita śmietana","Skórka z pomarańczy","1 saszetka cukru","Łyżeczka"],
+      steps:["Do kubka wlewamy sos mocha, syrop, espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Na górę wyciskamy bitą śmietanę i posypujemy startą skórką pomarańczy."]
+    }
+  ]
+},
+{
+  id:14, name:"Pumpkin Spice Latte", category:"kawy", icon:"🎃", tags:["dynia","przyprawy","bita śmietana","sezonowe"],
+  variants:[
+    {label:"Małe",
+      ingredients:["Filiżanka 300ml z talerzykiem","2 łyżeczki syropu pumpkin spice","1 shot espresso","Mleko","Bita śmietana","Posypka spice (mieszanka przypraw korzennych)","2 saszetki cukru","Łyżeczka"],
+      steps:["Do naczynia dodajemy syrop pumpkin spice, espresso.","Mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Całość dekorujemy bitą śmietaną i posypujemy mieszanką przypraw."]
+    },
+    {label:"Duże",
+      ingredients:["Filiżanka 500ml z talerzykiem","3 łyżeczki syropu pumpkin spice","2 shoty espresso","Mleko","Bita śmietana","Posypka spice (mieszanka przypraw korzennych)","2 saszetki cukru","Łyżeczka"],
+      steps:["Do naczynia dodajemy syrop pumpkin spice, espresso.","Mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Całość dekorujemy bitą śmietaną i posypujemy mieszanką przypraw."]
+    }
+  ]
+},
+{
+  id:15, name:"Kawa po Irlandzku", category:"kawy", icon:"🥃", tags:["whiskey","alkohol","bita śmietana"],
+  variants:[{label:null,
+    ingredients:["Szklanka 250ml","100ml wody z ekspresu","1 shot espresso","Płaska łyżeczka cukru brązowego","40ml Tullamore Dew Irish Whiskey","Bita śmietana","Długa łyżeczka"],
+    steps:["Do szklanki wlewamy whiskey, wsypujemy cukier, podpalamy i mieszamy do rozpuszczenia cukru, gasimy.","Wlewamy espresso i uzupełniamy wodą.","Na górę wyciskamy bitą śmietanę i posypujemy brązowym cukrem."]
+  }]
+},
+{
+  id:16, name:"Kawa z Baileys'em", category:"kawy", icon:"🍶", tags:["baileys","alkohol","bita śmietana"],
+  variants:[{label:null,
+    ingredients:["Szklanka 250ml","100ml wody","1 shot espresso","Płaska łyżeczka cukru brązowego","25ml Baileys","Bita śmietana","Cukier brązowy do posypania","Długa łyżeczka"],
+    steps:["Do szklanki wlewamy espresso, wsypujemy cukier i mieszamy.","Wlewamy wodę oraz likier Baileys.","Na górę wyciskamy bitą śmietanę i posypujemy cukrem."]
+  }]
+},
+{
+  id:17, name:"Kawa z Malibu", category:"kawy", icon:"🥥", tags:["malibu","kokos","alkohol","bita śmietana"],
+  variants:[{label:null,
+    ingredients:["Szklanka 250ml","100ml delikatnie spienionego mleka","1 shot espresso","20ml Malibu","10ml syropu kokosowego","Bita śmietana","Wiórki kokosowe do posypania"],
+    steps:["Do szklanki wlać kawę, Malibu, syrop kokosowy.","Zalać mlekiem spienionym jak do latte.","Na górę wycisnąć bitą śmietanę i posypać wiórkami kokosowymi."]
+  }]
+},
+{
+  id:18, name:"Kawa z Miodem i Cynamonem", category:"kawy", icon:"🍯", tags:["miód","cynamon","mleko"],
+  variants:[{label:null,
+    ingredients:["Filiżanka 300ml z talerzykiem","1 shot espresso","Miód — do smaku","Cynamon — szczypta","Spienione mleko jak na latte","Łyżeczka"],
+    steps:["Do kubka nakładamy miód i cynamon.","Wlewamy espresso i całość mieszamy.","Zalewamy lekko spienionym mlekiem. Górę posypujemy cynamonem."]
+  }]
+},
+
+// ── KAWY MROŻONE ─────────────────────────
+{
+  id:20, name:"Mrożona Cynamonowa", category:"kawy_mrozone", icon:"🧊", tags:["cynamon","speculoos","mleko","lód"],
+  variants:[
+    {label:"Mała",
+      ingredients:["Mała prążkowana szklanka","20ml syropu Speculoos","1 shot espresso","Mleko","Lód","Rurka"],
+      steps:["Wlewamy syrop do szklanki.","Szklankę wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]
+    },
+    {label:"Duża",
+      ingredients:["Duża prążkowana szklanka","30ml syropu Speculoos","2 shoty espresso","Mleko","Lód","Rurka"],
+      steps:["Wlewamy syrop do szklanki.","Szklankę wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]
+    }
+  ]
+},
+{
+  id:21, name:"Mrożona Karmelowa", category:"kawy_mrozone", icon:"🧊", tags:["karmel","sos","mleko","lód"],
+  variants:[
+    {label:"Mała",
+      ingredients:["Mała prążkowana szklanka","2 pompki sosu karmelowego","1 shot espresso","Mleko","Lód","Rurka"],
+      steps:["Wlewamy sos do szklanki.","Szklankę wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]
+    },
+    {label:"Duża",
+      ingredients:["Duża prążkowana szklanka","3 pompki sosu karmelowego","2 shoty espresso","Mleko","Lód","Rurka"],
+      steps:["Wlewamy sos do szklanki.","Szklankę wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]
+    }
+  ]
+},
+{
+  id:22, name:"Mrożona z Karmelizowanym Bananem", category:"kawy_mrozone", icon:"🍌", tags:["banan","karmelizowany","lód"],
+  variants:[
+    {label:"Mała",
+      ingredients:["Mała prążkowana szklanka","2 łyżeczki karmelizowanego banana","1 shot espresso","Mleko","Lód","Rurka"],
+      steps:["Dodajemy na dno szklanki karmelizowanego banana.","Szklankę wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]
+    },
+    {label:"Duża",
+      ingredients:["Duża prążkowana szklanka","4 łyżeczki karmelizowanego banana","2 shoty espresso","Mleko","Lód","Rurka"],
+      steps:["Dodajemy na dno szklanki karmelizowanego banana.","Szklankę wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]
+    }
+  ]
+},
+{
+  id:23, name:"Mrożona Latte Smakowa", category:"kawy_mrozone", icon:"🧊", tags:["syrop","smakowe","lód","mleko"],
+  variants:[
+    {label:"Mała",
+      ingredients:["Mała prążkowana szklanka","20ml wybranego syropu","1 shot espresso","Mleko","Lód","Rurka"],
+      steps:["Wlewamy syrop do szklanki.","Szklankę wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]
+    },
+    {label:"Duża",
+      ingredients:["Duża prążkowana szklanka","30ml wybranego syropu","2 shoty espresso","Mleko","Lód","Rurka"],
+      steps:["Wlewamy syrop do szklanki.","Szklankę wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]
+    }
+  ]
+},
+{
+  id:24, name:"Mrożona Latte Cafe", category:"kawy_mrozone", icon:"🧊", tags:["klasyczne","lód","mleko"],
+  variants:[
+    {label:"Mała",
+      ingredients:["Mała prążkowana szklanka","1 shot espresso","Mleko","Lód","Rurka"],
+      steps:["Szklankę wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]
+    },
+    {label:"Duża",
+      ingredients:["Duża prążkowana szklanka","2 shoty espresso","Mleko","Lód","Rurka"],
+      steps:["Szklankę wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]
+    }
+  ]
+},
+{
+  id:25, name:"Tonic Espresso", category:"kawy_mrozone", icon:"🫧", tags:["tonik","pomarańcza","lód"],
+  variants:[
+    {label:"Mała",
+      ingredients:["Mała prążkowana szklanka","Tonik","1 shot espresso","Lód","Plaster pomarańczy przekrojony na pół","Rurka"],
+      steps:["⁴⁄₅ szklanki wypełnij lodem. Pomiędzy ściankę a lód powkładaj plasterki pomarańczy.","Szklankę z lodem wypełnij tonikiem zostawiając miejsce na espresso.","Powoli po lodzie wlej espresso. Udekoruj listkiem mięty i dodaj rurkę."]
+    },
+    {label:"Duża",
+      ingredients:["Duża prążkowana szklanka","Tonik","2 shoty espresso","Lód","Plaster pomarańczy przekrojony na pół","Rurka"],
+      steps:["⁴⁄₅ szklanki wypełnij lodem. Pomiędzy ściankę a lód powkładaj plasterki pomarańczy.","Szklankę z lodem wypełnij tonikiem zostawiając miejsce na espresso.","Powoli po lodzie wlej espresso. Udekoruj listkiem mięty i dodaj rurkę."]
+    }
+  ]
+},
+{
+  id:26, name:"Latte na Lodzie", category:"kawy_mrozone", icon:"🧊", tags:["klasyczne","lód","mleko"],
+  variants:[
+    {label:"Mała",
+      ingredients:["Prążkowana szklanka","1 shot espresso","150ml mleka","½ szklanki lodu"],
+      steps:["Szklankę wypełniamy do połowy lodem.","Dodajemy mleko do 80% szklanki.","Po łyżeczce z boku wlewamy espresso — tworzymy warstwę. Opcjonalnie gałka lodów waniliowych / bita śmietana / syrop."]
+    },
+    {label:"Duża",
+      ingredients:["Duża prążkowana szklanka","2 shoty espresso (doppio)","200ml mleka","½ szklanki lodu"],
+      steps:["Szklankę wypełniamy do połowy lodem.","Dodajemy mleko do 80% szklanki.","Po łyżeczce z boku wlewamy doppio — tworzymy warstwę. Opcjonalnie gałka lodów waniliowych / bita śmietana / syrop."]
+    }
+  ]
+},
+{
+  id:27, name:"Latte na Lodzie Smakowe", category:"kawy_mrozone", icon:"🧊", tags:["syrop","smakowe","lód"],
+  variants:[
+    {label:"Mała",
+      ingredients:["Prążkowana szklanka","1 shot espresso","150ml mleka","Niecałe 2 pompki sosu Monin","½ szklanki lodu"],
+      steps:["Szklankę wypełniamy do połowy lodem, dodajemy mleko do 80% szklanki.","Dodajemy espresso oraz sos Monin.","Przekładamy do blendera i miksujemy. Dekorujemy sosem. Na górę gałka lodów waniliowych.","Dostępne: Karmel, Orzech laskowy, Czekolada, Pierniczki belgijskie, Amaretto, Żurawina, Brzoskwinia, Pistacja, Wanilia, Banan."]
+    },
+    {label:"Duża",
+      ingredients:["Duża prążkowana szklanka","2 shoty espresso","200ml mleka","Niecałe 3 pompki sosu Monin (~2,5)","½ szklanki lodu"],
+      steps:["Szklankę wypełniamy do połowy lodem, dodajemy mleko do 80% szklanki.","Dodajemy doppio oraz sos Monin.","Przekładamy do blendera i miksujemy. Dekorujemy sosem. Na górę gałka lodów waniliowych.","Dostępne: Karmel, Orzech laskowy, Czekolada, Pierniczki belgijskie, Amaretto, Żurawina, Brzoskwinia, Pistacja, Wanilia, Banan."]
+    }
+  ]
+},
+{
+  id:28, name:"Bananowe Frappe", category:"kawy_mrozone", icon:"🍌", tags:["banan","czekolada","bita śmietana","blender"],
+  variants:[
+    {label:"Mała",
+      ingredients:["Szklanka prążkowana","½ banana z lodówki","½ szklanki lodu","1 shot espresso","2 pompki syropu bananowego","100ml mleka","Sos czekoladowy do dekoracji","Bita śmietana","Starta czekolada"],
+      steps:["Szklankę wypełniamy ½ lodem, dodajemy mleko by przykryć lód, espresso i syrop.","Przekładamy do blendera i dodajemy banana. Blendujemy na gładką masę.","Naczynie dekorujemy sosem czekoladowym, przelewamy kawę. Na górę bita śmietana i starta czekolada."]
+    },
+    {label:"Duża",
+      ingredients:["Duża szklanka prążkowana","1 banan z lodówki","½ szklanki lodu","2 shoty espresso (doppio)","3 pompki syropu bananowego","150ml mleka","Sos czekoladowy do dekoracji","Bita śmietana","Starta czekolada"],
+      steps:["Szklankę wypełniamy ½ lodem, dodajemy mleko by przykryć lód, espresso i syrop.","Przekładamy do blendera i dodajemy banana. Blendujemy na gładką masę.","Naczynie dekorujemy sosem czekoladowym, przelewamy kawę. Na górę bita śmietana i starta czekolada."]
+    }
+  ]
+},
+{
+  id:29, name:"Frappe Pomarańczowe z Likierem", category:"kawy_mrozone", icon:"🍊", tags:["pomarańcza","likier","lody","blender"],
+  variants:[
+    {label:"Mała",
+      ingredients:["Szklanka prążkowana","1 shot espresso","20ml likieru pomarańczowego","Mleko do wypełnienia szklanki","½ szklanki lodu","1 gałka lodów waniliowych","Sos czekoladowy do dekoracji szklanki","Plaster pomarańczy"],
+      steps:["Szklankę dekorujemy sosem czekoladowym.","Szklankę wypełniamy ½ lodem, dodajemy mleko by przykryć lód, espresso i likier. Miksujemy w blenderze.","Na kawę nakładamy lody waniliowe. Dekorujemy plastrem pomarańczy."]
+    },
+    {label:"Duża",
+      ingredients:["Duża szklanka prążkowana","2 shoty espresso (doppio)","30ml likieru pomarańczowego","Mleko do wypełnienia szklanki","½ szklanki lodu","2 gałki lodów waniliowych","Sos czekoladowy do dekoracji szklanki","Plaster pomarańczy"],
+      steps:["Szklankę dekorujemy sosem czekoladowym.","Szklankę wypełniamy ½ lodem, dodajemy mleko by przykryć lód, espresso i likier. Miksujemy w blenderze.","Na kawę nakładamy lody waniliowe. Dekorujemy plastrem pomarańczy."]
+    }
+  ]
+},
+{
+  id:30, name:"Orzechowe Frappe", category:"kawy_mrozone", icon:"🌰", tags:["orzech","bita śmietana","blender"],
+  variants:[
+    {label:"Mała",
+      ingredients:["Szklanka prążkowana","Niecałe 2 pompki syropu orzechowego","1 shot espresso","Mleko do wypełnienia szklanki","½ szklanki lodu","Bita śmietana","Starty orzech włoski"],
+      steps:["Do naczynia dodajemy kolejno lód, syrop, espresso, mleko.","Całość blendujemy do gładkiej konsystencji.","Na górę nakładamy bitą śmietanę i starty orzech włoski."]
+    },
+    {label:"Duża",
+      ingredients:["Duża szklanka prążkowana","Niecałe 3 pompki syropu orzechowego","2 shoty espresso","Mleko do wypełnienia szklanki","½ szklanki lodu","Bita śmietana","Starty orzech włoski"],
+      steps:["Do naczynia dodajemy kolejno lód, syrop, espresso, mleko.","Całość blendujemy do gładkiej konsystencji.","Na górę nakładamy bitą śmietanę i starty orzech włoski."]
+    }
+  ]
+},
+{
+  id:31, name:"Karmelowe Frappe", category:"kawy_mrozone", icon:"🍮", tags:["karmel","wanilia","sos","blender"],
+  variants:[
+    {label:"Mała",
+      ingredients:["Szklanka prążkowana","1 shot espresso","1 pompka syropu waniliowego","Niecała pompka syropu karmelowego","Mleko do wypełnienia","½ szklanki lodu","Dużo sosu karmelowego na górę","Bita śmietana"],
+      steps:["Dekorujemy szklankę sosem karmelowym.","Do naczynia dodajemy kolejno lód, syropy, kawę, mleko. Blendujemy do gładkiej konsystencji.","Na górę bita śmietana i dużo sosu karmelowego."]
+    },
+    {label:"Duża",
+      ingredients:["Duża szklanka prążkowana","2 shoty espresso","2 pompki syropu waniliowego","1 pompka syropu karmelowego","Mleko do wypełnienia","½ szklanki lodu","Dużo sosu karmelowego na górę","Bita śmietana"],
+      steps:["Dekorujemy szklankę sosem karmelowym.","Do naczynia dodajemy kolejno lód, syropy, kawę, mleko. Blendujemy do gładkiej konsystencji.","Na górę bita śmietana i dużo sosu karmelowego."]
+    }
+  ]
+},
+{
+  id:32, name:"Lassi Kawowe", category:"kawy_mrozone", icon:"🥛", tags:["jogurt","miód","kardamon","blender"],
+  variants:[{label:null,
+    ingredients:["Szklanka prążkowana","1 shot espresso","Jogurt naturalny","Miód","Kardamon","Lód"],
+    steps:["Wszystkie składniki wrzucamy do blendera i miksujemy."]
+  }]
+},
+{
+  id:33, name:"Americano na Lodzie", category:"kawy_mrozone", icon:"🧊", tags:["doppio","woda","lód","blender"],
+  variants:[{label:null,
+    ingredients:["Szklanka prążkowana (~250ml)","Doppio (2 shoty)","Woda przefiltrowana","Lód"],
+    steps:["Wszystkie składniki wrzucamy do blendera i miksujemy."]
+  }]
+},
+{
+  id:34, name:"Matcha Latte na Lodzie", category:"kawy_mrozone", icon:"🍵", tags:["matcha","lód","mleko"],
+  variants:[{label:null,
+    ingredients:["Mała prążkowana szklanka","1,5g matchy","50ml wody 75°C","Mleko","Lód","Rurka"],
+    steps:["Matchę dokładnie rozpuszczamy w wodzie (75°C).","Szklankę wypełniamy lodem, następnie mlekiem.","Na koniec wlewamy matchę. Podajemy z rurką."]
+  }]
+},
+{
+  id:35, name:"Matcha Latte Wanilia na Lodzie", category:"kawy_mrozone", icon:"🍵", tags:["matcha","wanilia","lód","mleko"],
+  variants:[{label:null,
+    ingredients:["Mała prążkowana szklanka","1,5g matchy","20ml syropu waniliowego Monin","50ml wody 75°C","Mleko","Lód","Rurka"],
+    steps:["Matchę dokładnie rozpuszczamy w wodzie (75°C).","Do szklanki wlewamy syrop, wypełniamy lodem, następnie mlekiem.","Na koniec wlewamy matchę. Podajemy z rurką."]
+  }]
+},
+{
+  id:36, name:"Zielona Jaśminowa z Espresso", category:"kawy_mrozone", icon:"🌿", tags:["herbata","jaśmin","wanilia","lód"],
+  variants:[{label:null,
+    ingredients:["Szklanka 280ml","1 shot espresso","Baza herbaty zielonej jaśminowej","10ml syropu waniliowego","Woda","Lód — ¾ szklanki"],
+    steps:["Do szklanki wrzucamy lód, wlewamy espresso, syrop.","Uzupełniamy zieloną herbatą do ok ⅔ objętości, resztę uzupełniamy wodą."]
+  }]
+},
+
+// ── HERBATY GORĄCE ────────────────────────
+{
+  id:40, name:"Herbata Sypana", category:"herbaty", icon:"🍵", tags:["czarna","zielona","biała","pu-erh"],
+  variants:[{label:null,
+    ingredients:["Filiżanka 500ml z talerzykiem","Herbata wg wyboru (porcje poniżej)","Koszyczek","Cukier lub miód","Łyżeczka do herbaty","Wrzątek lub gorąca woda (zielona/biała: 70–80°C)"],
+    steps:[
+      "Dobierz porcję herbaty: Czarna ~0,8 czub. łyżeczki | Biała 2 czub. łyżeczki (70–80°C) | Zielona 1,5 czub. łyżeczki (70–80°C) | Pu-erh 1,25 czub. łyżeczki.",
+      "Wlewamy wodę o odpowiedniej temperaturze do kubka.",
+      "Na kubek nakładamy biały talerzyk, na którym kładziemy naczynie z miodem lub cukier, łyżeczkę i koszyczek z herbatą. Opcjonalnie plasterek cytryny."
     ]
-  },
-  {
-    id: 3, name: "Carmelove Latte", category: "kawy", icon: "🍮",
-    tags: ["karmel", "bita śmietana", "sos"],
-    variants: [
-      {
-        label: "Małe",
-        ingredients: ["Filiżanka 300ml z talerzykiem","1,5 dozy sosu karmelowego","1 shot espresso","Lekko spienione mleko","Bita śmietana","1 saszetka cukru","Łyżeczka"],
-        steps: ["Do kubka wlewamy sos karmelowy, następnie espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Dodajemy bitą śmietanę. Niecałe pół pompki sosu wyciskamy na łyżeczkę, następnie polewamy nim bitą śmietanę."]
-      },
-      {
-        label: "Duże",
-        ingredients: ["Filiżanka 500ml z talerzykiem","2 dozy sosu karmelowego","2 shoty espresso","Lekko spienione mleko","Bita śmietana","1 saszetka cukru","Łyżeczka"],
-        steps: ["Do kubka wlewamy sos karmelowy, następnie espresso.","Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.","Dodajemy bitą śmietanę. Niecałe pół pompki sosu wyciskamy na łyżeczkę, następnie polewamy nim bitą śmietanę."]
-      }
-    ]
-  }
+  }]
+},
+{
+  id:41, name:"Herbata Imbirowa", category:"herbaty", icon:"🫚", tags:["imbir","pomarańcza","goździki","czarna"],
+  variants:[{label:null,
+    ingredients:["Filiżanka 500ml z talerzykiem","1 płaska łyżeczka czarnej herbaty w koszyczku","4–5 plasterków imbiru","Plasterek pomarańczy z wbitymi goździkami, przekrojony na pół","Miód lub cukier","Łyżeczka","Wrzątek"],
+    steps:["Do kubka wrzucamy imbir i plasterek pomarańczy z goździkami.","Zalewamy wrzątkiem.","Przykrywamy małym białym talerzykiem, na który kładziemy naczynie z miodem lub cukier, łyżeczkę i koszyczek z herbatą."]
+  }]
+},
+{
+  id:42, name:"Herbata Goji", category:"herbaty", icon:"🍒", tags:["goji","pu-erh","maliny","imbir"],
+  variants:[{label:null,
+    ingredients:["Filiżanka 500ml z talerzykiem","1 płaska łyżeczka herbaty czerwonej pu-erh w koszyczku","4–5 jagód goji","2 małe plasterki imbiru","3–4 maliny","Plasterek pomarańczy z goździkami przekrojony na pół","Miód lub cukier","Łyżeczka","Wrzątek"],
+    steps:["Do kubka dodajemy goji, imbir, maliny i plasterek pomarańczy z goździkami.","Zalewamy wrzątkiem.","Na kubek nakładamy biały talerzyk z miodem/cukrem, łyżeczką i koszyczkiem z herbatą."]
+  }]
+},
+{
+  id:43, name:"Rooibos", category:"herbaty", icon:"🍵", tags:["rooibos","bezkofeinowa"],
+  variants:[{label:null,
+    ingredients:["Kubek 400ml","10g suszu rooibos (koszyczek napełniony na równo)","Miód lub cukier","Łyżeczka","Wrzątek"],
+    steps:["Nakładamy biały talerzyk z miodem/cukrem i łyżeczką. Kubek zalewamy wrzątkiem, nakładamy uprzednio przygotowany talerzyk z koszyczkiem suszu."]
+  }]
+},
+{
+  id:44, name:"Honeybush", category:"herbaty", icon:"🍵", tags:["honeybush","bezkofeinowa","słodka"],
+  variants:[{label:null,
+    ingredients:["Kubek 400ml","10g suszu honeybush (koszyczek napełniony na równo)","Miód lub cukier","Łyżeczka","Wrzątek"],
+    steps:["Nakładamy biały talerzyk z miodem/cukrem i łyżeczką. Kubek zalewamy wrzątkiem, nakładamy uprzednio przygotowany talerzyk z koszyczkiem suszu."]
+  }]
+},
+{
+  id:45, name:"Yerba Mate", category:"herbaty", icon:"🌿", tags:["yerba","energetyczna","tykwa"],
+  variants:[{label:null,
+    ingredients:["Tykwa","2 miarki yerby (biała miarka z opakowania)","Rurka bombija","Woda 60–80°C","Podstawka korkowa"],
+    steps:["Do tykwy wsypujemy 2 miarki yerby.","Wkładamy rurkę bombija.","Pod kątem zalewamy wodą (60–80°C) — NIE wrzątkiem.","Podajemy na podstawce z korka. Pytamy o dodatki: miód, sok, plasterek owocu. Informujemy o możliwości uzupełnienia tykwy."]
+  }]
+},
+{
+  id:46, name:"Herbata Matcha", category:"herbaty", icon:"🍵", tags:["matcha","zielona","tradycyjna","czarka"],
+  variants:[{label:null,
+    ingredients:["Czarka","1,6–1,8g proszku matcha (odmierzane łyżeczką chashaku)","80ml wody (NIE wrzątku — ok. 70–75°C)","Miotełka chasen","Podstawka korkowa"],
+    steps:["Do czarki wsypujemy odmierzoną ilość matchy.","Zalewamy 80ml wody (nie wrzątek!).","Energicznie mieszamy miotełką chasen dążąc do uzyskania jak największej ilości zielonej pianki.","Podajemy na podstawce z korka."]
+  }]
+},
+{
+  id:47, name:"Matcha Latte", category:"herbaty", icon:"🍵", tags:["matcha","mleko","latte"],
+  variants:[{label:null,
+    ingredients:["Filiżanka 300ml","1,5 chashaku (drewniany przyrząd) herbaty matcha","Podgrzane mleko (max 70°C)"],
+    steps:["Do naczynia wsyp półtorej miarki chashaku matchy.","Rozpuść w małej ilości podgrzanego mleka.","Zalej resztą mleka — temperatura nie może przekraczać 70°C. Uważaj na rozwarstwianie się."]
+  }]
+},
+{
+  id:48, name:"Chai Latte", category:"herbaty", icon:"🫖", tags:["chai","przyprawy","mleko"],
+  variants:[{label:null,
+    ingredients:["Kubek 300ml","25g proszku chai (ok. 4–5 płaskich łyżeczek)","Podgrzane mleko (max 70°C)"],
+    steps:["Do naczynia wsyp 25g proszku chai.","Rozpuść w małej ilości podgrzanego mleka.","Zalej resztą mleka — temperatura nie może przekraczać 70°C. Uważaj na rozwarstwianie się."]
+  }]
+},
+{
+  id:49, name:"Herbata z Prądem", category:"herbaty", icon:"⚡", tags:["rum","alkohol","miód","pu-erh"],
+  variants:[{label:null,
+    ingredients:["Filiżanka 300ml","Herbata czerwona pu-erh w koszyczku","35ml rumu złotego (Morgan Spice / Bacardi Gold)","1 łyżeczka miodu kupnego","Plaster pomarańczy z 5 goździkami","Wrzątek"],
+    steps:["Koszyczek z czerwoną herbatą wkładamy do kubka i zalewamy wrzątkiem.","Po 4 minutach wyciągamy koszyczek i dodajemy pomarańczę nabitą goździkami.","Dolewamy 35ml rumu i dodajemy łyżeczkę miodu."]
+  }]
+},
+
+// ── HERBATY MROŻONE ───────────────────────
+{
+  id:55, name:"Zielona Jaśminowa (mrożona)", category:"herbaty_mrozone", icon:"🫙", tags:["jaśmin","brzoskwinia","mięta","limonka"],
+  variants:[{label:null,
+    ingredients:["Duża szklanka","Baza z herbaty jaśminowej zielonej","3 łódki limonki","4 listki mięty","30ml syropu brzoskwiniowego","Woda","Lód"],
+    steps:["Do naczynia wkładamy 3 łódki limonki (wyciskamy i wrzucamy), 4 zgniecionymi listkami mięty.","Dodajemy syrop brzoskwiniowy (30ml).","Naczynie wypełniamy kostkami lodu i zalewamy bazą z herbaty jaśminowej."]
+  }]
+},
+{
+  id:56, name:"Biała (mrożona)", category:"herbaty_mrozone", icon:"🫙", tags:["biała herbata","kiwi","truskawka"],
+  variants:[{label:null,
+    ingredients:["Duża szklanka","Baza z białej herbaty","1 plasterek kiwi przekrojony na pół","10ml syropu truskawkowego","10ml syropu kiwi","2 mrożone truskawki","Lód"],
+    steps:["Do naczynia wrzucamy truskawki i rozgniatamy muddlerem.","Wlewamy syrop truskawkowy i kiwi (po 10ml każdy).","Naczynie wypełniamy kostkami lodu, zalewamy bazą z białej herbaty. Na górę plasterek kiwi."]
+  }]
+},
+{
+  id:57, name:"Czarna Malina (mrożona)", category:"herbaty_mrozone", icon:"🫙", tags:["czarna herbata","malina","rozmaryn","cytryna"],
+  variants:[{label:null,
+    ingredients:["Duża szklanka","Baza z czarnej herbaty","3–4 maliny","1,5 pompki syropu malinowego","10ml soku z cytryny","Gałązka rozmarynu","Pół plasterka cytryny","Lód"],
+    steps:["Do naczynia wrzucamy maliny i rozgniatamy muddlerem.","Wlewamy syrop malinowy i 10ml soku z cytryny.","Naczynie wypełniamy kostkami lodu, zalewamy bazą z czarnej herbaty. Na górę pół plasterka cytryny i gałązka rozmarynu."]
+  }]
+},
+{
+  id:58, name:"Herbata Brzoskwiniowa (mrożona)", category:"herbaty_mrozone", icon:"🍑", tags:["zielona","brzoskwinia","limonka","mięta"],
+  variants:[{label:null,
+    ingredients:["Szklanka","½ szklanki bazy herbaty zielonej","2,5 pompki syropu brzoskwiniowego (30ml)","⅜ limonki (⅛ wycisnąć, resztę wrzucić)","2–3 listki mięty","Lód","Ewentualnie woda"],
+    steps:["Do szklanki wrzucamy limonkę (⅛ wyciskamy, resztę wkładamy) i miętę (ugnieść w dłoni).","Dodajemy syrop brzoskwiniowy.","Wypełniamy lodem i zalewamy bazą herbaty zielonej. W razie potrzeby uzupełniamy wodą."]
+  }]
+},
+{
+  id:59, name:"Herbata Bananowo-Ananasowa (mrożona)", category:"herbaty_mrozone", icon:"🍍", tags:["zielona","banan","ananas"],
+  variants:[{label:null,
+    ingredients:["Szklanka","½ szklanki bazy herbaty zielonej","Plaster ananasa (½ wycisnąć, ½ wrzucić)","2 pompki syropu bananowego","30ml soku z ananasa (z puszki)","Lód"],
+    steps:["Do szklanki wrzucamy plaster ananasa (połowę wyciskamy).","Dodajemy syrop bananowy i sok ananasowy.","Wypełniamy lodem i zalewamy bazą herbaty zielonej."]
+  }]
+},
+{
+  id:60, name:"Herbata Żurawinowo-Pomarańczowa (mrożona)", category:"herbaty_mrozone", icon:"🫐", tags:["czarna","żurawina","pomarańcza"],
+  variants:[{label:null,
+    ingredients:["Szklanka","½ szklanki bazy herbaty czarnej","2–2,5 pompki syropu żurawinowego","2 plasterki pomarańczy","Lód"],
+    steps:["Do szklanki dodajemy syrop żurawinowy i plasterki pomarańczy.","Wypełniamy lodem.","Zalewamy bazą herbaty czarnej. Schładzamy."]
+  }]
+},
+
+// ── LEMONIADY NA GORĄCO ───────────────────
+{
+  id:65, name:"Lemon Imbirowa (gorąca)", category:"lemoniady", icon:"🍋", tags:["imbir","pomarańcza","gorąca"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml","40ml soku z cytryny","2 pompki soku imbirowego Herbapol","20ml syropu pomarańczowego Monin","Plaster pomarańczy z 5–6 goździkami, przekrojony na pół","Plaster cytryny przekrojony na pół","Woda ~70°C","Słomka"],
+    steps:["Wrzucamy pomarańczę i cytrynę do szklanki.","Wlewamy sok z cytryny, imbirowy i pomarańczowy.","Zalewamy wodą ~70°C. NIE MIESZAMY. Podajemy ze słomką."]
+  }]
+},
+{
+  id:66, name:"Fiołkowa (gorąca)", category:"lemoniady", icon:"💜", tags:["fiołek","cynamon","gorąca","pomarańcza"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml","40ml soku z cytryny","40ml syropu fiołkowego","Szczypta cynamonu","Plaster pomarańczy z goździkami, przekrojony na pół","Plaster cytryny przekrojony na pół","Woda ~70°C","Słomka"],
+    steps:["Wrzucamy pomarańczę i cytrynę do szklanki.","Wlewamy sok z cytryny, syrop fiołkowy, dodajemy cynamon.","Zalewamy wodą ~70°C. NIE MIESZAMY. Podajemy ze słomką."]
+  }]
+},
+{
+  id:67, name:"Czarny Bez (gorąca)", category:"lemoniady", icon:"🫐", tags:["czarny bez","cynamon","gorąca"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml","40ml soku z cytryny","40ml syropu czarny bez","Szczypta cynamonu","Plaster pomarańczy z goździkami, przekrojony na pół","Plaster cytryny przekrojony na pół","Woda ~70°C","Słomka"],
+    steps:["Wrzucamy pomarańczę i cytrynę do szklanki.","Wlewamy sok z cytryny, syrop czarny bez, dodajemy cynamon.","Zalewamy wodą ~70°C. NIE MIESZAMY. Podajemy ze słomką."]
+  }]
+},
+{
+  id:68, name:"Wiśniowa z Alkoholem (gorąca)", category:"lemoniady", icon:"🍒", tags:["wiśniówka","alkohol","cynamon","gorąca"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml","30ml soku z cytryny","20ml syropu Monin Winter Spice","10ml syropu Monin Orange","50ml wiśniówki","Gorąca woda","1 plaster pomarańczy z goździkami","3 kawałki poszarpanego cynamonu","5 suszonych żurawin"],
+    steps:["Do szklanki wlej wszystkie płynne składniki.","Dodaj pomarańczę z goździkami, cynamon i żurawinę.","Zalewamy do pełna gorącą wodą. Do dekoracji szypułka mięty."]
+  }]
+},
+// ── LEMONIADY NA ZIMNO ────────────────────
+{
+  id:70, name:"Lemoniada Lawendowa", category:"lemoniady", icon:"💜", tags:["lawenda","zimna","gazowana"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml","40ml soku z cytryny","Woda gazowana","¾ szklanki lodu","40ml syropu lawendowego","Plasterek cytryny"],
+    steps:["Do szklanki wsypujemy lód, wkładamy plasterek cytryny.","Wlewamy syrop lawendowy i sok z cytryny.","Uzupełniamy wodą gazowaną. NIE MIESZAMY."]
+  }]
+},
+{
+  id:71, name:"Lemoniada Fiołkowa", category:"lemoniady", icon:"💜", tags:["fiołek","zimna","gazowana"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml","40ml soku z cytryny","Woda gazowana","¾ szklanki lodu","40ml syropu fiołkowego","Plasterek cytryny"],
+    steps:["Do szklanki wsypujemy lód, wkładamy plasterek cytryny.","Wlewamy syrop fiołkowy i sok z cytryny.","Uzupełniamy wodą gazowaną. NIE MIESZAMY."]
+  }]
+},
+{
+  id:72, name:"Lemoniada z Czarnego Bzu", category:"lemoniady", icon:"🫐", tags:["czarny bez","zimna","gazowana"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml","40ml soku z cytryny","Woda gazowana","¾ szklanki lodu","40ml syropu czarny bez","Plasterek cytryny"],
+    steps:["Do szklanki wsypujemy lód, wkładamy plasterek cytryny.","Wlewamy syrop czarny bez i sok z cytryny.","Uzupełniamy wodą gazowaną. NIE MIESZAMY."]
+  }]
+},
+{
+  id:73, name:"Lemoniada Ogórkowa", category:"lemoniady", icon:"🥒", tags:["ogórek","mięta","zimna","gazowana"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml (duża prążkowana)","40ml soku z cytryny","40ml syropu ogórkowego","Woda gazowana","¾ szklanki lodu","Plasterek cytryny przekrojony na 4 części","3 plasterki ogórka przekrojone na pół","Kilka listków mięty"],
+    steps:["Do szklanki wsypujemy lód, wkładamy cytrynę, ogórek i listki mięty.","Wlewamy syrop ogórkowy i sok z cytryny.","Uzupełniamy wodą gazowaną. NIE MIESZAMY."]
+  }]
+},
+
+// ── SOKI ŚWIEŻO WYCISKANE ─────────────────
+{
+  id:78, name:"Marchewkowo!", category:"soki_smoothie", icon:"🥕", tags:["marchewka","jabłko","imbir","sok"],
+  variants:[{label:null,
+    ingredients:["Szklanka 280ml","3 marchewki","1,5 jabłka","Imbir ok. 2cm","4–5 kostek lodu"],
+    steps:["Składniki czyścimy, kroimy na kawałki i wrzucamy do sokowirówki.","Przelewamy do szklanki i uzupełniamy lodem. Jeśli za mało dodajemy jeszcze marchew."]
+  }]
+},
+{
+  id:79, name:"Pomarańczowo!", category:"soki_smoothie", icon:"🍊", tags:["pomarańcza","sok","świeży"],
+  variants:[{label:null,
+    ingredients:["Szklanka 280ml","2–3 pomarańcze","4–5 kostek lodu"],
+    steps:["Pomarańcze obieramy, kroimy na 4 części i wrzucamy do sokowirówki (lub wyciskarka do cytrusów).","Przelewamy do szklanki i uzupełniamy lodem."]
+  }]
+},
+{
+  id:80, name:"Burakowo!", category:"soki_smoothie", icon:"🫐", tags:["burak","gruszka","jabłko","cytryna","sok"],
+  variants:[{label:null,
+    ingredients:["Szklanka 280ml","1 burak","1 gruszka","1 jabłko","Sok z połowy cytryny","4–5 kostek lodu"],
+    steps:["Składniki czyścimy, kroimy na kawałki i wrzucamy do sokowirówki.","Przelewamy do szklanki i uzupełniamy lodem. Jeśli za mało dolewamy sok jabłkowy."]
+  }]
+},
+
+// ── SMOOTHIES ─────────────────────────────
+{
+  id:85, name:"Leśnie", category:"soki_smoothie", icon:"🍓", tags:["owoce leśne","banan","pomarańcza","smoothie"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml (puste 2 palce od góry)","1 garść mrożonych owoców leśnych (truskawki/jagody/maliny)","1 banan","150–200ml soku pomarańczowego","5 kostek lodu"],
+    steps:["Wrzucamy wszystko do blendera z 5 kostkami lodu, wlewamy sok i blendujemy.","Po przelaniu do szklanki uzupełniamy lodem.","Ozdabiamy połówką plastra pomarańczy wbitego w krawędź szklanki."]
+  }]
+},
+{
+  id:86, name:"Odżywczo", category:"soki_smoothie", icon:"🍌", tags:["cynamon","wanilia","mleko","smoothie"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml (puste 2 palce od góry)","½ łyżeczki cynamonu","2 pompki syropu waniliowego","150–200ml mleka","5 kostek lodu","Puder cynamonowy do posypania"],
+    steps:["Wrzucamy wszystko do blendera z 5 kostkami lodu, wlewamy mleko i blendujemy.","Po przelaniu do szklanki uzupełniamy lodem.","Górę posypujemy pudrem cynamonowym."]
+  }]
+},
+{
+  id:87, name:"Zielono", category:"soki_smoothie", icon:"🥝", tags:["jarmuż","szpinak","kiwi","banan","smoothie"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml (puste 2 palce od góry)","Mała garść jarmużu","½ banana","1 kiwi","1 garść szpinaku","Sok jabłkowy","Limonka","5 kostek lodu"],
+    steps:["Wrzucamy wszystko do blendera z 5 kostkami lodu, wlewamy sok jabłkowy i blendujemy.","Po przelaniu do szklanki uzupełniamy lodem.","Ozdabiamy plasterkiem limonki wbitym w brzeg szklanki."]
+  }]
+},
+{
+  id:88, name:"Detoksowo", category:"soki_smoothie", icon:"🍓", tags:["truskawki","banan","płatki owsiane","miód","smoothie"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml (puste 2 palce od góry)","5 mrożonych truskawek (~100g)","½ szklanki mleka","1 banan","1 łyżka płatków owsianych","1 łyżka siemienia lnianego","1 łyżka miodu","Płatki owsiane do posypania (~0,5 łyżeczki)"],
+    steps:["Wszystkie składniki wrzucamy do blendera i blendujemy.","Przelewamy do szklanki, uzupełniamy lodem.","Posypujemy płatkami owsianymi."]
+  }]
+},
+{
+  id:89, name:"Ożywiająco!", category:"soki_smoothie", icon:"🥝", tags:["truskawki","banan","kiwi","jabłko","smoothie"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml (puste 2 palce od góry)","5 mrożonych truskawek (~100g)","1 banan","1 kiwi","½ szklanki soku jabłkowego","1 łyżka miodu"],
+    steps:["Wrzucamy wszystko do blendera i blendujemy.","Przelewamy do szklanki, uzupełniamy lodem.","Ozdabiamy plasterkiem kiwi wbitym w brzeg szklanki."]
+  }]
+},
+{
+  id:90, name:"Jagodowo!", category:"soki_smoothie", icon:"🫐", tags:["borówki","mleko","miód","smoothie"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml (puste 2 palce od góry)","Garść borówek","250ml mleka","1 łyżeczka miodu","6 kropel soku z cytryny"],
+    steps:["Wszystkie składniki blendujemy.","Przelewamy do szklanki i uzupełniamy lodem.","Ozdabiamy listkiem mięty."]
+  }]
+},
+{
+  id:91, name:"Pobudzająco!", category:"soki_smoothie", icon:"🫐", tags:["borówki","żurawina","banan","smoothie"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml (puste 2 palce od góry)","Garść borówek","250ml soku żurawinowego","½ banana"],
+    steps:["Wszystkie składniki blendujemy.","Przelewamy do szklanki, uzupełniamy lodem.","Ozdabiamy listkiem mięty."]
+  }]
+},
+{
+  id:92, name:"Warzywnie!", category:"soki_smoothie", icon:"🥬", tags:["jarmuż","ogórek","seler","imbir","smoothie"],
+  variants:[{label:null,
+    ingredients:["Szklanka 420ml (puste 2 palce od góry)","Mała garść jarmużu","1 ogórek gruntowy","1 szt. selera naciowego","½ szklanki soku jabłkowego","10 listków mięty","Sok z połowy cytryny","2 plastry imbiru","1 łyżka miodu"],
+    steps:["Wrzucamy wszystko do blendera i blendujemy.","Przelewamy do szklanki, uzupełniamy lodem.","Ozdabiamy plasterkiem cytryny i listkiem mięty."]
+  }]
+},
+
+// ── CZEKOLADY GORĄCE ──────────────────────
+{
+  id:95, name:"Czekolada Klasyczna", category:"czekolady", icon:"🍫", tags:["marshmallow","groszki","klasyczna"],
+  variants:[{label:null,
+    ingredients:["Szklanka 250ml","1 płaska miarka groszków czekoladowych","75ml mleka","3–5 pianek marshmallow","Długa łyżeczka","Rurka"],
+    steps:["Do najmniejszego dzbanka nalewamy mleko i steamujemy.","Dodajemy groszki czekoladowe i mieszamy (łatwiej mieszaczem bateryjnym).","Wlewamy czekoladę do szklanki. Na górę kładziemy pianki marshmallow."]
+  }]
+},
+{
+  id:96, name:"Czekolada Biała", category:"czekolady", icon:"🍫", tags:["biała","migdały","bita śmietana"],
+  variants:[{label:null,
+    ingredients:["Szklanka 250ml","1 płaska miarka białych groszków czekoladowych","75ml mleka","Prażone płatki migdałów","Bita śmietana","Długa łyżeczka","Rurka"],
+    steps:["Do dzbanka nalewamy mleko i steamujemy. Dodajemy groszki i mieszamy.","Wlewamy czekoladę do szklanki.","Na górę wyciskamy bitą śmietanę i sypiemy płatki migdałów."]
+  }]
+},
+{
+  id:97, name:"Czekolada Biała z Espresso", category:"czekolady", icon:"🍫", tags:["biała","espresso","bita śmietana"],
+  variants:[{label:null,
+    ingredients:["Szklanka 250ml","1 płaska miarka białych groszków czekoladowych","75ml mleka","1 shot espresso","Bita śmietana","Długa łyżeczka","Rurka"],
+    steps:["Do dzbanka wlewamy mleko i steamujemy. Dodajemy groszki i mieszamy.","Wlewamy czekoladę do szklanki, następnie espresso.","Na górę wyciskamy bitą śmietanę."]
+  }]
+},
+{
+  id:98, name:"Czekolada z Musem Wiśniowym", category:"czekolady", icon:"🍒", tags:["wiśnie","bita śmietana","starta czekolada"],
+  variants:[{label:null,
+    ingredients:["Szklanka 250ml","1 kopiata miarka groszków czekoladowych","1,5 miarki mleka","4 mrożone wiśnie","Bita śmietana","Starta ciemna czekolada","Długa łyżeczka","Rurka"],
+    steps:["Do szklanki wrzucamy wiśnie i rozgniatamy.","Do dzbanka wlewamy mleko i steamujemy. Dodajemy groszki i mieszamy.","Wlewamy czekoladę do szklanki z wiśniami. Na górę bita śmietana i starta czekolada."]
+  }]
+},
+{
+  id:99, name:"Czekolada Orange", category:"czekolady", icon:"🍊", tags:["cointreau","pomarańcza","bita śmietana","alkohol"],
+  variants:[{label:null,
+    ingredients:["Szklanka 250ml","1 płaska miarka groszków czekoladowych","75ml mleka","20ml likieru pomarańczowego Cointreau","Bita śmietana","Skórka z pomarańczy","Długa łyżeczka","Rurka"],
+    steps:["Do dzbanka wlewamy mleko i steamujemy. Dodajemy groszki i mieszamy.","Do szklanki wlewamy likier pomarańczowy i czekoladę.","Na całość nakładamy bitą śmietanę i skórkę z pomarańczy."]
+  }]
+},
+{
+  id:100, name:"Czekolada Amaretti", category:"czekolady", icon:"🍫", tags:["amaretto","migdały","bita śmietana"],
+  variants:[{label:null,
+    ingredients:["Szklanka 250ml","1 płaska miarka groszków czekoladowych","75ml mleka","1,5 dozy syropu amaretto","Bita śmietana","Prażony migdał","Długa łyżeczka","Rurka"],
+    steps:["Do dzbanka wlewamy mleko i steamujemy. Dodajemy groszki i mieszamy.","Do szklanki wlewamy syrop amaretto i czekoladę.","Na całość nakładamy bitą śmietanę i posypujemy prażonym migdałem."]
+  }]
+},
+// ── CZEKOLADY MROŻONE ─────────────────────
+{
+  id:102, name:"Mrożona Biała z Espresso", category:"czekolady", icon:"🧊", tags:["biała","espresso","lód"],
+  variants:[{label:null,
+    ingredients:["Duża prążkowana szklanka","1 shot espresso","1 biała miarka groszków z białej czekolady","1 biała miarka mleka","¾ szklanki lodu","Rurka"],
+    steps:["Wsypujemy pełną szklankę lodu.","W małym dzbanku podgrzewamy groszki z mlekiem — gdy się połączą przelewamy do szklanki z lodem.","Dodajemy 1 shot espresso — tworzy się dwuwarstwowy napój. Podajemy ze słomką."]
+  }]
+},
+{
+  id:103, name:"Mrożona Klasyczna Chili Kokos", category:"czekolady", icon:"🧊", tags:["chili","kokos","lód"],
+  variants:[{label:null,
+    ingredients:["Duża prążkowana szklanka","1 biała miarka groszków czekoladowych","1 biała miarka mleka","⅓ łyżeczki chili w proszku","15ml syropu kokosowego","Lód","Rurka"],
+    steps:["Wsypujemy pełną szklankę lodu.","W małym dzbanku podgrzewamy groszki z mlekiem — gdy się połączą przelewamy do szklanki z lodem.","Dodajemy chili i syrop kokosowy, mieszamy. Podajemy ze słomką."]
+  }]
+},
+
+// ── KOKTAJLE BEZALKOHOLOWE ────────────────
+{
+  id:108, name:"Mojito (bezalkoholowe)", category:"koktajle", icon:"🌿", tags:["limonka","mięta","sprite","bezalkoholowe"],
+  variants:[{label:null,
+    ingredients:["Szklanka prążkowana 420ml","½ limonki pokrojonej w ćwiartki","3–4 średnie listki świeżej mięty","Sprite lub 7Up","Lód"],
+    steps:["Limonkę i miętę ugniatamy muddlerem do rozpuszczenia.","Do szklanki wsypujemy lód (~¾), mieszamy łyżką barmańską razem z ugniecionymi składnikami.","Wlewamy Sprite/7Up, resztę uzupełniamy lodem. Dekorujemy plastrem limonki."]
+  }]
+},
+{
+  id:109, name:"Sex on the Beach (bezalkoholowe)", category:"koktajle", icon:"🍊", tags:["pomarańcza","żurawina","brzoskwinia","bezalkoholowe"],
+  variants:[{label:null,
+    ingredients:["Szklanka Hurricane 400ml","150ml soku pomarańczowego","150ml soku żurawinowego","10ml syropu brzoskwiniowego","10ml syropu żurawinowego","Kilka kropel soku z cytryny","Lód"],
+    steps:["Lód wkładamy do szklanki. Wlewamy syrop żurawinowy, brzoskwiniowy i kilka kropel soku z cytryny.","Wlewamy sok żurawinowy.","Powoli wlewamy sok pomarańczowy tworząc warstwę. Podajemy ze słomką i plastrem pomarańczy."]
+  }]
+},
+
+// ── KOKTAJLE ALKOHOLOWE SHORT ─────────────
+{
+  id:112, name:"Daisy the Santiago", category:"koktajle", icon:"🍹", tags:["rum","bacardi","likier ziołowy","short"],
+  variants:[{label:null,
+    ingredients:["Szklanka do whiskey","60ml Bacardi Gold rum","20ml soku z cytryny","20ml likieru ziołowego (10ml do shakera + 10ml wykończenie)","10ml syropu cukrowego","Lód","Borówki na wykałaczce + szypułka mięty"],
+    steps:["Rum, sok z cytryny, 10ml likieru ziołowego i syrop wrzucamy do shakera z lodem. Wstrząsamy.","Przelewamy do szklanki, uzupełniamy lodem.","Na wierzch delikatnie po łyżeczce wlewamy pozostałe 10ml likieru ziołowego. Dekorujemy borówkami i miętą."]
+  }]
+},
+{
+  id:113, name:"Old Fashioned", category:"koktajle", icon:"🥃", tags:["whiskey","jim beam","angostura","short"],
+  variants:[{label:null,
+    ingredients:["Szklanka do whiskey","40ml Jim Beam","Kostka cukru trzcinowego","3 krople Angostura Bitters","Woda gazowana","4 kostki lodu","Pasek skórki pomarańczy"],
+    steps:["Do szklanki dajemy kostkę cukru, na nią 3 krople Angostura. Rozcieramy muddlerem.","Wlewamy 40ml Jim Beam. Dodajemy 4 kostki lodu.","Dolewamy wody gazowanej do ¾ szklanki i mieszamy. Pasek pomarańczy (bez białego miąższu) skręcamy, przecieramy rant szklanki i wrzucamy."]
+  }]
+},
+{
+  id:114, name:"Gin Sour", category:"koktajle", icon:"🍸", tags:["gin","cytryna","ogórek","truskawka","short"],
+  variants:[{label:null,
+    ingredients:["Szklanka do whiskey","40ml ginu","20ml soku z cytryny","20ml syropu ogórkowego","10ml syropu truskawkowego","Lód","Plasterek suszonej limonki"],
+    steps:["Wszystkie składniki poza lodem wrzucamy do shakera, dobrze wstrząsamy.","Przelewamy do szklanki, uzupełniamy lodem do max.","Wkładamy plasterek suszonej limonki."]
+  }]
+},
+{
+  id:115, name:"Kawaraggio", category:"koktajle", icon:"☕", tags:["baileys","karmel","espresso","short","kieliszek"],
+  variants:[{label:null,
+    ingredients:["Szkło koktajlowe (schłodzone)","20ml Baileys","20ml śmietanki 32%","10ml syropu karmelowego","1 shot espresso","Lód","3 ziarenka kawy"],
+    steps:["Wszystkie składniki z lodem wrzucamy do shakera, dobrze wstrząsamy.","Przelewamy przez cedzak (bez lodu) do schłodzonego kieliszka.","Ozdabiamy 3 ziarenkami kawy."]
+  }]
+},
+{
+  id:116, name:"Margarita Truskawkowa", category:"koktajle", icon:"🍓", tags:["tequila","cointreau","truskawki","kieliszek"],
+  variants:[{label:null,
+    ingredients:["Szkło koktajlowe","5 truskawek","30ml tequili","20ml likieru Cointreau","40ml soku z cytryny","1 łyżeczka cukru","4 kostki lodu","Cukier trzcinowy do obtoczenia rantu"],
+    steps:["Górną krawędź kieliszka przecieramy cytryną i obtaczamy w cukrze trzcinowym.","Pozostałe składniki wrzucamy do blendera i dobrze miksujemy.","Przelewamy do kieliszka. W razie potrzeby dodajemy lód."]
+  }]
+},
+
+// ── KOKTAJLE ALKOHOLOWE LONG ──────────────
+{
+  id:120, name:"Piętro Cafe (koktajl)", category:"koktajle", icon:"🍹", tags:["gin","biała herbata","truskawki","brzoskwinia","long"],
+  variants:[{label:null,
+    ingredients:["Szklanka Pokiel 300ml","¾ szklanki lodu","40ml ginu","150ml białej herbaty zaparzonej","3 truskawki","20ml syropu brzoskwiniowego (2 pompki)","10ml syropu truskawkowego (1 pompka)","3 listki mięty","Sok z ⅓ limonki"],
+    steps:["Lód wsypujemy do szklanki.","Wlewamy kolejno: syropy, sok z limonki, gin, herbatę.","Truskawki i miętę muddlujemy lub wrzucamy. Ozdabiamy plasterkiem limonki wbitym w krawędź szklanki."]
+  }]
+},
+{
+  id:121, name:"Mojito", category:"koktajle", icon:"🌿", tags:["rum","limonka","mięta","bacardi","long"],
+  variants:[{label:null,
+    ingredients:["Szklanka prążkowana 280ml","½ limonki w łódkach","3 średnie listki mięty","40ml rumu Bacardi White","Sprite","Kruszony lód"],
+    steps:["Limonkę kroimy w łódki. Wrzucamy do szklanki, dodajemy miętę (ściskaną wcześniej w dłoni). Ugniatamy muddlerem.","Dodajemy lód, rum, mieszamy.","Wlewamy Sprite do ok ¾ szklanki, dopełniamy wodą gazowaną. Wkładamy słomki, przyozdabiamy miętą i limonką."]
+  }]
+},
+{
+  id:122, name:"Sex on the Beach", category:"koktajle", icon:"🍊", tags:["wódka","brzoskwinia","żurawina","pomarańcza","long"],
+  variants:[{label:null,
+    ingredients:["Szklanka Hurricane 400ml","20ml wódki","20ml likieru brzoskwiniowego (Bols Peach 17%)","100ml soku żurawinowego","100ml soku pomarańczowego","1,5 pompki syropu żurawinowego lub grenadyny","Lód"],
+    steps:["Lód do szklanki ok ½. Na spód wlewamy syrop żurawinowy/grenadynę i alkohole.","Wlewamy sok żurawinowy.","Nad poziom płynu przykładamy łyżeczkę i po niej delikatnie wlewamy sok pomarańczowy tworząc warstwę. Podajemy ze słomką i plastrem pomarańczy."]
+  }]
+},
+{
+  id:123, name:"Tequila Sunrise", category:"koktajle", icon:"🌅", tags:["tequila","pomarańcza","żurawina","long"],
+  variants:[{label:null,
+    ingredients:["Szklanka Pokiel 300ml","½ szklanki lodu","50ml tequili","100ml soku pomarańczowego","¾ pompki syropu żurawinowego","Cukier trzcinowy do obtoczenia rantu","Plaster pomarańczy"],
+    steps:["Górną krawędź szklanki przecieramy limonką/cytryną/wodą i zamaczamy w cukrze trzcinowym.","Wsypujemy lód, wlewamy syrop, następnie tequilę.","Uzupełniamy sokiem pomarańczowym. Ozdabiamy plastrem pomarańczy."]
+  }]
+},
+{
+  id:124, name:"Cuba Libre", category:"koktajle", icon:"🥤", tags:["rum","cola","limonka","bacardi","long"],
+  variants:[{label:null,
+    ingredients:["Szklanka prążkowana 280ml","¾ szklanki lodu","50ml Rumu Bacardi White","2 plasterki limonki","Cola","Cukier trzcinowy do obtoczenia rantu"],
+    steps:["Górną krawędź szklanki przecieramy limonką/wodą i zamaczamy w cukrze trzcinowym.","Wsypujemy lód, wlewamy rum, dodajemy plasterki limonki.","Uzupełniamy colą."]
+  }]
+},
+{
+  id:125, name:"Krwawa Mary", category:"koktajle", icon:"🍅", tags:["wódka","pomidorowy","tabasco","long"],
+  variants:[{label:null,
+    ingredients:["Szklanka Hurricane","40ml wódki","150ml soku pomidorowego","Szczypta soli","Szczypta pieprzu","3 krople Tabasco","Lód","Listek bazylii"],
+    steps:["Wszystko wrzucamy do shakera z lodem i dobrze mieszamy.","Przelewamy do szklanki i wypełniamy lodem po brzegi.","Ozdabiamy bazylią."]
+  }]
+},
+{
+  id:126, name:"Aperol Spritz", category:"koktajle", icon:"🍊", tags:["aperol","prosecco","pomarańcza","long"],
+  variants:[{label:null,
+    ingredients:["Szklanka Pokiel","100ml Prosecco","50ml Aperol","50ml wody gazowanej","Plaster pomarańczy przekrojony na pół","Lód","Słomka"],
+    steps:["Wlewamy wszystkie składniki do szklanki.","Uzupełniamy lodem i wsadzamy pomarańczę.","Podajemy ze słomką."]
+  }]
+},
+{
+  id:127, name:"Malibu Hot Apple", category:"koktajle", icon:"🍎", tags:["malibu","wódka","jabłkowy","cynamon","gorący"],
+  variants:[{label:null,
+    ingredients:["Szklanka prążkowana mniejsza","60ml Malibu","20ml wódki","180ml soku jabłkowego","6 goździków","Cynamon"],
+    steps:["Sok z goździkami podgrzewamy do 60°C.","Przelewamy do szklanki, wlewamy wódkę i Malibu, mieszamy.","Posypujemy cynamonem."]
+  }]
+},
+{
+  id:128, name:"Piwo Fiołkowe", category:"koktajle", icon:"💜", tags:["piwo","fiołek","kwiatki jadalne"],
+  variants:[{label:null,
+    ingredients:["Szklanka do piwa","Piwo lane (z kranu)","20ml syropu fiołkowego Violette Monin (duże) / 10ml (małe)","Kwiatki jadalne niebieskie (jeśli są)"],
+    steps:["Nalewamy piwo do szklanki.","Dodajemy syrop fiołkowy: 20ml do dużego, 10ml do małego piwa.","Dekorujemy jadalnymi kwiatkami niebieskimi."]
+  }]
+},
+{
+  id:129, name:"Pina Colada", category:"koktajle", icon:"🥥", tags:["malibu","rum","ananas","kokos","long"],
+  variants:[{label:null,
+    ingredients:["Szklanka Pokiel","25ml Malibu","30ml rumu Bacardi White","10ml syropu kokosowego Monin","100ml soku ananasowego","50ml mleka","5g wiórek kokosowych","Kilka kostek lodu","Wiórki kokosowe do obtoczenia rantu"],
+    steps:["Górną krawędź szklanki przecieramy limonką/wodą i zamaczamy w wiórkach kokosowych.","Wszystkie składniki wrzucamy do shakera barmańskiego i delikatnie shakerujemy.","Przelewamy do szklanki."]
+  }]
+},
+{
+  id:130, name:"Casablanca", category:"koktajle", icon:"🍹", tags:["wódka","likier jajeczny","żurawina","pomarańcza","long"],
+  variants:[{label:null,
+    ingredients:["Szklanka Pokiel","30ml wódki","20ml likieru jajecznego","20ml soku cytrynowego","80–100ml soku pomarańczowego","20ml syropu żurawinowego","¾ szklanki lodu","Granat do posypania"],
+    steps:["Lód wsypujemy do szklanki, wlewamy syrop żurawinowy.","Wódkę, likier, sok cytrynowy i pomarańczowy umieszczamy w shakerze. Po energicznym wstrząśnięciu przelewamy do szklanki.","Na wierzch posypujemy granatem."]
+  }]
+},
+{
+  id:131, name:"Latte Black Red Yellow", category:"koktajle", icon:"✨", tags:["kurkuma","węgiel","burak","mleko","specjalne"],
+  variants:[{label:null,
+    ingredients:["Filiżanka 300ml","½ łyżeczki kurkumy LUB węgla aktywowanego LUB suszonego buraka","1 shot espresso","Spienione mleko jak na latte"],
+    steps:["Do naczynia wsyp wybraną przyprawę (kurkuma = złoty, węgiel = czarny, burak = czerwony).","Zaparz espresso i energicznie wymieszaj całość — uważaj na rozwarstwianie!","Zalej spienionym mlekiem i gotowe."]
+  }]
+},
+
+// ── SHOTY ─────────────────────────────────
+{
+  id:140, name:"Wściekły Pies", category:"shoty", icon:"🥃", tags:["wódka","malinowy","tabasco","shot"],
+  variants:[{label:null,
+    ingredients:["Kieliszek do shota","10ml syropu malinowego","30ml wódki","3 krople Tabasco"],
+    steps:["Wlewamy syrop malinowy na dno.","Po łyżeczce po ściankach wlewamy wódkę — tworzymy warstwy.","Dodajemy 3 krople Tabasco."]
+  }]
+},
+{
+  id:141, name:"Chupa Chups", category:"shoty", icon:"🥃", tags:["cytrynówka","imbir","pieprz","shot"],
+  variants:[{label:null,
+    ingredients:["Kieliszek do shota","10ml syropu imbirowego","30ml cytrynówki","Szczypta pieprzu"],
+    steps:["Wlewamy syrop imbirowy na dno.","Po łyżeczce po ściankach wlewamy cytrynówkę — tworzymy warstwy.","Dodajemy szczyptę pieprzu."]
+  }]
+},
+{
+  id:142, name:"B-52", category:"shoty", icon:"🥃", tags:["kahlua","baileys","cointreau","shot","warstwy"],
+  variants:[{label:null,
+    ingredients:["Kieliszek do shota","Kahlúa (równa część)","Baileys (równa część)","Cointreau (równa część)"],
+    steps:["Wlewamy Kahlúa na dno.","Po łyżeczce powoli dolewamy Baileys tworząc drugą warstwę.","Po łyżeczce powoli dolewamy Cointreau tworząc trzecią warstwę."]
+  }]
+},
+
+// ── GRZAŃCE BEZALKOHOLOWE ─────────────────
+{
+  id:148, name:"Piwo Wiśniowo-Cytrynowe (bezalk.)", category:"grzance", icon:"🍺", tags:["piwo bezalkoholowe","wiśnia","cytryna","grzane"],
+  variants:[{label:null,
+    ingredients:["Kufel z rączką 500ml","Piwo Tyskie 0%","30ml soku wiśniowego","20ml miodu","4 mrożone wiśnie","2 połówki cytryny z goździkami","2 plasterki imbiru","3 kawałki cynamonu","Szczypta kardamonu"],
+    steps:["Wlewamy piwo do kufla, dodajemy wszystkie składniki.","Przelewamy do garnka i podgrzewamy, nie mieszając.","Po podgrzaniu wlewamy z powrotem do kufla. Podajemy ze słomką."]
+  }]
+},
+{
+  id:149, name:"Piwo Imbirowo-Miodowe (bezalk.)", category:"grzance", icon:"🍺", tags:["piwo bezalkoholowe","imbir","miód","grzane"],
+  variants:[{label:null,
+    ingredients:["Kufel z rączką 500ml","Piwo Tyskie 0%","30ml soku imbirowego","10ml miodu","2 połówki pomarańczy z goździkami","3 plasterki imbiru","3 kawałki cynamonu","Szczypta kardamonu"],
+    steps:["Wlewamy piwo do kufla, dodajemy wszystkie składniki.","Przelewamy do garnka i podgrzewamy, nie mieszając.","Po podgrzaniu wlewamy z powrotem do kufla. Podajemy ze słomką."]
+  }]
+},
+{
+  id:150, name:"Wino Grzane Bezalkoholowe", category:"grzance", icon:"🍷", tags:["wino bezalkoholowe","anyż","cynamon","grzane"],
+  variants:[{label:null,
+    ingredients:["Naczynie","60ml wino białe BEZALKOHOLOWE","150ml wino czerwone BEZALKOHOLOWE","20ml soku z dzikiej róży","1 gwiazdka anyżu","3 owoce jałowca","4 goździki","3 kawałki cynamonu"],
+    steps:["Do naczynia wrzucić wszystkie przyprawy.","Podgrzać wino do 70°C, dodać sok z dzikiej róży i wlać do naczynia z przyprawami.","Posypać 3 przetarciami Kamis do ciast i deserów lub przyprawą piernikową."]
+  }]
+},
+
+// ── GRZAŃCE ALKOHOLOWE ────────────────────
+{
+  id:152, name:"Piwo Grzane Piętro Cafe", category:"grzance", icon:"🔥", tags:["piwo lane","dzika róża","imbir","cynamon","grzane"],
+  variants:[{label:null,
+    ingredients:["Kufel z rączką 500ml","Piwo lane","25ml soku z dzikiej róży","2 cienkie plastry imbiru","Plaster pomarańczy","5 goździków","2–3 poszarpane laski cynamonu","1 szczypta kardamonu"],
+    steps:["Nalewamy piwo do kufla, dodajemy: plaster pomarańczy (w połówce 5 goździków), kardamon, poszarpane laski cynamonu, plastry imbiru, 25ml soku z dzikiej róży.","Wszystko przelewamy do garnka i podgrzewamy NIE MIESZAJĄC.","Po podgrzaniu wlewamy do kufla, posypujemy 3 przetarciami Kamis do ciast lub przyprawą piernikową. Podajemy ze słomką."]
+  }]
+},
+{
+  id:153, name:"Wino Grzane Piętro Cafe", category:"grzance", icon:"🍷", tags:["wino","anyż","cynamon","jałowiec","grzane"],
+  variants:[{label:null,
+    ingredients:["Kubek 240ml","60ml wina białego","150ml wina czerwonego","20ml soku z dzikiej róży","1 gwiazdka anyżu","3 owoce jałowca","4 goździki","3 kawałki cynamonu (⅓ laski)"],
+    steps:["Do naczynia wrzucamy wszystkie przyprawy.","Podgrzać wino do 70°C, dodać sok z dzikiej róży i wlać do naczynia z przyprawami.","Posypać 3 przetarciami Kamis do ciast i deserów lub przyprawą piernikową."]
+  }]
+},
+{
+  id:154, name:"Grzany Cydr", category:"grzance", icon:"🍎", tags:["cydr","apple pie","anyż","cynamon","grzane"],
+  variants:[{label:null,
+    ingredients:["Kufel 500ml (gruby)","500ml cydru","10ml syropu Monin Apple Pie","2 kawałki poszarpanego cynamonu","1 gwiazdka anyżu","4–5 goździków","4–5 kawałków jabłka"],
+    steps:["Wlewamy cydr do garnka, wrzucamy wszystkie składniki.","Podgrzewamy do 70°C.","Przelewamy do kufla i podajemy ze słomką."]
+  }]
+},
+{
+  id:155, name:"Grzany Aperol", category:"grzance", icon:"🍊", tags:["aperol","prosecco","jabłkowy","pomarańcza","grzany"],
+  variants:[{label:null,
+    ingredients:["Mała prążkowana szklanka","100ml soku jabłkowego","100ml Prosecco","40ml Aperolu","10ml syropu pomarańczowego (1 pompka)","4 krople Angostura Bitters","1 grubszy plasterek pomarańczy przekrojony na pół","Słomka"],
+    steps:["Wszystko poza pomarańczą podgrzewamy do 70°C.","Dodajemy plasterek pomarańczy.","Podajemy ze słomką."]
+  }]
+}
+
 ];
 
 // ══════════════════════════════════════════
@@ -473,28 +1075,22 @@ function normalize(str) {
     .replace(/ł/g,'l').replace(/ń/g,'n').replace(/ó/g,'o')
     .replace(/ś/g,'s').replace(/ź|ż/g,'z');
 }
-
 function matches(drink, query) {
   if (!query) return true;
   const q = normalize(query);
-  const hay = normalize([drink.name, ...(drink.tags||[]),
-    ...drink.variants.flatMap(v=>[...v.ingredients,...v.steps])].join(' '));
-  return q.split(' ').every(p => hay.includes(p));
+  const hay = normalize([drink.name,...(drink.tags||[]),...drink.variants.flatMap(v=>[...v.ingredients,...v.steps])].join(' '));
+  return q.split(' ').every(p=>hay.includes(p));
 }
-
 function highlight(text, query) {
   if (!query) return text;
-  query.trim().split(/\s+/).filter(w=>normalize(w).length>1).forEach(word => {
-    const re = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
-    text = text.replace(re, '<mark>$1</mark>');
+  query.trim().split(/\s+/).filter(w=>normalize(w).length>1).forEach(word=>{
+    const re = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi');
+    text = text.replace(re,'<mark>$1</mark>');
   });
   return text;
 }
-
 function getFiltered() {
-  return DRINKS.filter(d =>
-    (currentCategory === 'all' || d.category === currentCategory) && matches(d, currentQuery)
-  );
+  return DRINKS.filter(d=>(currentCategory==='all'||d.category===currentCategory)&&matches(d,currentQuery));
 }
 
 // ══════════════════════════════════════════
@@ -504,16 +1100,16 @@ function renderList() {
   const list = document.getElementById('list-view');
   const filtered = getFiltered();
   if (!filtered.length) {
-    list.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Brak wyników dla "<strong>${currentQuery}</strong>"</div></div>`;
+    list.innerHTML=`<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Brak wyników dla "<strong>${currentQuery}</strong>"</div></div>`;
     return;
   }
-  list.innerHTML = filtered.map(drink => {
-    const varText = drink.variants.length > 1 ? drink.variants.map(v=>v.label).join(' / ') : '';
+  list.innerHTML = filtered.map(drink=>{
+    const varText = drink.variants.length>1?drink.variants.map(v=>v.label).join(' / '):'';
     const tags = (drink.tags||[]).slice(0,3).map(t=>`<span class="tag">${t}</span>`).join('');
     return `<div class="drink-card" onclick="openDrink(${drink.id})">
       <div class="drink-icon">${drink.icon}</div>
       <div class="drink-info">
-        <div class="drink-name">${highlight(drink.name, currentQuery)}</div>
+        <div class="drink-name">${highlight(drink.name,currentQuery)}</div>
         <div class="drink-meta">${varText?`<span>${varText}</span>`:''}${tags}</div>
       </div>
       <div class="drink-arrow">›</div>
@@ -525,206 +1121,137 @@ function renderList() {
 //  DETAIL
 // ══════════════════════════════════════════
 function openDrink(id) {
-  stopTTS(); currentDrinkId = id; currentVariant = 0;
-  const drink = DRINKS.find(d=>d.id===id);
-  document.getElementById('list-view-wrapper').style.display = 'none';
-  document.getElementById('detail-view').style.display = 'flex';
-  document.getElementById('detailTitle').textContent = drink.name;
+  stopTTS(); currentDrinkId=id; currentVariant=0;
+  const drink=DRINKS.find(d=>d.id===id);
+  document.getElementById('list-view-wrapper').style.display='none';
+  document.getElementById('detail-view').style.display='flex';
+  document.getElementById('detailTitle').textContent=drink.name;
   renderDetail(drink);
 }
-
 function renderDetail(drink) {
-  const vw = document.getElementById('variantWrap');
-  if (drink.variants.length > 1) {
-    vw.style.display = 'block';
-    vw.innerHTML = `<div class="variant-toggle">${drink.variants.map((v,i)=>
-      `<button class="var-btn ${i===currentVariant?'active':''}" onclick="setVariant(${i})">${v.label}</button>`
-    ).join('')}</div>`;
-  } else { vw.style.display = 'none'; }
-
-  const v = drink.variants[currentVariant];
-  document.getElementById('detailBody').innerHTML = `
-    <div>
-      <div class="section-label">Składniki</div>
-      <div class="ingredients-box">${v.ingredients.map(ing=>
-        `<div class="ingredient-item"><div class="ingredient-dot"></div><span>${ing}</span></div>`
-      ).join('')}</div>
-    </div>
-    <div>
-      <div class="section-label">Przygotowanie</div>
-      <div class="steps-list">${v.steps.map((s,i)=>
-        `<div class="step-item"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`
-      ).join('')}</div>
-    </div>`;
+  const vw=document.getElementById('variantWrap');
+  if(drink.variants.length>1){
+    vw.style.display='block';
+    vw.innerHTML=`<div class="variant-toggle">${drink.variants.map((v,i)=>`<button class="var-btn ${i===currentVariant?'active':''}" onclick="setVariant(${i})">${v.label}</button>`).join('')}</div>`;
+  } else { vw.style.display='none'; }
+  const v=drink.variants[currentVariant];
+  document.getElementById('detailBody').innerHTML=`
+    <div><div class="section-label">Składniki</div>
+    <div class="ingredients-box">${v.ingredients.map(ing=>`<div class="ingredient-item"><div class="ingredient-dot"></div><span>${ing}</span></div>`).join('')}</div></div>
+    <div><div class="section-label">Przygotowanie</div>
+    <div class="steps-list">${v.steps.map((s,i)=>`<div class="step-item"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('')}</div></div>`;
 }
-
-function setVariant(idx) {
-  stopTTS(); currentVariant = idx;
-  renderDetail(DRINKS.find(d=>d.id===currentDrinkId));
-}
-
-function goBack() {
-  stopTTS(); currentDrinkId = null;
-  document.getElementById('detail-view').style.display = 'none';
-  document.getElementById('list-view-wrapper').style.display = 'block';
-}
+function setVariant(idx){ stopTTS(); currentVariant=idx; renderDetail(DRINKS.find(d=>d.id===currentDrinkId)); }
+function goBack(){ stopTTS(); currentDrinkId=null; document.getElementById('detail-view').style.display='none'; document.getElementById('list-view-wrapper').style.display='block'; }
 
 // ══════════════════════════════════════════
 //  TTS
 // ══════════════════════════════════════════
-function buildTTSText() {
-  const drink = DRINKS.find(d=>d.id===currentDrinkId);
-  const v = drink.variants[currentVariant];
-  const lbl = v.label ? ` — ${v.label}` : '';
-  return `${drink.name}${lbl}. Składniki: ${v.ingredients.join(', ')}. Przygotowanie: ${v.steps.map((s,i)=>`Krok ${i+1}. ${s}`).join(' ')}`;
+function buildTTSText(){
+  const drink=DRINKS.find(d=>d.id===currentDrinkId);
+  const v=drink.variants[currentVariant];
+  return `${drink.name}${v.label?` — ${v.label}`:''}.  Składniki: ${v.ingredients.join(', ')}. Przygotowanie: ${v.steps.map((s,i)=>`Krok ${i+1}. ${s}`).join(' ')}`;
 }
-
-function startTTS() {
-  if (!('speechSynthesis' in window)) { alert('Użyj Chrome.'); return; }
+function startTTS(){
+  if(!('speechSynthesis' in window)){alert('Użyj Chrome.');return;}
   stopTTS();
-  const utt = new SpeechSynthesisUtterance(buildTTSText());
-  utt.lang = 'pl-PL'; utt.rate = 0.9;
-  const plVoice = window.speechSynthesis.getVoices().find(v=>v.lang.startsWith('pl'));
-  if (plVoice) utt.voice = plVoice;
-  utt.onstart = () => { ttsActive=true; const b=document.getElementById('ttsBtn'); b.textContent='⏹ Stop'; b.classList.add('playing'); };
-  utt.onend = utt.onerror = () => { ttsActive=false; const b=document.getElementById('ttsBtn'); b.textContent='▶ Czytaj'; b.classList.remove('playing'); };
+  const utt=new SpeechSynthesisUtterance(buildTTSText());
+  utt.lang='pl-PL'; utt.rate=0.9;
+  const plVoice=window.speechSynthesis.getVoices().find(v=>v.lang.startsWith('pl'));
+  if(plVoice) utt.voice=plVoice;
+  utt.onstart=()=>{ttsActive=true;const b=document.getElementById('ttsBtn');b.textContent='⏹ Stop';b.classList.add('playing');};
+  utt.onend=utt.onerror=()=>{ttsActive=false;const b=document.getElementById('ttsBtn');b.textContent='▶ Czytaj';b.classList.remove('playing');};
   window.speechSynthesis.speak(utt);
 }
-
-function stopTTS() {
+function stopTTS(){
   window.speechSynthesis?.cancel(); ttsActive=false;
   const b=document.getElementById('ttsBtn');
-  if (b) { b.textContent='▶ Czytaj'; b.classList.remove('playing'); }
+  if(b){b.textContent='▶ Czytaj';b.classList.remove('playing');}
 }
-
-document.getElementById('ttsBtn').addEventListener('click', ()=>{ ttsActive?stopTTS():startTTS(); });
+document.getElementById('ttsBtn').addEventListener('click',()=>{ttsActive?stopTTS():startTTS();});
 
 // ══════════════════════════════════════════
 //  AUDIO BEEPS
 // ══════════════════════════════════════════
-let audioCtx = null;
-function getAudioCtx() {
-  if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-  return audioCtx;
-}
-function playBeep(freq, dur, type='sine', vol=0.3) {
-  try {
-    const ctx=getAudioCtx(), osc=ctx.createOscillator(), gain=ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type=type; osc.frequency.setValueAtTime(freq,ctx.currentTime);
+let audioCtx=null;
+function getAudioCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function playBeep(freq,dur,type='sine',vol=0.3){
+  try{
+    const ctx=getAudioCtx(),osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type=type;osc.frequency.setValueAtTime(freq,ctx.currentTime);
     gain.gain.setValueAtTime(vol,ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
-    osc.start(ctx.currentTime); osc.stop(ctx.currentTime+dur);
-  } catch(e){}
+    osc.start(ctx.currentTime);osc.stop(ctx.currentTime+dur);
+  }catch(e){}
 }
-function beepStart() { playBeep(660,.12); setTimeout(()=>playBeep(880,.18),110); }
-function beepStop()  { playBeep(880,.08); setTimeout(()=>playBeep(550,.2),70); }
-function beepError() { playBeep(300,.3,'sawtooth',.15); }
+function beepStart(){playBeep(660,.12);setTimeout(()=>playBeep(880,.18),110);}
+function beepStop(){playBeep(880,.08);setTimeout(()=>playBeep(550,.2),70);}
+function beepError(){playBeep(300,.3,'sawtooth',.15);}
 
 // ══════════════════════════════════════════
 //  VOICE RECOGNITION
-//  Kluczowa zmiana: NIE wywołujemy getUserMedia z góry.
-//  Pozwalamy recognition.start() samemu wywołać dialog
-//  uprawnień — to działa poprawnie na Android Chrome
-//  bo jest bezpośrednią odpowiedzią na gest użytkownika.
 // ══════════════════════════════════════════
-const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-const micBtn = document.getElementById('micBtn');
+const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+const micBtn=document.getElementById('micBtn');
 
-if (SpeechRec) {
-  recognition = new SpeechRec();
-  recognition.lang = 'pl-PL';
-  recognition.continuous = false;
-  recognition.interimResults = false;
+if(SpeechRec){
+  recognition=new SpeechRec();
+  recognition.lang='pl-PL';
+  recognition.continuous=false;
+  recognition.interimResults=false;
 
-  recognition.onresult = (e) => {
-    const t = e.results[0][0].transcript;
-    document.getElementById('searchInput').value = t;
-    currentQuery = t;
-    renderList();
-    beepStop();
-    micBtn.classList.remove('listening');
+  recognition.onresult=(e)=>{
+    const t=e.results[0][0].transcript;
+    document.getElementById('searchInput').value=t;
+    currentQuery=t; renderList();
+    beepStop(); micBtn.classList.remove('listening');
+  };
+  recognition.onend=()=>{ if(micBtn.classList.contains('listening')){beepStop();micBtn.classList.remove('listening');} };
+  recognition.onerror=(e)=>{
+    micBtn.classList.remove('listening'); beepError();
+    if(e.error==='not-allowed'||e.error==='service-not-allowed') showMicHint();
   };
 
-  recognition.onend = () => {
-    if (micBtn.classList.contains('listening')) {
-      beepStop();
-      micBtn.classList.remove('listening');
+  micBtn.addEventListener('click',()=>{
+    try{getAudioCtx().resume();}catch(e){}
+    if(micBtn.classList.contains('listening')){
+      recognition.stop(); beepStop(); micBtn.classList.remove('listening'); return;
     }
-  };
-
-  recognition.onerror = (e) => {
-    micBtn.classList.remove('listening');
-    beepError();
-    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-      showMicHint();
-    }
-  };
-
-  micBtn.addEventListener('click', () => {
-    // Odblokuj AudioContext po interakcji użytkownika
-    try { getAudioCtx().resume(); } catch(e) {}
-
-    if (micBtn.classList.contains('listening')) {
-      recognition.stop();
-      beepStop();
-      micBtn.classList.remove('listening');
-      return;
-    }
-
-    // Bezpośrednio startujemy — Chrome Android sam pokaże
-    // dialog uprawnień jako reakcja na ten gest tapnięcia
-    micBtn.classList.add('listening');
-    beepStart();
-    try {
-      recognition.start();
-    } catch(e) {
-      micBtn.classList.remove('listening');
-      beepError();
-    }
+    micBtn.classList.add('listening'); beepStart();
+    try{ recognition.start(); }catch(e){ micBtn.classList.remove('listening'); beepError(); }
   });
-
 } else {
-  micBtn.title = 'Wyszukiwanie głosowe niedostępne (użyj Chrome)';
-  micBtn.style.opacity = '0.35';
-  micBtn.style.cursor = 'not-allowed';
+  micBtn.title='Wyszukiwanie głosowe niedostępne (użyj Chrome)';
+  micBtn.style.opacity='0.35'; micBtn.style.cursor='not-allowed';
 }
 
-function showMicHint() {
-  if (document.getElementById('micHint')) return;
-  const hint = document.createElement('div');
-  hint.id = 'micHint';
-  hint.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-    background:#3D1418;border:1px solid var(--accent);border-radius:12px;
-    padding:14px 18px;color:var(--cream);font-size:13px;line-height:1.6;
-    max-width:300px;text-align:center;z-index:500;box-shadow:0 4px 20px rgba(0,0,0,.5);`;
-  hint.innerHTML = `🎙️ Brak uprawnień do mikrofonu.<br>
-    Kliknij ikonę 🔒 w pasku adresu przeglądarki → <strong>Mikrofon</strong> → <strong>Zezwól</strong>,
-    a następnie odśwież stronę.<br><br>
-    <button onclick="document.getElementById('micHint').remove()"
-      style="background:var(--accent);border:none;border-radius:8px;padding:6px 16px;color:#F2E5D0;cursor:pointer;font-size:13px;">OK</button>`;
+function showMicHint(){
+  if(document.getElementById('micHint')) return;
+  const hint=document.createElement('div');
+  hint.id='micHint';
+  hint.style.cssText=`position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#3D1418;border:1px solid var(--accent);border-radius:12px;padding:14px 18px;color:var(--cream);font-size:13px;line-height:1.6;max-width:300px;text-align:center;z-index:500;box-shadow:0 4px 20px rgba(0,0,0,.5);`;
+  hint.innerHTML=`🎙️ Brak uprawnień do mikrofonu.<br>Kliknij ikonę 🔒 w pasku adresu → <strong>Mikrofon</strong> → <strong>Zezwól</strong>, odśwież stronę.<br><br><button onclick="document.getElementById('micHint').remove()" style="background:var(--accent);border:none;border-radius:8px;padding:6px 16px;color:#F2E5D0;cursor:pointer;font-size:13px;">OK</button>`;
   document.body.appendChild(hint);
-  setTimeout(()=>hint?.remove(), 12000);
+  setTimeout(()=>hint?.remove(),12000);
 }
 
 // ══════════════════════════════════════════
 //  EVENTS
 // ══════════════════════════════════════════
-document.getElementById('searchInput').addEventListener('input', e => {
-  currentQuery = e.target.value; renderList();
-});
-document.getElementById('backBtn').addEventListener('click', goBack);
-document.getElementById('catBar').addEventListener('click', e => {
-  const btn = e.target.closest('.cat-btn');
-  if (!btn) return;
+document.getElementById('searchInput').addEventListener('input',e=>{currentQuery=e.target.value;renderList();});
+document.getElementById('backBtn').addEventListener('click',goBack);
+document.getElementById('catBar').addEventListener('click',e=>{
+  const btn=e.target.closest('.cat-btn');
+  if(!btn) return;
   document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  currentCategory = btn.dataset.cat;
+  currentCategory=btn.dataset.cat;
   renderList();
 });
 
 window.speechSynthesis?.getVoices();
-window.speechSynthesis?.addEventListener?.('voiceschanged', ()=>{});
+window.speechSynthesis?.addEventListener?.('voiceschanged',()=>{});
 renderList();
 </script>
 </body>
