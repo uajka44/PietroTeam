@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Piętro Cafe — Przepisy</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #110608;
+    --surface:   #1C090B;
+    --card:      #260C0F;
+    --accent:    #A61B22;
+    --accent2:   #E8C9A0;
+    --cream:     #F2E5D0;
+    --muted:     #8A6A6D;
+    --step-bg:   #200A0C;
+    --radius:    16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overscroll-behavior: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 5 C20 5 15 12 15 18 C15 24 20 27 25 28 C20 29 15 32 15 38 C15 44 20 51 30 51 C40 51 45 44 45 38 C45 32 40 29 35 28 C40 27 45 24 45 18 C45 12 40 5 30 5Z M30 10 C37 10 41 15 41 18 C41 22 37 25 30 27 C23 25 19 22 19 18 C19 15 23 10 30 10Z M30 33 C37 33 41 36 41 38 C41 42 37 47 30 47 C23 47 19 42 19 38 C19 36 23 33 30 33Z' fill='%23A61B22' opacity='0.06'/%3E%3C/svg%3E");
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--surface);
+    padding: 20px 20px 0;
+    border-bottom: 1px solid #3D1418;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .logo-main {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent2);
+    letter-spacing: 0.5px;
+  }
+
+  .logo-sub {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* ── SEARCH BAR ── */
+  .search-wrap {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .search-box {
+    flex: 1;
+    background: var(--card);
+    border: 1.5px solid #3D1418;
+    border-radius: 12px;
+    padding: 13px 16px;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    outline: none;
+    transition: border-color .2s;
+  }
+
+  .search-box::placeholder { color: var(--muted); }
+  .search-box:focus { border-color: var(--accent); }
+
+  .mic-btn {
+    background: var(--card);
+    border: 1.5px solid #3D1418;
+    border-radius: 12px;
+    width: 50px;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .2s;
+    color: var(--muted);
+    font-size: 20px;
+  }
+
+  .mic-btn.listening {
+    border-color: #e05050;
+    background: #3a1010;
+    color: #e05050;
+    animation: pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(224,80,80,.4); }
+    50%       { box-shadow: 0 0 0 8px rgba(224,80,80,0); }
+  }
+
+  /* ── CATEGORIES ── */
+  .cats {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 14px;
+    scrollbar-width: none;
+  }
+  .cats::-webkit-scrollbar { display: none; }
+
+  .cat-btn {
+    background: transparent;
+    border: 1.5px solid #3D1418;
+    border-radius: 20px;
+    padding: 6px 14px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all .15s;
+  }
+
+  .cat-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #F2E5D0;
+    font-weight: 500;
+  }
+
+  /* ── LIST VIEW ── */
+  #list-view {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .drink-card {
+    background: var(--card);
+    border: 1px solid #3D1418;
+    border-radius: var(--radius);
+    padding: 18px 18px 16px;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .drink-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 3px 0 0 3px;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+
+  .drink-card:active,
+  .drink-card:hover {
+    background: #341018;
+    border-color: var(--accent);
+  }
+
+  .drink-card:active::before,
+  .drink-card:hover::before {
+    opacity: 1;
+  }
+
+  .drink-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 44px;
+    text-align: center;
+  }
+
+  .drink-info { flex: 1; min-width: 0; }
+
+  .drink-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--cream);
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .drink-meta {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    background: #3D1418;
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  .drink-arrow {
+    color: var(--muted);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-text { font-size: 15px; }
+
+  /* ── DETAIL VIEW ── */
+  #detail-view {
+    display: none;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .detail-header {
+    background: var(--surface);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #3D1418;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+  }
+
+  .detail-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--cream);
+    flex: 1;
+  }
+
+  .tts-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 14px;
+    color: #F2E5D0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+
+  .tts-btn.playing {
+    background: #e05050;
+    color: #fff;
+  }
+
+  /* ── VARIANT TOGGLE ── */
+  .variant-wrap {
+    padding: 16px 20px 0;
+  }
+
+  .variant-toggle {
+    display: flex;
+    background: var(--card);
+    border: 1px solid #3D1418;
+    border-radius: 12px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .var-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    border-radius: 9px;
+    padding: 10px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+  }
+
+  .var-btn.active {
+    background: var(--accent);
+    color: #F2E5D0;
+  }
+
+  /* ── DETAIL CONTENT ── */
+  .detail-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  /* Ingredients */
+  .ingredients-box {
+    background: var(--card);
+    border: 1px solid #3D1418;
+    border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+
+  .ingredient-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #3D1418;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .ingredient-item:last-child { border-bottom: none; }
+
+  .ingredient-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 7px;
+  }
+
+  /* Steps */
+  .steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .step-item {
+    background: var(--step-bg);
+    border: 1px solid #3D1418;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    background: var(--accent);
+    color: #F2E5D0;
+    font-weight: 700;
+    font-size: 13px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-text {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--cream);
+  }
+
+  /* ── HIGHLIGHT ── */
+  mark {
+    background: rgba(200, 144, 42, 0.3);
+    color: var(--accent2);
+    border-radius: 3px;
+    padding: 0 1px;
+  }
+
+  /* ── GRAIN OVERLAY ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    z-index: 999;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════ LIST VIEW ══════════ -->
+<div id="list-view-wrapper">
+  <div class="header">
+    <div class="logo">
+      <span class="logo-main">Piętro Cafe</span>
+      <span class="logo-sub">Przepisy</span>
+    </div>
+    <div class="search-wrap">
+      <input
+        class="search-box"
+        id="searchInput"
+        type="search"
+        placeholder="Szukaj napoju lub składnika…"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+      >
+      <button class="mic-btn" id="micBtn" title="Szukaj głosowo">🎙️</button>
+    </div>
+    <div class="cats" id="catBar">
+      <button class="cat-btn active" data-cat="all">Wszystkie</button>
+      <button class="cat-btn" data-cat="kawy">☕ Kawy</button>
+      <button class="cat-btn" data-cat="kawy_mrozone">🧊 Kawy mrożone</button>
+      <button class="cat-btn" data-cat="herbaty">🍵 Herbaty</button>
+      <button class="cat-btn" data-cat="czekolady">🍫 Czekolady</button>
+      <button class="cat-btn" data-cat="koktajle">🍹 Koktajle</button>
+    </div>
+  </div>
+  <div id="list-view"></div>
+</div>
+
+<!-- ══════════ DETAIL VIEW ══════════ -->
+<div id="detail-view">
+  <div class="detail-header">
+    <button class="back-btn" id="backBtn">←</button>
+    <span class="detail-title" id="detailTitle"></span>
+    <button class="tts-btn" id="ttsBtn">▶ Czytaj</button>
+  </div>
+  <div id="variantWrap" class="variant-wrap"></div>
+  <div class="detail-body" id="detailBody"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  DANE — PRZEPISY
+// ══════════════════════════════════════════
+const DRINKS = [
+  {
+    id: 1,
+    name: "Espresso",
+    category: "kawy",
+    icon: "☕",
+    tags: ["shot", "klasyczne"],
+    variants: [
+      {
+        label: null,
+        ingredients: [
+          "Filiżanka na espresso z talerzykiem",
+          "1 shot espresso",
+          "Mała szklanka letniej wody",
+          "1 saszetka cukru",
+          "Łyżeczka"
+        ],
+        steps: [
+          "Podajemy wraz ze szklanką wody."
+        ]
+      }
+    ]
+  },
+  {
+    id: 2,
+    name: "Cappuccino",
+    category: "kawy",
+    icon: "☕",
+    tags: ["mleko", "pianka", "klasyczne"],
+    variants: [
+      {
+        label: "Małe",
+        ingredients: [
+          "Filiżanka 150ml z talerzykiem",
+          "1 shot espresso",
+          "Mocno spienione mleko",
+          "2 saszetki cukru",
+          "Łyżeczka"
+        ],
+        steps: [
+          "Espresso zalewamy mlekiem bardziej spienionym niż do latte. Pianka powinna mieć około 1 cm."
+        ]
+      },
+      {
+        label: "Duże",
+        ingredients: [
+          "Filiżanka 300ml z talerzykiem",
+          "2 shoty espresso",
+          "Mocno spienione mleko",
+          "2 saszetki cukru",
+          "Łyżeczka"
+        ],
+        steps: [
+          "Espresso zalewamy mlekiem bardziej spienionym niż do latte. Pianka powinna mieć około 1 cm."
+        ]
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: "Carmelove Latte",
+    category: "kawy",
+    icon: "🍮",
+    tags: ["karmel", "bita śmietana", "sos"],
+    variants: [
+      {
+        label: "Małe",
+        ingredients: [
+          "Filiżanka 300ml z talerzykiem",
+          "1,5 dozy sosu karmelowego",
+          "1 shot espresso",
+          "Lekko spienione mleko",
+          "Bita śmietana",
+          "1 saszetka cukru",
+          "Łyżeczka"
+        ],
+        steps: [
+          "Do kubka wlewamy sos karmelowy, następnie espresso.",
+          "Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.",
+          "Dodajemy bitą śmietanę. Niecałe pół pompki sosu wyciskamy na łyżeczkę, następnie polewamy nim bitą śmietanę."
+        ]
+      },
+      {
+        label: "Duże",
+        ingredients: [
+          "Filiżanka 500ml z talerzykiem",
+          "2 dozy sosu karmelowego",
+          "2 shoty espresso",
+          "Lekko spienione mleko",
+          "Bita śmietana",
+          "1 saszetka cukru",
+          "Łyżeczka"
+        ],
+        steps: [
+          "Do kubka wlewamy sos karmelowy, następnie espresso.",
+          "Całość mieszamy i zalewamy mlekiem spienionym jak na latte — mało pianki.",
+          "Dodajemy bitą śmietanę. Niecałe pół pompki sosu wyciskamy na łyżeczkę, następnie polewamy nim bitą śmietanę."
+        ]
+      }
+    ]
+  }
+];
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let currentQuery    = '';
+let currentCategory = 'all';
+let currentDrinkId  = null;
+let currentVariant  = 0;
+let ttsActive       = false;
+let recognition     = null;
+
+// ══════════════════════════════════════════
+//  SEARCH & FILTER
+// ══════════════════════════════════════════
+function normalize(str) {
+  return str.toLowerCase()
+    .replace(/ą/g,'a').replace(/ć/g,'c').replace(/ę/g,'e')
+    .replace(/ł/g,'l').replace(/ń/g,'n').replace(/ó/g,'o')
+    .replace(/ś/g,'s').replace(/ź|ż/g,'z');
+}
+
+function matches(drink, query) {
+  if (!query) return true;
+  const q  = normalize(query);
+  const haystack = normalize([
+    drink.name,
+    ...(drink.tags || []),
+    ...drink.variants.flatMap(v => [...v.ingredients, ...v.steps])
+  ].join(' '));
+  return q.split(' ').every(part => haystack.includes(part));
+}
+
+function highlight(text, query) {
+  if (!query) return text;
+  const words = query.trim().split(/\s+/).filter(Boolean);
+  let result = text;
+  words.forEach(word => {
+    const norm = normalize(word);
+    if (norm.length < 2) return;
+    const re = new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+    result = result.replace(re, '<mark>$1</mark>');
+  });
+  return result;
+}
+
+function getFiltered() {
+  return DRINKS.filter(d => {
+    const catOk = currentCategory === 'all' || d.category === currentCategory;
+    return catOk && matches(d, currentQuery);
+  });
+}
+
+// ══════════════════════════════════════════
+//  RENDER LIST
+// ══════════════════════════════════════════
+function renderList() {
+  const list = document.getElementById('list-view');
+  const filtered = getFiltered();
+
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-text">Brak wyników dla "<strong>${currentQuery}</strong>"</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(drink => {
+    const hasVariants = drink.variants.length > 1;
+    const variantsText = hasVariants
+      ? drink.variants.map(v => v.label).join(' / ')
+      : '';
+    const tagsHTML = (drink.tags || []).slice(0,3).map(t =>
+      `<span class="tag">${t}</span>`
+    ).join('');
+
+    return `
+      <div class="drink-card" data-id="${drink.id}" onclick="openDrink(${drink.id})">
+        <div class="drink-icon">${drink.icon}</div>
+        <div class="drink-info">
+          <div class="drink-name">${highlight(drink.name, currentQuery)}</div>
+          <div class="drink-meta">
+            ${variantsText ? `<span>${variantsText}</span>` : ''}
+            ${tagsHTML}
+          </div>
+        </div>
+        <div class="drink-arrow">›</div>
+      </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  OPEN DRINK
+// ══════════════════════════════════════════
+function openDrink(id) {
+  stopTTS();
+  currentDrinkId = id;
+  currentVariant = 0;
+  const drink = DRINKS.find(d => d.id === id);
+
+  document.getElementById('list-view-wrapper').style.display = 'none';
+  const dv = document.getElementById('detail-view');
+  dv.style.display = 'flex';
+
+  document.getElementById('detailTitle').textContent = drink.name;
+  renderDetail(drink);
+}
+
+function renderDetail(drink) {
+  const vw = document.getElementById('variantWrap');
+  if (drink.variants.length > 1) {
+    vw.style.display = 'block';
+    vw.innerHTML = `
+      <div class="variant-toggle">
+        ${drink.variants.map((v,i) => `
+          <button class="var-btn ${i === currentVariant ? 'active' : ''}"
+                  onclick="setVariant(${i})">
+            ${v.label}
+          </button>`).join('')}
+      </div>`;
+  } else {
+    vw.style.display = 'none';
+  }
+
+  const variant = drink.variants[currentVariant];
+  const body = document.getElementById('detailBody');
+
+  body.innerHTML = `
+    <div>
+      <div class="section-label">Składniki</div>
+      <div class="ingredients-box">
+        ${variant.ingredients.map(ing => `
+          <div class="ingredient-item">
+            <div class="ingredient-dot"></div>
+            <span>${ing}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div class="section-label">Przygotowanie</div>
+      <div class="steps-list">
+        ${variant.steps.map((step, i) => `
+          <div class="step-item">
+            <div class="step-num">${i + 1}</div>
+            <div class="step-text">${step}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function setVariant(idx) {
+  stopTTS();
+  currentVariant = idx;
+  const drink = DRINKS.find(d => d.id === currentDrinkId);
+  renderDetail(drink);
+}
+
+function goBack() {
+  stopTTS();
+  currentDrinkId = null;
+  document.getElementById('detail-view').style.display = 'none';
+  document.getElementById('list-view-wrapper').style.display = 'block';
+}
+
+// ══════════════════════════════════════════
+//  TTS — LEKTOR
+// ══════════════════════════════════════════
+function buildTTSText() {
+  const drink = DRINKS.find(d => d.id === currentDrinkId);
+  const variant = drink.variants[currentVariant];
+  const varLabel = variant.label ? ` — ${variant.label}` : '';
+  let text = `${drink.name}${varLabel}. `;
+  text += 'Składniki: ';
+  text += variant.ingredients.join(', ') + '. ';
+  text += 'Przygotowanie: ';
+  text += variant.steps.map((s, i) => `Krok ${i+1}. ${s}`).join(' ');
+  return text;
+}
+
+function startTTS() {
+  if (!('speechSynthesis' in window)) {
+    alert('Twoja przeglądarka nie obsługuje lektora. Użyj Chrome.');
+    return;
+  }
+  stopTTS();
+  const utt = new SpeechSynthesisUtterance(buildTTSText());
+  utt.lang = 'pl-PL';
+  utt.rate = 0.9;
+  utt.pitch = 1;
+  const voices = window.speechSynthesis.getVoices();
+  const plVoice = voices.find(v => v.lang.startsWith('pl'));
+  if (plVoice) utt.voice = plVoice;
+  utt.onstart = () => {
+    ttsActive = true;
+    const btn = document.getElementById('ttsBtn');
+    btn.textContent = '⏹ Stop';
+    btn.classList.add('playing');
+  };
+  utt.onend = utt.onerror = () => {
+    ttsActive = false;
+    const btn = document.getElementById('ttsBtn');
+    btn.textContent = '▶ Czytaj';
+    btn.classList.remove('playing');
+  };
+  window.speechSynthesis.speak(utt);
+}
+
+function stopTTS() {
+  window.speechSynthesis?.cancel();
+  ttsActive = false;
+  const btn = document.getElementById('ttsBtn');
+  if (btn) { btn.textContent = '▶ Czytaj'; btn.classList.remove('playing'); }
+}
+
+document.getElementById('ttsBtn').addEventListener('click', () => {
+  ttsActive ? stopTTS() : startTTS();
+});
+
+// ══════════════════════════════════════════
+//  AUDIO BEEPS
+// ══════════════════════════════════════════
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playBeep(freq, duration, type = 'sine', volume = 0.3) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+
+function beepStart() {
+  playBeep(660, 0.12);
+  setTimeout(() => playBeep(880, 0.18), 110);
+}
+
+function beepStop() {
+  playBeep(880, 0.08);
+  setTimeout(() => playBeep(550, 0.2), 70);
+}
+
+function beepError() {
+  playBeep(300, 0.3, 'sawtooth', 0.15);
+}
+
+// ══════════════════════════════════════════
+//  VOICE RECOGNITION
+// ══════════════════════════════════════════
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+const micBtn = document.getElementById('micBtn');
+let micPermissionGranted = false;
+
+async function requestMicPermission() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(t => t.stop());
+    micPermissionGranted = true;
+    micBtn.title = 'Szukaj głosowo';
+    micBtn.style.opacity = '1';
+  } catch(e) {
+    micPermissionGranted = false;
+    micBtn.title = 'Brak dostępu do mikrofonu';
+    micBtn.style.opacity = '0.35';
+    micBtn.style.cursor = 'not-allowed';
+  }
+}
+
+if (SpeechRec) {
+  recognition = new SpeechRec();
+  recognition.lang = 'pl-PL';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    document.getElementById('searchInput').value = transcript;
+    currentQuery = transcript;
+    renderList();
+    beepStop();
+    micBtn.classList.remove('listening');
+  };
+
+  recognition.onend = () => {
+    if (micBtn.classList.contains('listening')) {
+      beepStop();
+      micBtn.classList.remove('listening');
+    }
+  };
+
+  recognition.onerror = (e) => {
+    micBtn.classList.remove('listening');
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      beepError();
+      micBtn.style.opacity = '0.35';
+      micBtn.title = 'Brak uprawnień do mikrofonu';
+      showMicHint();
+    } else {
+      beepError();
+    }
+  };
+
+  micBtn.addEventListener('click', async () => {
+    try { getAudioCtx().resume(); } catch(e) {}
+
+    if (micBtn.classList.contains('listening')) {
+      recognition.stop();
+      beepStop();
+      micBtn.classList.remove('listening');
+      return;
+    }
+
+    if (!micPermissionGranted) {
+      await requestMicPermission();
+      if (!micPermissionGranted) return;
+    }
+
+    micBtn.classList.add('listening');
+    beepStart();
+    try {
+      recognition.start();
+    } catch(e) {
+      micBtn.classList.remove('listening');
+      beepError();
+    }
+  });
+
+  requestMicPermission();
+
+} else {
+  micBtn.title = 'Wyszukiwanie głosowe niedostępne (użyj Chrome)';
+  micBtn.style.opacity = '0.35';
+  micBtn.style.cursor = 'not-allowed';
+}
+
+function showMicHint() {
+  const existing = document.getElementById('micHint');
+  if (existing) return;
+  const hint = document.createElement('div');
+  hint.id = 'micHint';
+  hint.style.cssText = `
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: #3D1418; border: 1px solid var(--accent); border-radius: 12px;
+    padding: 14px 18px; color: var(--cream); font-size: 13px; line-height: 1.5;
+    max-width: 300px; text-align: center; z-index: 500;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  `;
+  hint.innerHTML = `
+    🎙️ Brak dostępu do mikrofonu.<br>
+    <strong>Android:</strong> Kliknij 🔒 w pasku adresu → Uprawnienia → Mikrofon → Zezwól<br>
+    <strong>Desktop:</strong> Kliknij ikonę 🎙️/🔒 w pasku Chrome → Zezwól zawsze
+    <br><br><button onclick="document.getElementById('micHint').remove()"
+      style="background:var(--accent);border:none;border-radius:8px;padding:6px 16px;
+             color:#F2E5D0;cursor:pointer;font-size:13px;">OK</button>
+  `;
+  document.body.appendChild(hint);
+  setTimeout(() => hint?.remove(), 10000);
+}
+
+// ══════════════════════════════════════════
+//  EVENTS
+// ══════════════════════════════════════════
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  currentQuery = e.target.value;
+  renderList();
+});
+
+document.getElementById('backBtn').addEventListener('click', goBack);
+
+document.getElementById('catBar').addEventListener('click', (e) => {
+  const btn = e.target.closest('.cat-btn');
+  if (!btn) return;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCategory = btn.dataset.cat;
+  renderList();
+});
+
+window.speechSynthesis?.getVoices();
+window.speechSynthesis?.addEventListener?.('voiceschanged', () => {});
+
+renderList();
+</script>
+</body>
+</html>
