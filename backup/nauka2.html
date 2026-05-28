@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Piętro Cafe — Szkolenie</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #110608;
+    --surface: #1C090B;
+    --card:    #260C0F;
+    --accent:  #A61B22;
+    --accent2: #E8C9A0;
+    --cream:   #F2E5D0;
+    --muted:   #8A6A6D;
+    --step-bg: #200A0C;
+    --radius:  16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 5 C20 5 15 12 15 18 C15 24 20 27 25 28 C20 29 15 32 15 38 C15 44 20 51 30 51 C40 51 45 44 45 38 C45 32 40 29 35 28 C40 27 45 24 45 18 C45 12 40 5 30 5Z M30 10 C37 10 41 15 41 18 C41 22 37 25 30 27 C23 25 19 22 19 18 C19 15 23 10 30 10Z M30 33 C37 33 41 36 41 38 C41 42 37 47 30 47 C23 47 19 42 19 38 C19 36 23 33 30 33Z' fill='%23A61B22' opacity='0.06'/%3E%3C/svg%3E");
+  }
+  .header { background: var(--surface); padding: 20px 20px 10px; border-bottom: 1px solid #3D1418; position: sticky; top: 0; z-index: 100; }
+  .logo { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+  .logo-main { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--accent2); letter-spacing: 0.5px; }
+  .logo-sub { font-size: 12px; font-weight: 300; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  .search-wrap { display: flex; gap: 10px; margin-bottom: 12px; }
+  .search-box { flex: 1; background: var(--card); border: 1.5px solid #3D1418; border-radius: 12px; padding: 13px 16px; color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 16px; outline: none; transition: border-color .2s; }
+  .search-box::placeholder { color: var(--muted); }
+  .search-box:focus { border-color: var(--accent); }
+  .mic-btn { background: var(--card); border: 1.5px solid #3D1418; border-radius: 12px; width: 50px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; color: var(--muted); font-size: 20px; }
+  .mic-btn.listening { border-color: #e05050; background: #3a1010; color: #e05050; animation: pulse 1s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(224,80,80,.4)} 50%{box-shadow:0 0 0 8px rgba(224,80,80,0)} }
+  
+  .cats { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+  .cats::-webkit-scrollbar { display: none; }
+  .cat-btn { background: transparent; border: 1.5px solid #3D1418; border-radius: 20px; padding: 6px 14px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px; white-space: nowrap; cursor: pointer; transition: all .15s; }
+  .cat-btn.active { background: var(--accent); border-color: var(--accent); color: #F2E5D0; font-weight: 500; }
+  
+  /* Nowe, powiększone i wyraźne ramki na instrukcje */
+  .category-container { padding: 10px 16px 30px; }
+  .category-header { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--accent2); margin: 20px 0 15px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); display: flex; align-items: center; gap: 10px; scroll-margin-top: 140px; }
+  .cat-instruction-box { background: #220b0e; border: 1.5px solid #4a181d; border-left: 6px solid var(--accent); border-radius: 12px; padding: 16px 20px; font-size: 16px; font-weight: 400; color: #fcefd9; line-height: 1.6; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+  
+  /* Nowa struktura widoku karty napoju */
+  .drink-main-card { background: var(--card); border: 1px solid #3D1418; border-radius: var(--radius); padding: 22px; margin-bottom: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+  .drink-title-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #3D1418; }
+  .drink-main-icon { font-size: 32px; }
+  .drink-main-name { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--cream); flex: 1; }
+  .drink-tags-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .tag { background: #3D1418; border-radius: 6px; padding: 3px 8px; font-size: 12px; color: var(--accent); font-weight: 500; }
+  .tag-top { background: rgba(166,27,34,0.3); border-radius: 6px; padding: 3px 8px; font-size: 12px; color: #E8C9A0; font-weight: 500; }
+  .sold-count { font-size: 12px; color: var(--muted); margin-left: auto; background: rgba(0,0,0,0.15); padding: 4px 8px; border-radius: 6px; }
+  
+  .pair-info { background: var(--step-bg); border: 1px solid #3D1418; border-left: 3px solid var(--accent2); border-radius: 10px; padding: 12px 16px; font-size: 14px; color: var(--accent2); line-height: 1.6; margin-bottom: 15px; }
+  
+  /* Układ wariantów napoju (Mała / Duża) */
+  .variant-section { background: rgba(0,0,0,0.15); border-radius: 12px; padding: 16px; margin-top: 15px; border: 1px solid rgba(61,20,24,0.4); }
+  .variant-title { font-size: 15px; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .variant-title::before { content: '•'; color: var(--accent); font-size: 20px; }
+  
+  .recipe-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 10px; }
+  @media(min-width: 768px) { .recipe-grid { grid-template-columns: 1fr 1fr; } }
+  
+  .section-label { font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .ingredients-box { background: var(--step-bg); border: 1px solid #3D1418; border-radius: 10px; padding: 12px 14px; height: 100%; }
+  .ingredient-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(61,20,24,0.3); font-size: 14px; line-height: 1.4; }
+  .ingredient-item:last-child { border-bottom: none; }
+  .ingredient-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+  
+  .steps-list { display: flex; flex-direction: column; gap: 8px; }
+  .step-item { background: rgba(17,6,8,0.4); border: 1px solid #3D1418; border-radius: 10px; padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start; }
+  .step-num { background: var(--accent); color: #F2E5D0; font-weight: 700; font-size: 12px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.5; color: var(--cream); }
+
+  /* Stylowanie kontenera na zdjęcia przepisu */
+  .recipe-image-wrap { width: 100%; margin-top: 12px; border-radius: 10px; overflow: hidden; border: 1px solid #3D1418; background: #170709; position: relative; aspect-ratio: 16 / 9; display: flex; align-items: center; justify-content: center; }
+  .recipe-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .recipe-image-placeholder { position: absolute; color: rgba(138,106,109,0.3); font-size: 40px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .recipe-image-placeholder span { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+
+  .empty { text-align:center; padding:60px 20px; color:var(--muted); }
+  .empty-icon { font-size:48px; margin-bottom:12px; }
+  .empty-text { font-size:15px; }
+  mark { background:rgba(200,144,42,0.3); color:var(--accent2); border-radius:3px; padding:0 1px; }
+  body::after { content:''; position:fixed; inset:0; pointer-events:none; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E"); opacity:0.025; z-index:999; }
+</style>
+</head>
+<body>
+
+<div id="app-wrapper">
+  <div class="header">
+    <div class="logo">
+      <span class="logo-main">Piętro Cafe</span>
+      <span class="logo-sub">Szkolenie nowego pracownika</span>
+    </div>
+    <div class="search-wrap">
+      <input class="search-box" id="searchInput" type="search" placeholder="Szukaj napoju lub składnika…" autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="mic-btn" id="micBtn" title="Szukaj głosowo">🎙️</button>
+    </div>
+    <div class="cats" id="catBar">
+      <button class="cat-btn active" data-cat="all">Wszystkie</button>
+      <button class="cat-btn" data-cat="kawy">☕ Kawy gorące</button>
+      <button class="cat-btn" data-cat="kawy_mrozone">🧊 Kawy mrożone</button>
+      <button class="cat-btn" data-cat="herbaty">🍵 Herbaty i Matcha</button>
+      <button class="cat-btn" data-cat="czekolady">🍫 Czekolady</button>
+      <button class="cat-btn" data-cat="chai">🫖 Chai</button>
+      <button class="cat-btn" data-cat="lemoniady">🍋 Lemoniady i napoje zimne</button>
+      <button class="cat-btn" data-cat="drinki">🍹 Drinki</button>
+    </div>
+  </div>
+  
+  <!-- Główny kontener na przepisy przewijane w dół -->
+  <div id="main-content-view"></div>
+</div>
+
+<script>
+// Poprawione, czytelniejsze instrukcje dla kategorii napojów
+const CAT_INFO = {
+  kawy: {
+    title: "☕ Kawy gorące",
+    note: "<b>Mała kawa</b> = 1 shot espresso, mniejszy kubek.<br><b>Duża kawa</b> = 2 shoty espresso, większy kubek.<br><b>Wyjątek:</b> Flat White zawsze przygotowujemy na 2 shotach espresso.<br>Espresso oraz Doppio zawsze podajemy klientowi wraz ze szklanką letniej wody."
+  },
+  kawy_mrozone: {
+    title: "🧊 Kawy mrożone",
+    note: "Mrożone wersje zawierają te same składniki co kawy gorące, jednak podawane są w inny sposób — używamy lodu zamiast spieniania mleka.<br><b>Mała kawa</b> = 1 shot espresso.<br><b>Duża kawa</b> = 2 shoty espresso.<br>Wszystkie podajemy w prążkowanej szklance wraz z rurką."
+  },
+  herbaty: {
+    title: "🍵 Herbaty i Matcha",
+    note: "<b>NIGDY nie używamy wody bezpośrednio z ekspresu</b> — nalewamy wyłącznie przefiltrowaną wodę z czajnika!<br><b>Herbata biała oraz zielona:</b> temperatura wody maksymalnie 70–80°C (nigdy wrzątek!).<br><b>Matcha:</b> temperatura wody maksymalnie 70–75°C.<br>Wszystkie pozycje podajemy estetycznie z talerzykiem, łyżeczką, koszyczkiem oraz osobnym naczyniem na miód."
+  },
+  czekolady: {
+    title: "🍫 Czekolady",
+    note: "Groszki czekoladowe rozpuszczamy dokładnie w mleku poddawanym procesowi steamowania (napowietrzania) w małym dzbanku.<br><b>WSKAZÓWKA:</b> Ręczny spieniacz bateryjny znakomicie ułatwia precyzyjne wymieszanie groszków.<br>Podajemy w szklance 250ml z rurką oraz długą łyżeczką."
+  },
+  chai: {
+    title: "🫖 Chai",
+    note: "Proszek chai rozpuszczamy najpierw w bardzo małej ilości gorącego mleka, a po dokładnym wymieszaniu dolewamy całą resztę.<br>Temperatura mleka może wynosić <b>MAKSYMALNIE 70°C</b> — uważaj, ponieważ zbyt wysoka temperatura spowoduje rozwarstwienie napoju."
+  },
+  lemoniady: {
+    title: "🍋 Lemoniady i napoje zimne",
+    note: "<b>Lemoniady zimne:</b> Absolutnie NIE MIESZAMY napoju po nalaniu — wyraźne warstwy stanowią kluczowy efekt wizualny.<br><b>Smoothies:</b> Przygotowujemy w blenderze z dodatkiem lodu. Podajemy w szklance 420ml, pozostawiając wolną przestrzeń na szerokość około 2 palców od górnej krawędzi."
+  },
+  drinki: {
+    title: "🍹 Drinki (Alkoholowe, Bezalkoholowe, Grzańce)",
+    note: "Pozycje w menu zostały posortowane według ich popularności. Drinki bezalkoholowe znajdują się na początku listy, ponieważ są zamawiane najczęściej.<br><b>WAŻNE:</b> Przy przyjmowaniu obsługi zawsze upewnij się i zapytaj klienta, czy życzy sobie wersję z alkoholem, czy bezalkoholową."
+  }
+};
+
+const DRINKS = [
+// Kawy Gorące
+{id:1,name:"Cafe Latte",cat:"kawy",icon:"☕",sold:160,tags:["mleko","klasyczna"],variants:[
+  {label:"Mała kawa",img_name:"cafe_latte_mala",ing:["Filiżanka 300ml z talerzykiem","1 shot espresso","Lekko spienione mleko","2 saszetki cukru","Łyżeczka"],steps:["Espresso zalewamy lekko spienionym mlekiem. Pianki mało — to nie cappuccino."]},
+  {label:"Duża kawa",img_name:"cafe_latte_duza",ing:["Filiżanka 500ml z talerzykiem","2 shoty espresso","Lekko spienione mleko","2 saszetki cukru","Łyżeczka"],steps:["Espresso zalewamy lekko spienionym mlekiem. Pianki mało — to nie cappuccino."]}
+]},
+{id:2,name:"Cappuccino",cat:"kawy",icon:"☕",sold:107,tags:["pianka","mleko","klasyczne"],variants:[
+  {label:"Mała kawa",img_name:"cappuccino_mala",ing:["Filiżanka 150ml z talerzykiem","1 shot espresso","Mocno spienione mleko","2 saszetki cukru","Łyżeczka"],steps:["Espresso zalewamy mocno spienionym mlekiem. Pianka ok. 1 cm — więcej niż w latte!"]},
+  {label:"Duża kawa",img_name:"cappuccino_duza",ing:["Filiżanka 300ml z talerzykiem","2 shoty espresso","Mocno spienione mleko","2 saszetki cukru","Łyżeczka"],steps:["Espresso zalewamy mocno spienionym mlekiem. Pianka ok. 1 cm — więcej niż w latte!"]}
+],pair:"Porównaj z Cafe Latte: cappuccino = więcej pianki, mniejszy kubek."},
+{id:3,name:"Americano",cat:"kawy",icon:"☕",sold:78,tags:["woda","klasyczne"],variants:[
+  {label:"Mała kawa",img_name:"americano_mala",ing:["Filiżanka 120ml z talerzykiem","1 shot espresso","Wrzątek 100ml","2 saszetki cukru","Łyżeczka"],steps:["Espresso zalewamy wrzątkiem."]},
+  {label:"Duża kawa",img_name:"americano_duza",ing:["Filiżanka 200ml z talerzykiem","2 shoty espresso","Wrzątek 200ml","2 saszetki cukru","Łyżeczka"],steps:["Espresso zalewamy wrzątkiem."]}
+],pair:"Mrożone Americano: te same shoty + woda filtrowana + lód."},
+{id:4,name:"Carmelove Latte",cat:"kawy",icon:"🍮",sold:75,tags:["karmel","sos","bita śmietana"],variants:[
+  {label:"Mała kawa",img_name:"carmelove_latte_mala",ing:["Filiżanka 300ml z talerzykiem","1,5 dozy sosu karmelowego","1 shot espresso","Lekko spienione mleko","Bita śmietana","1 saszetka cukru","Łyżeczka"],steps:["Sos karmelowy do kubka, następnie espresso. Mieszamy.","Zalewamy mlekiem jak na latte — mało pianki.","Bita śmietana na górę. Niecałe pół pompki sosu karmelowego wyciskamy na łyżeczkę i polewamy bitą śmietanę."]},
+  {label:"Duża kawa",img_name:"carmelove_latte_duza",ing:["Filiżanka 500ml z talerzykiem","2 dozy sosu karmelowego","2 shoty espresso","Lekko spienione mleko","Bita śmietana","1 saszetka cukru","Łyżeczka"],steps:["Sos karmelowy do kubka, następnie espresso. Mieszamy.","Zalewamy mlekiem jak na latte — mało pianki.","Bita śmietana na górę. Niecałe pół pompki sosu karmelowego wyciskamy na łyżeczkę i polewamy bitą śmietanę."]}
+],pair:"Mrożona wersja: Mrożona Karmelowa — ta sama baza, bez bity śmietany, na lodzie."},
+{id:5,name:"Flat White",cat:"kawy",icon:"☕",sold:58,tags:["mleko","podwójne"],variants:[
+  {label:null,img_name:"flat_white",ing:["Filiżanka biała 250ml z talerzykiem","2 shoty espresso","Delikatnie spienione mleko","2 saszetki cukru","Łyżeczka"],steps:["Espresso zalewamy delikatnie spienionym mlekiem. Zawsze 2 shoty, zawsze mało pianki."]}
+]},
+{id:6,name:"Latte Cynamonowe (Cinnamon Cream)",cat:"kawy",icon:"🍂",sold:56,tags:["cynamon","speculoos","bita śmietana"],variants:[
+  {label:"Mała kawa",img_name:"latte_cynamonowe_mala",ing:["Filiżanka 300ml z talerzykiem","1,5 dozy / 15ml syropu Speculoos (korzenny)","1 shot espresso","Lekko spienione mleko","Bita śmietana","Puder cynamonowy (cukier puder + cynamon 1:1)","1 saszetka cukru","Łyżeczka"],steps:["Syrop Speculoos do kubka, następnie espresso. Mieszamy.","Zalewamy mlekiem jak na latte — mało pianki.","Bita śmietana na górę, posypujemy pudrem cynamonowym."]},
+  {label:"Duża kawa",img_name:"latte_cynamonowe_duza",ing:["Filiżanka 500ml z talerzykiem","2 dozy / 20ml syropu Speculoos (korzenny)","2 shoty espresso","Lekko spienione mleko","Bita śmietana","Puder cynamonowy (cukier puder + cynamon 1:1)","1 saszetka cukru","Łyżeczka"],steps:["Syrop Speculoos do kubka, następnie espresso. Mieszamy.","Zalewamy mlekiem jak na latte — mało pianki.","Bita śmietana na górę, posypujemy pudrem cynamonowym."]}
+],pair:"Mrożona wersja: Mrożona Cynamonowa — ta sama baza, lód zamiast spieniania, bez bity śmietany."},
+{id:7,name:"Latte Smakowe",cat:"kawy",icon:"🫙",sold:36,tags:["syrop","monin","smakowe"],variants:[
+  {label:"Mała kawa",img_name:"latte_smakowe_mala",ing:["Filiżanka 300ml z talerzykiem","2 pompki syropu Monin (20ml) — wybrany smak","1 shot espresso","Lekko spienione mleko","1 saszetka cukru","Łyżeczka"],steps:["Syrop do kubka, dodajemy espresso. Mieszamy.","Zalewamy mlekiem jak na latte.","Dostępne syropy: karmel, orzech laskowy, czekolada, pierniczki belgijskie, amaretto, żurawina, brzoskwinia, wanilia, banan, truskawka, kiwi, fiołek, lawenda, czarny bez, cynamon, pomarańcza."]},
+  {label:"Duża kawa",img_name:"latte_smakowe_duza",ing:["Filiżanka 500ml z talerzykiem","2,5 pompki syropu Monin (25ml) — wybrany smak","2 shoty espresso","Lekko spienione mleko","1 saszetka cukru","Łyżeczka"],steps:["Syrop do kubka, dodajemy espresso. Mieszamy.","Zalewamy mlekiem jak na latte.","Dostępne syropy: karmel, orzech laskowy, czekolada, pierniczki belgijskie, amaretto, żurawina, brzoskwinia, wanilia, banan, truskawka, kiwi, fiołek, lawenda, czarny bez, cynamon, pomarańcza."]}
+],pair:"Mrożona wersja: Mrożona Latte Smakowa — ten sam syrop, lód + zimne mleko, bez spieniania."},
+{id:8,name:"Orange Mocca Latte",cat:"kawy",icon:"🍊",sold:26,tags:["czekolada","pomarańcza","bita śmietana"],variants:[
+  {label:"Mała kawa",img_name:"orange_mocca_mala",ing:["Filiżanka 300ml z talerzykiem","1,5 dozy sosu mocha czarnego","10ml syropu pomarańczowego","1 shot espresso","Lekko spienione mleko","Bita śmietana","Starta skórka pomarańczy","1 saszetka cukru","Łyżeczka"],steps:["Sos mocha + syrop pomarańczowy + espresso do kubka. Mieszamy.","Zalewamy mlekiem jak na latte — mało pianki.","Bita śmietana na górę, posypujemy startą skórką pomarańczy."]},
+  {label:"Duża kawa",img_name:"orange_mocca_duza",ing:["Filiżanka 500ml z talerzykiem","2 dozy sosu mocha czarnego","20ml syropu pomarańczowego","2 shoty espresso","Lekko spienione mleko","Bita śmietana","Starta skórka pomarańczy","1 saszetka cukru","Łyżeczka"],steps:["Sos mocha + syrop pomarańczowy + espresso do kubka. Mieszamy.","Zalewamy mlekiem jak na latte — mało pianki.","Bita śmietana na górę, posypujemy startą skórką pomarańczy."]}
+]},
+{id:9,name:"Latte Bezkofeinowe",cat:"kawy",icon:"☕",sold:15,tags:["bezkofeinowe","mleko","bezkafeina"],variants:[
+  {label:"Mała kawa",img_name:"latte_bezkofeinowe_mala",ing:["Filiżanka 300ml z talerzykiem","1 shot espresso BEZKOFEINOWEGO","Lekko spienione mleko","2 saszetki cukru","Łyżeczka"],steps:["Identycznie jak Cafe Latte — espresso zalewamy lekko spienionym mlekiem. Różnica: shot z bezkofeinowego."]},
+  {label:"Duża kawa",img_name:"latte_bezkofeinowe_duza",ing:["Filiżanka 500ml z talerzykiem","2 shoty espresso BEZKOFEINOWEGO","Lekko spienione mleko","2 saszetki cukru","Łyżeczka"],steps:["Identycznie jak Cafe Latte — espresso zalewamy lekko spienionym mlekiem. Różnica: 2 shoty z bezkofeinowego."]}
+]},
+{id:10,name:"Mocca Latte",cat:"kawy",icon:"🍫",sold:12,tags:["czekolada","sos","mocha"],variants:[
+  {label:"Mała kawa",img_name:"mocca_latte_mala",ing:["Filiżanka 300ml z talerzykiem","1,5 dozy sosu mocha czarnego","1 shot espresso","Lekko spienione mleko","1 saszetka cukru","Łyżeczka"],steps:["Sos mocha do kubka, następnie espresso. Mieszamy.","Zalewamy mlekiem jak na latte — mało pianki."]},
+  {label:"Duża kawa",img_name:"mocca_latte_duza",ing:["Filiżanka 500ml z talerzykiem","2 dozy sosu mocha czarnego","2 shoty espresso","Lekko spienione mleko","1 saszetka cukru","Łyżeczka"],steps:["Sos mocha do kubka, następnie espresso. Mieszamy.","Zalewamy mlekiem jak na latte — mało pianki."]}
+],pair:"Mrożona wersja: Mrożona Dark Mocha — ta sama baza, lód zamiast spieniania."},
+{id:11,name:"Espresso",cat:"kawy",icon:"☕",sold:9,tags:["klasyczne","shot"],variants:[
+  {label:null,img_name:"espresso",ing:["Filiżanka na espresso z talerzykiem","1 shot espresso","Mała szklanka letniej wody","1 saszetka cukru","Łyżeczka"],steps:["Podajemy zawsze ze szklanką letniej wody."]}
+]},
+{id:12,name:"Apple Pie Latte",cat:"kawy",icon:"🍎",sold:8,tags:["jabłko","cynamon","bita śmietana"],variants:[
+  {label:"Mała kawa",img_name:"apple_pie_latte_mala",ing:["Filiżanka 300ml z talerzykiem","1,5 dozy / 15ml syropu Apple Pie","1 shot espresso","Lekko spienione mleko","Bita śmietana","Cynamon","Kawałki suszonego jabłka","1 saszetka cukru","Łyżeczka"],steps:["Syrop Apple Pie do kubka, następnie espresso. Mieszamy.","Zalewamy mlekiem jak na latte — mało pianki.","Bita śmietana, cynamon i suszone jabłko na górę."]},
+  {label:"Duża kawa",img_name:"apple_pie_latte_duza",ing:["Filiżanka 500ml z talerzykiem","2 dozy / 20ml syropu Apple Pie","2 shoty espresso","Lekko spienione mleko","Bita śmietana","Cynamon","Kawałki suszonego jabłka","1 saszetka cukru","Łyżeczka"],steps:["Syrop Apple Pie do kubka, następnie espresso. Mieszamy.","Zalewamy mlekiem jak na latte — mało pianki.","Bita śmietana, cynamon i suszone jabłko na górę."]}
+]},
+{id:13,name:"Kawa z Baileys'em",cat:"kawy",icon:"🍶",sold:7,tags:["baileys","alkohol","bita śmietana"],variants:[
+  {label:null,img_name:"kawa_baileys",ing:["Szklanka 250ml","1 shot espresso","Płaska łyżeczka cukru brązowego","25ml Baileys","100ml wody","Bita śmietana","Cukier brązowy do posypania","Długa łyżeczka"],steps:["Do szklanki wlewamy espresso, wsypujemy cukier i mieszamy.","Wlewamy wodę i Baileys.","Bita śmietana na górę, posypujemy cukrem brązowym."]}
+]},
+{id:14,name:"Kawa po Irlandzku",cat:"kawy",icon:"🥃",sold:7,tags:["whiskey","alkohol","bita śmietana"],variants:[
+  {label:null,img_name:"kawa_po_irlandzku",ing:["Szklanka 250ml","1 shot espresso","Płaska łyżeczka cukru brązowego","40ml Tullamore Dew Irish Whiskey","100ml wody z ekspresu","Bita śmietana","Długa łyżeczka"],steps:["Do szklanki wlewamy whiskey i cukier. Podpalamy i mieszamy do rozpuszczenia cukru. Gasimy.","Wlewamy espresso i uzupełniamy wodą.","Bita śmietana na górę, posypujemy brązowym cukrem."]}
+]},
+{id:15,name:"Doppio",cat:"kawy",icon:"☕",sold:5,tags:["podwójne","klasyczne","shot"],variants:[
+  {label:null,img_name:"doppio",ing:["Filiżanka na espresso/doppio z talerzykiem","2 shoty espresso","Mała szklanka letniej wody","1 saszetka cukru","Łyżeczka"],steps:["Podajemy always ze szklanką letniej wody."]}
+]},
+{id:16,name:"Pumpkin Spice Latte",cat:"kawy",icon:"🎃",sold:5,tags:["dynia","przyprawy","bita śmietana","sezonowe"],variants:[
+  {label:"Mała kawa",img_name:"pumpkin_spice_mala",ing:["Filiżanka 300ml z talerzykiem","2 łyżeczki syropu pumpkin spice (domowego)","1 shot espresso","Lekko spienione mleko","Bita śmietana","Mieszanka przypraw korzennych do posypania","2 saszetki cukru","Łyżeczka"],steps:["Syrop pumpkin spice do naczynia z espresso. Mieszamy.","Zalewamy mlekiem jak na latte — mało pianki.","Bita śmietana i posypka korzenna na górę.","SYROP ROBIMY SAMI: woda + imbir + cynamon + gałka muszkatołowa + kardamon + anyż + wanilia + mleko skondensowane + purée z dyni. Przepis szczegółowy dostępny oddzielnie."]},
+  {label:"Duża kawa",img_name:"pumpkin_spice_duza",ing:["Filiżanka 500ml z talerzykiem","3 łyżeczki syropu pumpkin spice (domowego)","2 shoty espresso","Lekko spienione mleko","Bita śmietana","Mieszanka przypraw korzennych do posypania","2 saszetki cukru","Łyżeczka"],steps:["Syrop pumpkin spice do naczynia z espresso. Mieszamy.","Zalewamy mlekiem jak na latte — mało pianki.","Bita śmietana i posypka korzenna na górę."]}
+]},
+
+// Kawy Mrożone
+{id:20,name:"Mrożone Latte",cat:"kawy_mrozone",icon:"🧊",sold:40,tags:["mleko","lód","klasyczne"],variants:[
+  {label:"Mała kawa",img_name:"mrozone_latte_mala",ing:["Mała prążkowana szklanka","1 shot espresso","150ml mleka","½ szklanki lodu","Rurka"],steps:["Szklaną wypełniamy do połowy lodem.","Wlewamy mleko do ok. 80% szklanki.","Po łyżeczce z boku wlewamy espresso tworząc warstwę. Rurka.","Opcjonalnie: gałka lodów waniliowych / bita śmietana / syrop — na pytanie klienta."]},
+  {label:"Duża kawa",img_name:"mrozone_latte_duza",ing:["Duża prążkowana szklanka","2 shoty espresso","200ml mleka","½ szklanki lodu","Rurka"],steps:["Szklanę wypełniamy do połowy lodem.","Wlewamy mleko do ok. 80% szklanki.","Po łyżeczce z boku wlewamy doppio tworząc warstwę. Rurka."]}
+],pair:"Gorąca wersja: Cafe Latte — ta sama baza, spienione mleko zamiast zimnego."},
+{id:21,name:"Mrożona Latte Smakowa",cat:"kawy_mrozone",icon:"🧊",sold:28,tags:["syrop","smakowe","lód"],variants:[
+  {label:"Mała kawa",img_name:"mrozone_latte_smakowe_mala",ing:["Mała prążkowana szklanka","20ml wybranego syropu Monin","1 shot espresso","Mleko","Lód","Rurka"],steps:["Syrop wlewamy do szklanki.","Wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę.","Dostępne: karmel, orzech, czekolada, pierniczki, amaretto, żurawina, brzoskwinia, pistacja, wanilia, banan."]},
+  {label:"Duża kawa",img_name:"mrozone_latte_smakowe_duza",ing:["Duża prążkowana szklanka","30ml wybranego syropu Monin","2 shoty espresso","Mleko","Lód","Rurka"],steps:["Syrop wlewamy do szklanki.","Wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]}
+],pair:"Gorąca wersja: Latte Smakowe — ten sam syrop, spienione mleko zamiast zimnego."},
+{id:22,name:"Mrożona Karmelowa",cat:"kawy_mrozone",icon:"🍮",sold:23,tags:["karmel","sos","lód"],variants:[
+  {label:"Mała kawa",img_name:"mrozona_karmelowa_mala",ing:["Mała prążkowana szklanka","2 pompki sosu karmelowego","1 shot espresso","Mleko","Lód","Rurka"],steps:["Sos karmelowy wlewamy do szklanki.","Wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]},
+  {label:"Duża kawa",img_name:"mrozona_karmelowa_duza",ing:["Duża prążkowana szklanka","3 pompki sosu karmelowego","2 shoty espresso","Mleko","Lód","Rurka"],steps:["Sos karmelowy wlewamy do szklanki.","Wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]}
+],pair:"Gorąca wersja: Carmelove Latte — ta sama baza + bita śmietana."},
+{id:23,name:"Mrożona Matcha Latte",cat:"kawy_mrozone",icon:"🍵",sold:19,tags:["matcha","lód","mleko"],variants:[
+  {label:"Podstawowa",img_name:"mrozona_matcha",ing:["Mała prążkowana szklanka","1,5g proszku matcha","50ml wody 75°C","Mleko","Lód","Rurka"],steps:["Matchę dokładnie rozpuszczamy w 50ml wody 75°C — używamy miotełki chasen.","Szklanę wypełniamy lodem, następnie mlekiem.","Na koniec wlewamy matchę. Rurka."]},
+  {label:"Smakowa/Wanilia",img_name:"mrozona_matcha_wanilia",ing:["Mała prążkowana szklanka","1,5g proszku matcha","20ml syropu Monin (wanilia lub inny)","50ml wody 75°C","Mleko","Lód","Rurka"],steps:["Matchę dokładnie rozpuszczamy w 50ml wody 75°C.","Do szklanki syrop, następnie lód i mleko.","Na koniec wlewamy matchę. Rurka."]}
+],pair:"Gorąca wersja: Matcha Latte (w kategorii Herbaty i Matcha)."},
+{id:24,name:"Matcha Malinowe Macchiato (mrożone)",cat:"kawy_mrozone",icon:"🍵",sold:17,tags:["matcha","maliny","lód","warstwy"],variants:[
+  {label:null,img_name:"mrozona_matcha_malina",ing:["Mała prążkowana szklanka","1,5g matchy","15ml syropu malinowego","7 mrożonych malin","Mleko","50ml wody 75°C","Lód","Rurka"],steps:["Matchę dokładnie rozpuszczamy w 50ml wody 75°C — miotełka chasen.","Do szklanki syrop malinowy i mrożone maliny. Rozgniatamy.","Wsypujemy lód, wlewamy mleko.","Na koniec wlewamy matchę. Rurka."]}
+],pair:"Gorąca wersja: Matcha Malinowe Macchiato (w kategorii Herbaty i Matcha)."},
+{id:25,name:"Americano mrożona",cat:"kawy_mrozone",icon:"🧊",sold:12,tags:["doppio","woda","lód"],variants:[
+  {label:null,img_name:"mrozona_americano",ing:["Prążkowana szklanka (~250ml)","2 shoty espresso (doppio)","Woda filtrowana","Lód","Rurka"],steps:["Szklanę wypełniamy lodem.","Zalewamy wodą filtrowaną zostawiając miejsce na espresso.","Wlewamy doppio i wkładamy rurkę."]}
+],pair:"Gorąca wersja: Americano — te same shoty, wrzątek zamiast zimnej wody."},
+{id:26,name:"Mrożona Dark Mocha",cat:"kawy_mrozone",icon:"🍫",sold:7,tags:["czekolada","sos","lód"],variants:[
+  {label:"Mała kawa",img_name:"mrozona_dark_mocha_mala",ing:["Mała prążkowana szklanka","1,5 dozy sosu mocha czarnego","1 shot espresso","Mleko","Lód","Rurka"],steps:["Sos mocha wlewamy do szklanki.","Wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]},
+  {label:"Duża kawa",img_name:"mrozona_dark_mocha_duza",ing:["Duża prążkowana szklanka","2 dozy sosu mocha czarnego","2 shoty espresso","Mleko","Lód","Rurka"],steps:["Sos mocha wlewamy do szklanki.","Wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]}
+],pair:"Gorąca wersja: Mocca Latte — ta sama baza."},
+{id:27,name:"Tonic Espresso",cat:"kawy_mrozone",icon:"🫧",sold:6,tags:["tonik","pomarańcza","lód"],variants:[
+  {label:"Mała kawa",img_name:"tonic_espresso_mala",ing:["Mała prążkowana szklanka","1 shot espresso","Tonik","Lód","Plasterki pomarańczy","Listek mięty","Rurka"],steps:["⁴⁄₅ szklanki wypełnij lodem. Pomiędzy ściankę a lód powkładaj plasterki pomarańczy.","Wypełnij tonikiem zostawiając miejsce na espresso.","Powoli po lodzie wlej espresso. Listka mięty i rurka."]},
+  {label:"Duża kawa",img_name:"tonic_espresso_duza",ing:["Duża prążkowana szklanka","2 shoty espresso","Tonik","Lód","Plasterki pomarańczy","Listek mięty","Rurka"],steps:["⁴⁄₅ szklanki wypełnij lodem. Pomiędzy ściankę a lód powkładaj plasterki pomarańczy.","Wypełnij tonikiem zostawiając miejsce na espresso.","Powoli po lodzie wlej espresso. Listka mięty i rurka."]}
+]},
+{id:28,name:"Mrożona Cynamonowa",cat:"kawy_mrozone",icon:"🧊",sold:5,tags:["cynamon","speculoos","lód"],variants:[
+  {label:"Mała kawa",img_name:"mrozona_cynamonowa_mala",ing:["Mała prążkowana szklanka","20ml syropu Speculoos (korzenny)","1 shot espresso","Mleko","Lód","Rurka"],steps:["Syrop wlewamy do szklanki.","Wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]},
+  {label:"Duża kawa",img_name:"mrozona_cynamonowa_duza",ing:["Duża prążkowana szklanka","30ml syropu Speculoos (korzenny)","2 shoty espresso","Mleko","Lód","Rurka"],steps:["Syrop wlewamy do szklanki.","Wypełniamy lodem i zalewamy mlekiem zostawiając miejsce na espresso.","Wlewamy espresso i wkładamy rurkę."]}
+],pair:"Gorąca wersja: Latte Cynamonowe (Cinnamon Cream) — ta sama baza + bita śmietana + puder."},
+
+// Herbaty i Matcha
+{id:40,name:"Herbata Biała Borówkowa",cat:"herbaty",icon:"🫐",sold:67,tags:["biała","borówka","smakowa"],variants:[
+  {label:null,img_name:"herbata_biala_borowkowa",ing:["Filiżanka 500ml z talerzykiem","Biała herbata borówkowa (saszetka lub sypana 2 czub. łyżeczki)","Koszyczek","Naczynie na miód","Łyżeczka","Woda 70–80°C (NIE wrzątek!)"],steps:["Do kubka wlewamy wodę 70–80°C — biała herbata parzy się w niższej temperaturze!","Na kubek biały talerzyk z naczyniem na miód/cukier, łyżeczką i koszyczkiem z herbatą.","Opcjonalnie plasterek cytryny."]}
+]},
+{id:41,name:"Herbata Biała Malinowa",cat:"herbaty",icon:"🍓",sold:45,tags:["biała","malina","smakowa"],variants:[
+  {label:null,img_name:"herbata_biala_malinowa",ing:["Filiżanka 500ml z talerzykiem","Biała herbata malinowa (saszetka lub sypana 2 czub. łyżeczki)","Koszyczek","Naczynie na miód","Łyżeczka","Woda 70–80°C (NIE wrzątek!)"],steps:["Do kubka wlewamy wodę 70–80°C.","Na kubek biały talerzyk z naczynie na miód/cukier, łyżeczką i koszyczkiem.","Opcjonalnie plasterek cytryny."]}
+]},
+{id:42,name:"Herbata Goji (Energia Goji)",cat:"herbaty",icon:"🍒",sold:28,tags:["goji","pu-erh","maliny","imbir"],variants:[
+  {label:null,img_name:"herbata_goji",ing:["Filiżanka 500ml z talerzykiem","1 płaska łyżeczka herbaty czerwonej pu-erh w koszyczku","4–5 jagód goji","2 małe plasterki imbiru","3–4 maliny","Plasterek pomarańczy z wbitymi goździkami","Miód lub cukier","Łyżeczka","Wrzątek"],steps:["Do kubka wrzucamy goji, imbir, maliny i plasterek pomarańczy z goździkami.","Zalewamy wrzątkiem.","Na kubek biały talerzyk z naczyniem na miód/cukier, łyżeczką i koszyczkiem pu-erh."]}
+]},
+{id:43,name:"Miodowe Utulenie",cat:"herbaty",icon:"🍯",sold:27,tags:["miód","rozmaryn","pomarańcza","czarna"],variants:[
+  {label:null,img_name:"miodowe_utulenie",ing:["Filiżanka 500ml z talerzykiem","Herbata czarna 'Czas Harmonii' w koszyczku","Miód do smaku","Gałązka świeżego rozmarynu","Plasterek pomarańczy z wbitymi goździkami","Łyżeczka","Wrzątek"],steps:["Do kubka wrzucamy plasterek pomarańczy z goździkami i gałązkę rozmarynu.","Zalewamy wrzątkiem.","Na kubek biały talerzyk z naczyniem na miód, łyżeczką i koszyczkiem herbaty."]}
+]},
+{id:44,name:"Matcha Latte",cat:"herbaty",icon:"🍵",sold:25,tags:["matcha","mleko","gorąca"],variants:[
+  {label:null,img_name:"matcha_latte_goraca",ing:["Filiżanka 300ml","1,5 miarki chashaku matcha","Podgrzane mleko max 70°C"],steps:["Do naczynia wsyp matchę.","Rozpuść w małej ilości podgrzanego mleka — energicznie mieszaj.","Zalej resztą mleka max 70°C. UWAŻAJ na rozwarstwianie."]}
+],pair:"Mrożona wersja: Mrożona Matcha Latte (w kategorii Kawy mrożone)."},
+{id:45,name:"Herbata Imbirowa (Imbirowa Rozgrzewka)",cat:"herbaty",icon:"🫚",sold:21,tags:["imbir","pomarańcza","goździki","czarna"],variants:[
+  {label:null,img_name:"herbata_imbirowa",ing:["Filiżanka 500ml z talerzykiem","1 płaska łyżeczka czarnej herbaty w koszyczku","4–5 plasterków imbiru","Plasterek pomarańczy z wbitymi goździkami","Miód lub cukier","Łyżeczka","Wrzątek"],steps:["Do kubka wrzucamy plasterki imbiru i plasterek pomarańczy z goździkami.","Zalewamy wrzątkiem.","Na kubek biały talerzyk z naczyniem na miód/cukier, łyżeczką i koszyczkiem czarnej herbaty."]}
+]},
+{id:46,name:"Herbata Matcha (tradycyjna)",cat:"herbaty",icon:"🍵",sold:20,tags:["matcha","czarka","tradycyjna"],variants:[
+  {label:null,img_name:"matcha_tradycyjna",ing:["Czarka","1,6–1,8g proszku matcha (łyżeczka chashaku)","80ml wody ok. 70–75°C (NIE wrzątek!)","Miotełka chasen","Podstawka korkowa"],steps:["Do czarki wsypujemy odmierzoną matchę.","Zalewamy 80ml wody (nie wrzątek!).","Energicznie mieszamy chasen dążąc do dużej ilości zielonej pianki.","Podajemy na podstawce korkowej."]}
+]},
+{id:47,name:"T Owoce leśne",cat:"herbaty",icon:"🍇",sold:19,tags:["owoce leśne","smakowa","czarna lub czerwona"],variants:[
+  {label:null,img_name:"herbata_owoce_lesne",ing:["Filiżanka 500ml z talerzykiem","Herbata owoce leśne (saszetka lub sypana)","Koszyczek","Naczynie na miód","Łyżeczka","Wrzątek"],steps:["Do kubka wlewamy wrzątek.","Na kubek biały talerzyk z naczynie na miód/cukier, łyżeczką i koszyczkiem z herbatą.","Opcjonalnie plasterek cytryny."]}
+]},
+{id:48,name:"Honeybush",cat:"herbaty",icon:"🍯",sold:18,tags:["honeybush","bezkofeinowa","słodka"],variants:[
+  {label:null,img_name:"honeybush",ing:["Kubek 400ml z talerzykiem","10g suszu honeybush (koszyczek na równo)","Naczynie na miód lub cukier","Łyżeczka","Wrzątek"],steps:["Kubek zalewamy wrzątkiem.","Nakładamy biały talerzyk z naczyniem na miód/cukier, łyżeczką i koszyczkiem suszu honeybush."]}
+]},
+{id:49,name:"Matcha Malinowe Macchiato (gorące)",cat:"herbaty",icon:"🍵",sold:17,tags:["matcha","maliny","warstwy","szklanka stożek"],variants:[
+  {label:null,img_name:"matcha_malina_goraca",ing:["Mała szklanka stożkowa","1,5g matchy","15ml syropu malinowego","7 mrożonych malin","Spienione mleko","50ml wody 75°C","2 saszetki cukru","Długa łyżeczka"],steps:["Matchę dokładnie rozpuszczamy w 50ml wody 75°C — miotełka chasen.","Do szklanki syrop malinowy i mrożone maliny. Rozgniatamy (maliny MUSZĄ być mrożone — nie ocieplaj!).","Ostrożnie po ściance wlewamy spienione mleko do ⅘ szklanki. Czekamy 30 sek — pianka MUSI się oddzielić od mleka.","Po łyżeczce po ściance wlewamy matchę tworząc warstwy. Na wierzch łyżeczką pianka.","Podajemy z długą łyżeczką w serwetce i 2 saszetkami cukru."]}
+],pair:"Mrożona wersja: Matcha Malinowe Macchiato mrożone (w kategorii Kawy mrożone)."},
+{id:50,name:"Herbata Zielona",cat:"herbaty",icon:"🍃",sold:12,tags:["zielona","klasyczna"],variants:[
+  {label:null,img_name:"herbata_zielona",ing:["Filiżanka 500ml z talerzykiem","1,5 czubatej łyżeczki zielonej herbaty w koszyczku","Naczynie na miód","Łyżeczka","Woda 70–80°C (NIE wrzątek!)"],steps:["Do kubka wlewamy wodę 70–80°C — zielona herbata parzy się w niższej temperaturze!","Na kubek biały talerzyk z naczynie na miód/cukier, łyżeczką i koszyczkiem.","Opcjonalnie plasterek cytryny."]}
+]},
+{id:51,name:"Zimowy Sekret",cat:"herbaty",icon:"❄️",sold:10,tags:["wiśnia","kokos","pomarańcza","zimowa"],variants:[
+  {label:null,img_name:"zimowy_sekret",ing:["Filiżanka 500ml z talerzykiem","Herbata zimowa wiśnia (saszetka lub sypana)","4–5 wiśni (mrożone lub suszone)","Plasterek pomarańczy z goździkami","Kilka płatków kokosa","Łyżeczka","Wrzątek"],steps:["Do kubka wrzucamy wiśnie i plasterek pomarańczy z goździkami.","Zalewamy wrzątkiem.","Na kubek talerzyk z łyżeczką i koszyczkiem herbaty. Na wierzch płatki kokosa."]}
+]},
+{id:52,name:"Yerba Mate",cat:"herbaty",icon:"🌿",sold:7,tags:["yerba","energetyczNA","tykwa"],variants:[
+  {label:null,img_name:"yerba_mate",ing:["Tykwa (naczynie)","2 miarki yerby (biała miarka z opakowania)","Rurka bombija","Woda 60–80°C","Podstawka korkowa"],steps:["Do tykwy wsypujemy 2 miarki yerby.","Wkładamy rurkę bombija.","Pod kątem zalewamy wodą 60–80°C — NIE wrzątkiem!","Podajemy na podstawce korkowej.","Przy zamówieniu pytamy o ewentualne dodatki (miód, sok, plasterek owocu). Informujemy o możliwości uzupełnienia tykwy."]}
+]},
+{id:53,name:"Herbata z prądem",cat:"herbaty",icon:"⚡",sold:4,tags:["rum","alkohol","miód","pu-erh"],variants:[
+  {label:null,img_name:"herbata_z_pradem",ing:["Filiżanka 300ml","Herbata czerwona pu-erh w koszyczku","35ml rumu złotego (Morgan Spice lub Bacardi Gold)","1 łyżeczka miodu","Plasterek pomarańczy z 5 goździkami","Wrzątek"],steps:["Koszyczek z herbatą do kubka 300ml, zalewamy wrzątkiem.","Po 4 minutach wyciągamy koszyczek i dodajemy plasterek pomarańczy z goździkami.","Dolewamy 35ml rumu i dodajemy miód."]}
+]},
+
+// Czekolady
+{id:60,name:"Klasyczna z piankami",cat:"czekolady",icon:"🍫",sold:19,tags:["marshmallow","ciemna","groszki"],variants:[
+  {label:null,img_name:"czekolada_klasyczna",ing:["Szklanka 250ml","1 płaska miarka groszków czekoladowych","75ml mleka","3–5 pianek marshmallow","Długa łyżeczka","Rurka"],steps:["Do małego dzbanka nalewamy mleko i steamujemy.","Dodajemy groszki czekoladowe i mieszamy (TIP: ręczny spieniacz bateryjny ułatwia).","Wlewamy czekoladę do szklanki. Pianki marshmallow na górę."]}
+]},
+{id:61,name:"Ciemna z musem wiśniowym",cat:"czekolady",icon:"🍒",sold:6,tags:["wiśnie","bita śmietana","ciemna"],variants:[
+  {label:null,img_name:"czekolada_ciemna_wisnia",ing:["Szklanka 250ml","1 kopiata miarka groszków czekoladowych","1,5 miarki mleka","4 mrożone wiśnie","Bita śmietana","Starta ciemna czekolada","Długa łyżeczka","Rurka"],steps:["Wiśnie do szklanki i rozgniatamy.","Do dzbanka mleko i steamujemy. Dodajemy groszki czekoladowe i mieszamy.","Wlewamy czekoladę do szklanki. Bita śmietana i starta czekolada na górę."]}
+]},
+{id:62,name:"Biała z musem malinowym",cat:"czekolady",icon:"🍓",sold:5,tags:["maliny","bita śmietana","biała"],variants:[
+  {label:null,img_name:"czekolada_biala_malina",ing:["Szklanka 250ml","1 kopiata miarka białych groszków czekoladowych","1,5 miarki mleka","7 mrożonych malin","Bita śmietana","Długa łyżeczka","Rurka"],steps:["Maliny do szklanki, na chwilę pod spieniacz żeby zmiękły, rozgniatamy — zostawiamy pół łyżeczki do dekoracji.","Do dzbanka mleko i steamujemy. Dodajemy białe groszki czekoladowe i mieszamy.","Wlewamy czekoladę do szklanki. Bita śmietana i maliny na górę."]}
+]},
+{id:63,name:"Czekolada Biała",cat:"czekolady",icon:"⬜",sold:5,tags:["biała","migdały","bita śmietana"],variants:[
+  {label:null,img_name:"czekolada_biala",ing:["Szklanka 250ml","1 płaska miarka białych groszków czekoladowych","75ml mleka","Prażone płatki migdałów","Bita śmietana","Długa łyżeczka","Rurka"],steps:["Do dzbanka nalewamy mleko i steamujemy.","Dodajemy białe groszki czekoladowe i mieszamy.","Wlewamy do szklanki. Bita śmietana i prażone płatki migdałów na górę."]}
+]},
+
+// Chai
+{id:70,name:"Chai Latte",cat:"chai",icon:"🫖",sold:18,tags:["chai","przyprawy","mleko","gorące"],variants:[
+  {label:null,img_name:"chai_latte",ing:["Kubek 300ml (filiżanka do małego latte)","25g proszku chai (ok. 4–5 płaskich łyżeczek)","Podgrzane mleko max 70°C"],steps:["Do naczynia wsyp 25g chai.","Rozpuść w małej ilości podgrzanego mleka — dokładnie mieszaj.","Zalej resztą mleka max 70°C. UWAŻAJ na rozwarstwianie."]}
+]},
+
+// Lemoniady
+{id:80,name:"Lemoniada Fiołkowa",cat:"lemoniady",icon:"💜",sold:55,tags:["fiołek","zimna","gazowana"],variants:[
+  {label:null,img_name:"lemoniada_fiolkowa",ing:["Szklanka 420ml","¾ szklanki lodu","40ml syropu fiołkowego","40ml soku z cytryny","Woda gazowana","Plasterek cytryny"],steps:["Lód i plasterek cytryny do szklanki.","Wlewamy syrop fiołkowy i sok z cytryny.","Uzupełniamy wodą gazowaną. NIE MIESZAMY — warstwy to efekt."]}
+]},
+{id:81,name:"Lemoniada Lawendowa",cat:"lemoniady",icon:"💜",sold:54,tags:["lawenda","zimna","gazowana"],variants:[
+  {label:null,img_name:"lemoniada_lawendowa",ing:["Szklanka 420ml","¾ szklanki lodu","40ml syropu lawendowego","40ml soku z cytryny","Woda gazowana","Plasterek cytryny"],steps:["Lód i plasterek cytryny do szklanki.","Wlewamy syrop lawendowy i sok z cytryny.","Uzupełniamy wodą gazowaną. NIE MIESZAMY."]}
+]},
+{id:82,name:"Lemoniada Czarny Bez",cat:"lemoniady",icon:"🫐",sold:52,tags:["czarny bez","zimna","gazowana"],variants:[
+  {label:null,img_name:"lemoniada_czarny_bez",ing:["Szklanka 420ml","¾ szklanki lodu","40ml syropu czarny bez","40ml soku z cytryny","Woda gazowana","Plasterek cytryny"],steps:["Lód i plasterek cytryny do szklanki.","Wlewamy syrop czarny bez i sok z cytryny.","Uzupełniamy wodą gazowaną. NIE MIESZAMY."]}
+]},
+{id:83,name:"Leśnie",cat:"lemoniady",icon:"🍓",sold:19,tags:["owoce leśne","banan","smoothie","blender"],variants:[
+  {label:null,img_name:"smoothie_lesnie",ing:["Szklanka 420ml (2 palce wolne od góry)","1 garść mrożonych owoców leśnych (truskawki, jagody, maliny)","1 banan","150–200ml soku pomarańczowego","5 kostek lodu"],steps:["Do blendera: owoce, banan, 5 kostek lodu. Wlewamy sok pomarańczowy.","Blendujemy. Przelewamy do szklanki i uzupełniamy lodem.","Ozdoba: połówka plasterka pomarańczy wbita w brzeg szklanki."]}
+]},
+{id:84,name:"Ożywiająco",cat:"lemoniady",icon:"🥝",sold:18,tags:["truskawka","banan","kiwi","smoothie"],variants:[
+  {label:null,img_name:"smoothie_ozywiajaco",ing:["Szklanka 420ml (2 palce wolne od góry)","5 mrożonych truskawek (~100g)","1 banan","1 kiwi","½ szklanki soku jabłkowego","1 łyżka miodu"],steps:["Wszystkie składniki do blendera i blendujemy.","Przelewamy do szklanki i uzupełniamy lodem.","Ozdoba: plasterek kiwi wbity w brzeg szklanki."]}
+]},
+{id:85,name:"Odżywczo",cat:"lemoniady",icon:"🍌",sold:8,tags:["cynamon","wanilia","mleko","smoothie"],variants:[
+  {label:null,img_name:"smoothie_odzywczo",ing:["Szklanka 420ml (2 palce wolne od góry)","2 banany","½ łyżeczki cynamonu","2 pompki syropu waniliowego","150–200ml mleka","5 kostek lodu","Puder cynamonowy do posypania"],steps:["Do blendera: banany, cynamon, syrop waniliowy, 5 kostek lodu. Wlewamy mleko.","Blendujemy. Przelewamy do szklanki i uzupełniamy lodem.","Posypujemy pudrem cynamonowym (cukier puder + cynamon 1:1)."]}
+]},
+{id:86,name:"Zielono",cat:"lemoniady",icon:"🥬",sold:7,tags:["jarmuż","szpinak","kiwi","banan","smoothie"],variants:[
+  {label:null,img_name:"smoothie_zielono",ing:["Szklanka 420ml (2 palce wolne od góry)","Mała garść jarmużu","½ banana","1 kiwi","1 garść szpinaku","Sok jabłkowy","Limonka","5 kostek lodu"],steps:["Wszystkie składniki do blendera z 5 kostkami lodu. Wlewamy sok jabłkowy.","Blendujemy. Przelewamy do szklanki i uzupełniamy lodem.","Ozdoba: plasterek limonki wbity w brzeg szklanki."]}
+]},
+{id:87,name:"Detoksowo",cat:"lemoniady",icon:"🍓",sold:6,tags:["truskawka","banan","płatki owsiane","smoothie"],variants:[
+  {label:null,img_name:"smoothie_detoksowo",ing:["Szklanka 420ml (2 palce wolne od góry)","5 mrożonych truskawek (~100g)","½ szklanki mleka","1 banan","1 łyżka płatków owsianych","1 łyżka siemienia lnianego","1 łyżka miodu","Płatki owsiane do posypania"],steps:["Wszystkie składniki do blendera i blendujemy.","Przelewamy do szklanki i uzupełniamy lodem.","Posypujemy płatkami owsianymi."]}
+]},
+{id:88,name:"Lemoniada Mango",cat:"lemoniady",icon:"🥭",sold:4,tags:["mango","zimna","gazowana"],variants:[
+  {label:null,img_name:"lemoniada_mango",ing:["Szklanka 420ml","¾ szklanki lodu","40ml syropu mango","40ml soku z cytryny","Woda gazowana","Plasterek cytryny"],steps:["Wlewamy syrop mango do szklanki.","Wsypujemy lód, po lodzie wlewamy sok z cytryny.","Uzupełniamy wodą gazowaną. Ozdabiamy plasterkiem cytryny. NIE MIESZAMY."]}
+]},
+
+// Drinki
+{id:100,name:"Mojito b/alk.",cat:"drinki",icon:"🌿",sold:23,tags:["limonka","mięta","sprite","bezalkoholowe"],variants:[
+  {label:null,img_name:"mojito_free",ing:["Szklanka prążkowana 420ml","½ limonki pokrojonej w ćwiartki","3–4 średnie listki świeżej mięty","Sprite lub 7Up","Lód"],steps:["Limonkę i miętę ugniatamy muddlerem.","Do szklanki lód (~¾), mieszamy z ugniecionymi składnikami łyżką barmańską.","Wlewamy Sprite/7Up, uzupełniamy lodem. Dekoracja: plasterek limonki."]}
+]},
+{id:101,name:"Mojito b/alk. Malinowe",cat:"drinki",icon:"🌿",sold:18,tags:["limonka","mięta","maliny","bezalkoholowe"],variants:[
+  {label:null,img_name:"mojito_malina_free",ing:["Szklanka prążkowana 420ml","½ limonki pokrojonej w ćwiartki","3–4 średnie listki świeżej mięty","Garść świeżych lub mrożonych malin","Sprite lub 7Up","Lód"],steps:["Limonkę, miętę i maliny ugniatamy muddlerem.","Do szklanki lód (~¾), mieszamy z ugniecionymi składnikami.","Wlewamy Sprite/7Up, uzupełniamy lodem. Dekoracja: plasterek limonki i maliny."]}
+]},
+{id:102,name:"Sex on the Beach b/alk.",cat:"drinki",icon:"🍊",sold:11,tags:["pomarańcza","żurawina","brzoskwinia","bezalkoholowe"],variants:[
+  {label:null,img_name:"sex_on_the_beach_free",ing:["Szklanka Hurricane 400ml","150ml soku pomarańczowego","150ml soku żurawinowego","10ml syropu brzoskwiniowego","10ml syropu żurawinowego","Kilka kropel soku z cytryny","Lód"],steps:["Lód do szklanki. Syrop żurawinowy, brzoskwiniowy i kilka kropel cytryny.","Wlewamy sok żurawinowy.","Nad poziom płynu przykładamy łyżeczkę i delikatnie wlewamy sok pomarańczowy tworząc warstwę. Słomka i plasterek pomarańczy."]}
+]},
+{id:103,name:"Tequila Sunrise",cat:"drinki",icon:"🌅",sold:8,tags:["tequila","pomarańcza","żurawina"],variants:[
+  {label:null,img_name:"tequila_sunrise",ing:["Szklanka Pokiel 300ml","½ szklanki lodu","50ml tequili","100ml soku pomarańczowego","¾ pompki syropu żurawinowego","Cukier trzcinowy do rantu","Plasterek pomarańczy"],steps:["Górną krawędź szklanki przecieramy limonką/wodą i obtaczamy w cukrze trzcinowym.","Wsypujemy lód, wlewamy syrop żurawinowy, tequilę.","Uzupełniamy sokiem pomarańczowym. Ozdabiamy plastrem pomarańczy."]}
+]},
+{id:104,name:"Piętro Cafe b/alk.",cat:"drinki",icon:"🍹",sold:8,tags:["biała herbata","truskawki","brzoskwinia","bezalkoholowe"],variants:[
+  {label:null,img_name:"pietro_cafe_drink_free",ing:["Szklanka Pokiel 300ml","¾ szklanki lodu","150ml białej herbaty zaparzonej","3 truskawki","20ml syropu brzoskwiniowego","10ml syropu truskawkowego","10ml syropu cukrowego","3 listki mięty","Sok z ⅓ limonki"],steps:["Zblenduj truskawki z herbatą.","Do szklanki: syrop cukrowy, lód, syropy brzoskwiniowy i truskawkowy, sok z limonki, mięta.","Wlej zblendowane truskawki z herbatą. Wymieszaj łyżką barmańską.","Ozdoba: plasterek limonki wbity w krawędź szklanki."]}
+]},
+{id:105,name:"Aperol Spritz",cat:"drinki",icon:"🍊",sold:7,tags:["aperol","prosecco","pomarańcza"],variants:[
+  {label:null,img_name:"aperol_spritz",ing:["Szklanka Pokiel","100ml Prosecco","50ml Aperol","50ml wody gazowanej","Plasterek pomarańczy","Lód","Słomka"],steps:["Wlewamy wszystkie składniki do szklanki.","Uzupełniamy lodem i wsadzamy plasterek pomarańczy.","Podajemy ze słomką."]}
+]},
+{id:106,name:"Piwo Grzane Piętro Cafe",cat:"drinki",icon:"🔥",sold:6,tags:["piwo lane","dzika róża","cynamon","grzane"],variants:[
+  {label:null,img_name:"grzane_piwo",ing:["Kufel z rączką 500ml","Piwo lane","25ml soku z dzikiej róży","2 cienkie plastry imbiru","Plasterek pomarańczy","5 goździków","2–3 poszarpane laski cynamonu","1 szczypta kardamonu"],steps:["Nalewamy piwo do kufla, dodajemy: plasterek pomarańczy z goździkami (5 szt.), kardamon, cynamon, imbir, sok z dzikiej róży.","Wszystko przelewamy do garnka. Podgrzewamy NIE MIESZAJĄC.","Po podgrzaniu wlewamy do kufla, posypujemy przyprawą piernikową lub Kamis. Słomka."]}
+]},
+{id:107,name:"Piętro Cafe (drink)",cat:"drinki",icon:"🍹",sold:6,tags:["gin","biała herbata","truskawki","brzoskwinia"],variants:[
+  {label:null,img_name:"pietro_cafe_drink_alk",ing:["Szklanka Pokiel 300ml","¾ szklanki lodu","40ml ginu","150ml białej herbaty zaparzonej","3 truskawki","20ml syropu brzoskwiniowego","10ml syropu truskawkowego","10ml syropu cukrowego","3 listki mięty","Sok z ⅓ limonki"],steps:["Zblenduj truskawki z herbatą.","Do szklanki: syrop cukrowy, lód, gin, syropy brzoskwiniowy i truskawkowy, sok z limonki, mięta.","Wlej zblendowane truskawki z herbatą. Wymieszaj łyżką barmańską.","Ozdoba: plasterek limonki wbity w krawędź szklanki."]}
+]},
+{id:108,name:"Sex on the Beach",cat:"drinki",icon:"🍊",sold:6,tags:["wódka","brzoskwinia","żurawina","pomarańcza"],variants:[
+  {label:null,img_name:"sex_on_the_beach_alk",ing:["Szklanka Hurricane 400ml","20ml wódki","20ml likieru brzoskwiniowego Bols Peach 17%","100ml soku żurawinowego","100ml soku pomarańczowego","1,5 pompki syropu żurawinowego lub grenadyny","Lód"],steps:["Lód do ok. ½ szklanki. Na spód syrop, alkohole, sok żurawinowy.","Nad poziom płynu przykładamy łyżeczkę i delikatnie wlewamy sok pomarańczowy tworząc warstwę.","Słomka i plasterek pomarańczy."]}
+]},
+{id:109,name:"Ciderita b/alk.",cat:"drinki",icon:"🍋",sold:6,tags:["mango","brzoskwinia","jabłkowy","bezalkoholowe"],variants:[
+  {label:null,img_name:"ciderita_free",ing:["Szklanka Pokiel","Kostki lodu","30ml syropu mango","10ml syropu brzoskwiniowego","40ml soku z cytryny","150ml soku jabłkowego","100ml wody gazowanej","Plasterek cytryny"],steps:["Do blendera: kostki lodu, syropy, sok z cytryny, wodę gazowaną i sok jabłkowy.","Blendujemy aż kostki lodu będą pokruszone.","Wylewamy do szklanki Pokiel, mieszamy. Ozdoba: plasterek limonki wbity w brzeg."]}
+]},
+{id:110,name:"Gin Sauer",cat:"drinki",icon:"🍸",sold:5,tags:["gin","cytryna","ogórek","truskawka"],variants:[
+  {label:null,img_name:"gin_sauer",ing:["Szklanka do whiskey","40ml ginu","20ml soku z cytryny","20ml syropu ogórkowego","10ml syropu truskawkowego","Lód","Plasterek suszonej limonki"],steps:["Wszystkie składniki poza lodem do shakera. Dobrze wstrząsamy.","Przelewamy do szklanki, uzupełniamy lodem.","Wkładamy plasterek suszonej limonki."]}
+]},
+{id:111,name:"Ciderita",cat:"drinki",icon:"🍎",sold:5,tags:["cydr","prosecco","mango","cytryna"],variants:[
+  {label:null,img_name:"ciderita_alk",ing:["Szklanka Pokiel","Kostki lodu","100ml Prosecco","200ml cydru","40ml syropu mango","40ml soku z cytryny","Plasterek cytryny"],steps:["Do blendera: kostki lodu, syrop mango, sok z cytryny, Prosecco i cydr.","Blendujemy aż kostki lodu będą pokruszone.","Wylewamy do szklanki Pokiel, mieszamy. Ozdoba: plasterek cytryny w brzeg."]}
+]},
+{id:112,name:"Piwo Grzane b/alk. Wiśnia + Cytryna",cat:"drinki",icon:"🍺",sold:5,tags:["piwo bezalkoholowe","wiśnia","cytryna","grzane"],variants:[
+  {label:null,img_name:"grzane_piwo_wisnia_free",ing:["Kufel z rączką 500ml","Piwo Tyskie 0%","30ml soku wiśniowego","20ml miodu","4 mrożone wiśnie","2 połówki cytryny z goździkami","2 plasterki imbiru","3 kawałki cynamonu","Szczypta kardamonu"],steps:["Wlewamy piwo do kufla, dodajemy wszystkie składniki.","Przelewamy do garnka i podgrzewamy nie mieszając.","Po podgrzaniu wlewamy do kufla. Słomka."]}
+]},
+{id:113,name:"Piwo Grzane b/alk. Imbir + Miód",cat:"drinki",icon:"🍺",sold:4,tags:["piwo bezalkoholowe","imbir","miód","grzane"],variants:[
+  {label:null,img_name:"grzane_piwo_imbir_free",ing:["Kufel z rączką 500ml","Piwo Tyskie 0%","30ml soku imbirowego","10ml miodu","2 połówki pomarańczy z goździkami","3 plasterki imbiru","3 kawałki cynamonu","Szczypta kardamonu"],steps:["Wlewamy piwo do kufla, dodajemy wszystkie składniki.","Przelewamy do garnka i podgrzewamy nie mieszając.","Po podgrzaniu wlewamy do kufla. Słomka."]}
+]},
+{id:114,name:"Mojito",cat:"drinki",icon:"🌿",sold:4,tags:["rum","limonka","mięta","bacardi"],variants:[
+  {label:null,img_name:"mojito_alk",ing:["Szklanka prążkowana 280ml","½ limonki w łódkach","3 średnie listki mięty","40ml rumu Bacardi White","Sprite","Kruszony lód"],steps:["Limonkę w łódki. Do szklanki z miętą — ugniatamy muddlerem.","Dodajemy lód, rum. Mieszamy.","Wlewamy Sprite do ¾, dopełniamy wodą gazowaną. Słomka, dekoracja."]}
+]},
+{id:115,name:"Wino Grzane Piętro Cafe",cat:"drinki",icon:"🍷",sold:3,tags:["wino","anyż","cynamon","jałowiec","grzane"],variants:[
+  {label:null,img_name:"grzane_wino",ing:["Kubek 240ml","60ml wina białego","150ml wina czerwonego","20ml soku z dzikiej róży","1 gwiazdka anyżu","3 owoce jałowca","4 goździki","3 kawałki cynamonu"],steps:["Do naczynia wrzucamy wszystkie przyprawy.","Wino podgrzewamy do 70°C, dodajemy sok z dzikiej róży.","Wlewamy do naczynia z przyprawami. Posypujemy 3 przetarciami Kamis lub przyprawą piernikową."]}
+]},
+{id:116,name:"Cuba Libre",cat:"drinki",icon:"🥤",sold:2,tags:["rum","cola","limonka","bacardi"],variants:[
+  {label:null,img_name:"cuba_libre",ing:["Szklanka prążkowana 280ml","¾ szklanki lodu","50ml Bacardi White","2 plasterki limonki","Cola","Cukier trzcinowy do rantu"],steps:["Górną krawędź przecieramy limonką/wodą, obtaczamy w cukrze trzcinowym.","Wsypujemy lód, wlewamy rum, dodajemy plasterki limonki.","Uzupełniamy colą."]}
+]},
+{id:117,name:"Margarita Truskawkowa",cat:"drinki",icon:"🍓",sold:2,tags:["tequila","cointreau","truskawki","kieliszek"],variants:[
+  {label:null,img_name:"margarita_truskawkowa",ing:["Szkło koktajlowe","5 truskawek","30ml tequili","20ml likieru Cointreau","40ml soku z cytryny","1 łyżeczka cukru","4 kostki lodu","Cukier trzcinowy do rantu"],steps:["Górną krawędź kieliszka przecieramy cytryną i obtaczamy w cukrze trzcinowym.","Wszystkie pozostałe składniki do blendera. Miksujemy.","Przelewamy do kieliszka. W razie potrzeby dodajemy lód."]}
+]}
+];
+
+let currentQuery = '', currentCat = 'all', recognition = null;
+
+function normalize(s){ return s.toLowerCase().replace(/ą/g,'a').replace(/ć/g,'c').replace(/ę/g,'e').replace(/ł/g,'l').replace(/ń/g,'n').replace(/ó/g,'o').replace(/ś/g,'s').replace(/ź|ż/g,'z'); }
+
+function matches(d, q){
+  if(!q) return true;
+  const nq = normalize(q);
+  const hay = normalize([d.name,...(d.tags||[]),...d.variants.flatMap(v=>[...v.ing,...v.steps])].join(' '));
+  return nq.split(' ').every(p=>hay.includes(p));
+}
+
+function hl(text, q){
+  if(!q) return text;
+  q.trim().split(/\s+/).filter(w=>normalize(w).length>1).forEach(word=>{
+    const re=new RegExp(`(${word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi');
+    text=text.replace(re,'<mark>$1</mark>');
+  });
+  return text;
+}
+
+// Funkcja renderująca cały widok — sekcja po sekcji
+function renderApp(){
+  const container = document.getElementById('main-content-view');
+  container.innerHTML = '';
+  
+  // Lista kategorii do przetworzenia
+  const categoriesToRender = currentCat === 'all' ? Object.keys(CAT_INFO) : [currentCat];
+  let hasAnyResults = false;
+
+  categoriesToRender.forEach(catKey => {
+    // Filtrujemy napoje dla danej kategorii odpowiadające wyszukiwaniu
+    const filteredDrinks = DRINKS.filter(d => d.cat === catKey && matches(d, currentQuery));
+    
+    if(filteredDrinks.length > 0) {
+      hasAnyResults = true;
+      
+      // Tworzymy kontener kategorii
+      const catContainer = document.createElement('div');
+      catContainer.className = 'category-container';
+      catContainer.id = `sec-${catKey}`;
+      
+      // Nagłówek kategorii
+      const catHeader = document.createElement('h2');
+      catHeader.className = 'category-header';
+      catHeader.innerHTML = CAT_INFO[catKey].title;
+      catContainer.appendChild(catHeader);
+      
+      // Powiększona i wyróżniona ramka instrukcji baristycznych
+      const instructionBox = document.createElement('div');
+      instructionBox.className = 'cat-instruction-box';
+      instructionBox.innerHTML = CAT_INFO[catKey].note;
+      catContainer.appendChild(instructionBox);
+      
+      // Renderowanie napojów jeden pod drugim
+      filteredDrinks.forEach(d => {
+        const drinkCard = document.createElement('div');
+        drinkCard.className = 'drink-main-card';
+        
+        const topBadge = d.sold >= 50 ? `<span class="tag-top">🔥 TOP</span>` : '';
+        const tagsHtml = (d.tags||[]).map(t => `<span class="tag">${t}</span>`).join('');
+        const pairHtml = d.pair ? `<div class="pair-info">💡 ${d.pair}</div>` : '';
+        
+        // Pasek tytułowy napoju
+        let cardContent = `
+          <div class="drink-title-bar">
+            <span class="drink-main-icon">${d.icon}</span>
+            <h3 class="drink-main-name">${hl(d.name, currentQuery)}</h3>
+            <div class="drink-tags-row">${topBadge} ${tagsHtml}</div>
+            <span class="sold-count">${d.sold} szt.</span>
+          </div>
+          ${pairHtml}
+        `;
+        
+        // Wyświetlanie wszystkich wariantów (np. Mała, Duża) od razu jeden pod drugim
+        d.variants.forEach(v => {
+          const labelHtml = v.label ? `<div class="variant-title">${v.label}</div>` : '';
+          
+          cardContent += `
+            <div class="variant-section">
+              ${labelHtml}
+              <div class="recipe-grid">
+                <div>
+                  <div class="section-label">Składniki</div>
+                  <div class="ingredients-box">
+                    ${v.ing.map(i => `<div class="ingredient-item"><div class="ingredient-dot"></div><span>${hl(i, currentQuery)}</span></div>`).join('')}
+                  </div>
+                </div>
+                <div>
+                  <div class="section-label">Przygotowanie</div>
+                  <div class="steps-list">
+                    ${v.steps.map((s, idx) => `<div class="step-item"><div class="step-num">${idx+1}</div><div class="step-text">${hl(s, currentQuery)}</div></div>`).join('')}
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Kontener na zdjęcie przepisu z katalogu "zdjecia przepisy" -->
+              <div class="recipe-image-wrap">
+                <img class="recipe-image" src="zdjecia przepisy/${v.img_name}.jpg" alt="${d.name} ${v.label || ''}" onerror="this.style.display='none'">
+                <div class="recipe-image-placeholder">
+                  📷 <span>zdjecia przepisy/${v.img_name}.jpg</span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        drinkCard.innerHTML = cardContent;
+        catContainer.appendChild(drinkCard);
+      });
+      
+      container.appendChild(catContainer);
+    }
+  });
+
+  if(!hasAnyResults) {
+    container.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Brak wyników dla "<strong>${currentQuery}</strong>"</div></div>`;
+  }
+}
+
+// Obsługa paska kategorii — teraz działa jako płynne przewijanie (Smooth Scroll) lub filtr
+document.getElementById('catBar').addEventListener('click', e => {
+  const btn = e.target.closest('.cat-btn');
+  if (!btn) return;
+  
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  currentCat = btn.dataset.cat;
+  
+  // Odświeżamy widok, żeby ukryć lub pokazać odpowiednie sekcje
+  renderApp();
+  
+  // Jeśli wybrano konkretną kategorię (i nie szukamy akurat czegoś), przewijamy do niej ekran
+  if(currentCat !== 'all' && !currentQuery) {
+    const targetSec = document.getElementById(`sec-${currentCat}`);
+    if(targetSec) {
+      targetSec.scrollIntoView({ behavior: 'smooth' });
+    }
+  } else {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+
+// Wyszukiwarka tekstowa
+document.getElementById('searchInput').addEventListener('input', e => {
+  currentQuery = e.target.value;
+  renderApp();
+});
+
+// Głosowe wyszukiwanie
+let audioCtx=null;
+function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playBeep(f,dur,type='sine',vol=0.3){try{const c=getAudioCtx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=type;o.frequency.setValueAtTime(f,c.currentTime);g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);o.start(c.currentTime);o.stop(c.currentTime+dur);}catch(e){}}
+function beepStart(){playBeep(660,.12);setTimeout(()=>playBeep(880,.18),110);}
+function beepStop(){playBeep(880,.08);setTimeout(()=>playBeep(550,.2),70);}
+function beepError(){playBeep(300,.3,'sawtooth',.15);}
+
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+const micBtn = document.getElementById('micBtn');
+if(SpeechRec){
+  recognition = new SpeechRec(); recognition.lang = 'pl-PL'; recognition.continuous = false; recognition.interimResults = false;
+  recognition.onresult = (e) => {
+    const t = e.results[0][0].transcript;
+    document.getElementById('searchInput').value = t;
+    currentQuery = t;
+    renderApp();
+    beepStop();
+    micBtn.classList.remove('listening');
+  };
+  recognition.onend = () => { if(micBtn.classList.contains('listening')){ beepStop(); micBtn.classList.remove('listening'); } };
+  recognition.onerror = () => { micBtn.classList.remove('listening'); beepError(); };
+  micBtn.addEventListener('click', () => {
+    try{getAudioCtx().resume();}catch(e){}
+    if(micBtn.classList.contains('listening')){ recognition.stop(); beepStop(); micBtn.classList.remove('listening'); return; }
+    micBtn.classList.add('listening'); beepStart();
+    try{ recognition.start(); }catch(e){ micBtn.classList.remove('listening'); beepError(); }
+  });
+} else { micBtn.style.opacity = '0.35'; micBtn.style.cursor = 'not-allowed'; }
+
+// Pierwsze uruchomienie aplikacji
+renderApp();
+</script>
+</body>
+</html>
