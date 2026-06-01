@@ -1,0 +1,27 @@
+name: Supabase Keepalive
+
+on:
+  schedule:
+    # Co 3 dni o 6:00 UTC (8:00 czasu polskiego)
+    - cron: '0 6 */3 * *'
+  workflow_dispatch: # mozna tez odpalic recznie z GitHub UI → Actions → Run workflow
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase PietroProject
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/paragony?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+
+          echo "HTTP status: $response"
+
+          if [ "$response" = "200" ] || [ "$response" = "206" ]; then
+            echo "Supabase zyje - projekt aktywny"
+          else
+            echo "Nieoczekiwany status: $response"
+            exit 1
+          fi
