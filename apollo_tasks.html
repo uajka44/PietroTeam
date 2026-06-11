@@ -1,0 +1,442 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+
+  .app { max-width: 680px; padding: 1.5rem 0; }
+
+  .header { margin-bottom: 2rem; }
+  .header h1 { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+  .header p { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+
+  .record-zone {
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    background: var(--color-background-primary);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .record-btn-row { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
+
+  .btn-record {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-record:hover { background: var(--color-background-secondary); }
+  .btn-record.recording {
+    border-color: #E24B4A;
+    color: #A32D2D;
+    background: #FCEBEB;
+  }
+  .btn-record .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #E24B4A;
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .status-text { font-size: 13px; color: var(--color-text-tertiary); }
+  .status-text.active { color: #A32D2D; }
+
+  .textarea-wrap { position: relative; }
+  textarea {
+    width: 100%; min-height: 110px;
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-secondary);
+    color: var(--color-text-primary);
+    font-size: 14px; font-family: var(--font-sans);
+    padding: 12px; resize: vertical;
+    line-height: 1.6;
+  }
+  textarea:focus { outline: none; border-color: var(--color-border-secondary); }
+  textarea::placeholder { color: var(--color-text-tertiary); }
+
+  .action-row { display: flex; gap: 8px; margin-top: 10px; }
+  .btn-analyze {
+    flex: 1; padding: 10px;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-analyze:hover { background: var(--color-background-secondary); }
+  .btn-analyze:disabled { opacity: 0.4; cursor: default; }
+  .btn-clear {
+    padding: 10px 16px;
+    border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-tertiary);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 14px; cursor: pointer;
+  }
+  .btn-clear:hover { background: var(--color-background-secondary); }
+
+  .no-speech {
+    background: #FAEEDA; color: #633806;
+    border-radius: var(--border-radius-md);
+    padding: 10px 14px; font-size: 13px;
+    margin-bottom: 1rem;
+    border: 0.5px solid #FAC775;
+  }
+
+  .results { margin-top: 1.5rem; }
+  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .results-header h2 { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+
+  .focus-today {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .focus-today .label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
+    color: var(--color-text-secondary); text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .task-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+  .task-item:last-child { border-bottom: none; }
+
+  .task-check {
+    width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-border-secondary);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .task-check:hover { border-color: var(--color-text-secondary); }
+  .task-check.done { border-color: #1D9E75; background: #1D9E75; }
+  .task-check.done::after { content: '✓'; color: white; font-size: 10px; }
+
+  .task-text { flex: 1; font-size: 14px; color: var(--color-text-primary); line-height: 1.5; }
+  .task-text.done { text-decoration: line-through; color: var(--color-text-tertiary); }
+
+  .task-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
+  .badge {
+    font-size: 11px; padding: 2px 8px; border-radius: 20px;
+    font-weight: 500;
+  }
+  .badge-cafe { background: #FAEEDA; color: #633806; }
+  .badge-trading { background: #E6F1FB; color: #0C447C; }
+  .badge-dom { background: #EAF3DE; color: #27500A; }
+  .badge-inne { background: #F1EFE8; color: #444441; }
+  .badge-pilne { background: #FCEBEB; color: #791F1F; }
+  .date-tag { font-size: 11px; color: var(--color-text-tertiary); }
+
+  .section-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
+    color: var(--color-text-secondary); text-transform: uppercase;
+    margin: 1rem 0 8px;
+  }
+
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--color-border-tertiary); border-top-color: var(--color-text-secondary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .thinking {
+    display: flex; align-items: center; gap: 10px;
+    padding: 1rem; font-size: 13px;
+    color: var(--color-text-secondary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    background: var(--color-background-secondary);
+  }
+
+  .btn-add-more {
+    width: 100%; padding: 10px;
+    margin-top: 1rem;
+    border-radius: var(--border-radius-md);
+    border: 0.5px dashed var(--color-border-secondary);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 13px; cursor: pointer;
+  }
+  .btn-add-more:hover { background: var(--color-background-secondary); }
+
+  .error-box {
+    background: #FCEBEB; color: #791F1F;
+    border-radius: var(--border-radius-md);
+    padding: 10px 14px; font-size: 13px;
+    border: 0.5px solid #F09595;
+    margin-top: 10px;
+  }
+</style>
+
+<div class="app">
+  <h2 class="sr-only">Apollo Focus — organizer zadań z nagrywaniem głosu i AI</h2>
+
+  <div class="header">
+    <h1>Fokus</h1>
+    <p id="date-display"></p>
+  </div>
+
+  <div id="no-speech-warn" class="no-speech" style="display:none">
+    <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+    Nagrywanie głosu działa najlepiej w Chrome. W innych przeglądarkach wpisz tekst ręcznie.
+  </div>
+
+  <div class="record-zone">
+    <div class="record-btn-row">
+      <button class="btn-record" id="recordBtn" onclick="toggleRecord()">
+        <i class="ti ti-microphone" aria-hidden="true"></i>
+        Nagraj
+      </button>
+      <span class="status-text" id="statusText">Naciśnij i mów swobodnie</span>
+    </div>
+    <div class="textarea-wrap">
+      <textarea id="dumpText" placeholder="...albo wpisz tekstem. Możesz pisać swobodnie: 'zadzwonić do elektryka, ważne, sprawdzić faktury do piątku, zaplanować menu na weekend'"></textarea>
+    </div>
+    <div class="action-row">
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyzeText()">
+        <i class="ti ti-sparkles" aria-hidden="true"></i>
+        Posegreguj zadania ↗
+      </button>
+      <button class="btn-clear" onclick="clearAll()">Wyczyść</button>
+    </div>
+    <div id="error-box" class="error-box" style="display:none"></div>
+  </div>
+
+  <div id="results" class="results" style="display:none"></div>
+
+  <button class="btn-add-more" onclick="showAddMore()" id="addMoreBtn" style="display:none">
+    <i class="ti ti-plus" aria-hidden="true"></i>
+    Dodaj kolejne zadania
+  </button>
+</div>
+
+<script>
+  const days = ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'];
+  const months = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+  const now = new Date();
+  document.getElementById('date-display').textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+  let recognition = null;
+  let isRecording = false;
+  let tasks = [];
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    document.getElementById('no-speech-warn').style.display = 'block';
+  }
+
+  function toggleRecord() {
+    if (!SpeechRecognition) return;
+    if (isRecording) {
+      stopRecord();
+    } else {
+      startRecord();
+    }
+  }
+
+  function startRecord() {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'pl-PL';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    let finalTranscript = document.getElementById('dumpText').value;
+    const startLen = finalTranscript.length;
+
+    recognition.onresult = (e) => {
+      let interim = '';
+      let final = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
+        else interim += e.results[i][0].transcript;
+      }
+      const base = document.getElementById('dumpText').value.slice(0, startLen) + (startLen > 0 ? ' ' : '') + '';
+      document.getElementById('dumpText').value = finalTranscript + final + interim;
+      if (final) finalTranscript += final;
+    };
+
+    recognition.onerror = (e) => {
+      if (e.error !== 'no-speech') stopRecord();
+    };
+
+    recognition.onend = () => {
+      if (isRecording) recognition.start();
+    };
+
+    recognition.start();
+    isRecording = true;
+
+    const btn = document.getElementById('recordBtn');
+    btn.className = 'btn-record recording';
+    btn.innerHTML = '<span class="dot"></span> Nagrywam...';
+    document.getElementById('statusText').textContent = 'Mów swobodnie. Kliknij ponownie by zatrzymać.';
+    document.getElementById('statusText').className = 'status-text active';
+  }
+
+  function stopRecord() {
+    if (recognition) { recognition.onend = null; recognition.stop(); recognition = null; }
+    isRecording = false;
+    const btn = document.getElementById('recordBtn');
+    btn.className = 'btn-record';
+    btn.innerHTML = '<i class="ti ti-microphone" aria-hidden="true"></i> Nagraj';
+    document.getElementById('statusText').textContent = 'Nagrywanie zatrzymane';
+    document.getElementById('statusText').className = 'status-text';
+  }
+
+  async function analyzeText() {
+    const text = document.getElementById('dumpText').value.trim();
+    if (!text) return;
+
+    if (isRecording) stopRecord();
+
+    const btn = document.getElementById('analyzeBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Analizuję...';
+
+    document.getElementById('error-box').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').innerHTML = `<div class="thinking"><span class="spinner"></span> Claude segreguje zadania...</div>`;
+    document.getElementById('addMoreBtn').style.display = 'none';
+
+    const today = `${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`;
+
+    const prompt = `Jesteś asystentem organizacji pracy dla Apollona, który prowadzi kawiarnię Piętro w Rzeszowie, handluje CFD (GER40, US30, US100) na MetaTrader 5, i buduje dom. Dzisiaj jest ${today}.
+
+Użytkownik właśnie powiedział (lub napisał) swobodnie:
+"""
+${text}
+"""
+
+Twoim zadaniem jest:
+1. Wyciągnąć konkretne zadania z tego tekstu
+2. Każde zadanie przypisać do projektu: kawiarnia / trading / dom / inne
+3. Ocenić pilność: pilne (na dziś lub wspomniane jako ważne/pilne) vs. backlog
+4. Wybrać MAKSYMALNIE 2 zadania jako "fokus na dziś" — to co naprawdę trzeba zrobić dzisiaj
+5. Resztę przypisać do "później"
+6. Jeśli wspomniana jest data — zanotować ją przy zadaniu
+
+Odpowiedz TYLKO w formacie JSON, bez żadnego tekstu przed ani po:
+{
+  "focusToday": [
+    {"text": "...", "project": "kawiarnia|trading|dom|inne", "date": null|"DD.MM"},
+    {"text": "...", "project": "...", "date": null}
+  ],
+  "backlog": [
+    {"text": "...", "project": "kawiarnia|trading|dom|inne", "date": null|"DD.MM"},
+    ...
+  ],
+  "summary": "Jedno krótkie zdanie co jest dzisiaj najważniejsze."
+}`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      const data = await response.json();
+      const rawText = data.content?.find(b => b.type === 'text')?.text || '';
+      const clean = rawText.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+
+      tasks = [...(parsed.focusToday || []).map(t => ({...t, done: false, phase: 'focus'})),
+               ...(parsed.backlog || []).map(t => ({...t, done: false, phase: 'backlog'}))];
+
+      renderResults(parsed);
+    } catch(e) {
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('error-box').textContent = 'Błąd podczas analizy. Spróbuj ponownie.';
+      document.getElementById('error-box').style.display = 'block';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-sparkles" aria-hidden="true"></i> Posegreguj zadania ↗';
+    document.getElementById('addMoreBtn').style.display = 'block';
+  }
+
+  function renderResults(data) {
+    const focus = data.focusToday || [];
+    const backlog = data.backlog || [];
+    const summary = data.summary || '';
+
+    let html = `<div class="results-header"><h2>Twój plan</h2></div>`;
+
+    if (summary) {
+      html += `<p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1rem;line-height:1.6">${summary}</p>`;
+    }
+
+    html += `<div class="focus-today"><div class="label">Fokus na dziś</div>`;
+    if (focus.length === 0) {
+      html += `<p style="font-size:13px;color:var(--color-text-tertiary)">Brak zadań pilnych — dobry dzień na spokojną pracę.</p>`;
+    } else {
+      focus.forEach((t, i) => {
+        html += taskHTML(t, i, 'focus');
+      });
+    }
+    html += `</div>`;
+
+    if (backlog.length > 0) {
+      html += `<div class="section-label">Na później</div>`;
+      html += `<div class="focus-today">`;
+      backlog.forEach((t, i) => {
+        html += taskHTML(t, focus.length + i, 'backlog');
+      });
+      html += `</div>`;
+    }
+
+    document.getElementById('results').innerHTML = html;
+  }
+
+  function taskHTML(t, idx, phase) {
+    const projClass = {kawiarnia:'cafe', trading:'trading', dom:'dom', inne:'inne'}[t.project] || 'inne';
+    const projLabel = {kawiarnia:'☕ kawiarnia', trading:'📈 trading', dom:'🏠 dom', inne:'inne'}[t.project] || t.project;
+    return `<div class="task-item" id="task-${idx}">
+      <div class="task-check" id="check-${idx}" onclick="toggleTask(${idx})" role="checkbox" aria-label="Oznacz jako zrobione"></div>
+      <div style="flex:1">
+        <div class="task-text" id="txt-${idx}">${t.text}</div>
+        <div class="task-meta">
+          <span class="badge badge-${projClass}">${projLabel}</span>
+          ${t.date ? `<span class="date-tag"><i class="ti ti-calendar" style="font-size:11px" aria-hidden="true"></i> ${t.date}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function toggleTask(idx) {
+    const check = document.getElementById(`check-${idx}`);
+    const txt = document.getElementById(`txt-${idx}`);
+    const done = check.classList.toggle('done');
+    if (done) txt.classList.add('done'); else txt.classList.remove('done');
+  }
+
+  function clearAll() {
+    document.getElementById('dumpText').value = '';
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('results').innerHTML = '';
+    document.getElementById('addMoreBtn').style.display = 'none';
+    document.getElementById('error-box').style.display = 'none';
+    tasks = [];
+  }
+
+  function showAddMore() {
+    document.getElementById('dumpText').value = '';
+    document.getElementById('dumpText').focus();
+    document.getElementById('addMoreBtn').style.display = 'none';
+    window.scrollTo(0, 0);
+  }
+</script>
