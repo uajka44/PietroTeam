@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Godziny pracy — Piętro Cafe</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: #0f0e0c; color: #e8e0d0;
+    font-family: 'Courier Prime', monospace;
+    min-height: 100vh; padding: 24px 16px 80px;
+  }
+
+  .logo { font-family:'Bebas Neue',sans-serif; font-size:28px; color:#f5a623; letter-spacing:5px; text-align:center; }
+  .sub  { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:#5a5248; text-align:center; margin-bottom:24px; }
+
+  .card {
+    background:#1a1814; border:1px solid #2e2a22; border-radius:8px;
+    padding:18px 16px; margin-bottom:12px; max-width:420px; margin-left:auto; margin-right:auto;
+  }
+  .card-title {
+    font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:3px;
+    color:#5a5248; margin-bottom:12px; text-transform:uppercase;
+  }
+
+  /* --- IMIĘ --- */
+  .name-row { display:flex; align-items:center; justify-content:space-between; }
+  .name-display { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:3px; color:#f5a623; }
+  .name-change { font-size:11px; color:#5a5248; letter-spacing:1px; cursor:pointer; border:none; background:none; color:#5a5248; text-decoration:underline; padding:4px; }
+  .name-change:hover { color:#f5a623; }
+
+  /* --- DATA --- */
+  input[type="date"] {
+    background:#0f0e0c; border:1px solid #2e2a22; border-radius:4px;
+    color:#e8e0d0; font-family:'Courier Prime',monospace; font-size:15px;
+    padding:10px 12px; width:100%; cursor:pointer;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator { filter:invert(0.6); cursor:pointer; }
+
+  /* --- ZMIANY --- */
+  .shift-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .shift-btn {
+    border:1px solid #2e2a22; border-radius:6px; background:#0f0e0c;
+    padding:14px 10px; cursor:pointer; text-align:center; transition:all 0.15s;
+  }
+  .shift-btn:hover { border-color:#f5a623; }
+  .shift-btn.active { border-color:#f5a623; background:#211f1a; }
+  .shift-btn .s-label { font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:2px; color:#8a8070; }
+  .shift-btn.active .s-label { color:#f5a623; }
+  .shift-btn .s-time { font-size:13px; color:#5a5248; margin-top:3px; }
+  .shift-btn.active .s-time { color:#e8e0d0; }
+
+  /* --- CZAS --- */
+  .time-row { display:flex; align-items:center; gap:8px; }
+  .time-lbl { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#5a5248; width:24px; }
+  .time-sep { color:#5a5248; font-size:18px; }
+  select {
+    background:#0f0e0c; border:1px solid #2e2a22; border-radius:4px;
+    color:#e8e0d0; font-family:'Courier Prime',monospace; font-size:18px;
+    padding:10px 8px; text-align:center; cursor:pointer; flex:1;
+    appearance:none; -webkit-appearance:none;
+  }
+  select:focus { outline:none; border-color:#f5a623; }
+
+  /* --- NOTATKA --- */
+  textarea {
+    width:100%; background:#0f0e0c; border:1px solid #2e2a22; border-radius:4px;
+    color:#e8e0d0; font-family:'Courier Prime',monospace; font-size:13px;
+    padding:10px 12px; resize:none; min-height:64px;
+  }
+  textarea:focus { outline:none; border-color:#f5a623; }
+
+  /* --- ZAPISZ --- */
+  .save-btn {
+    display:block; width:100%; max-width:420px; margin:0 auto;
+    background:#f5a623; color:#0f0e0c; border:none; border-radius:6px;
+    padding:18px; font-family:'Bebas Neue',sans-serif; font-size:22px;
+    letter-spacing:3px; cursor:pointer; transition:background 0.15s;
+  }
+  .save-btn:hover { background:#c4841c; }
+  .save-btn:disabled { background:#3e3530; color:#5a5248; cursor:default; }
+
+  /* --- TOAST --- */
+  .toast {
+    display:none; position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:#1a1814; border:1px solid #2e2a22; border-radius:6px;
+    padding:12px 20px; font-size:13px; color:#e8e0d0; z-index:500;
+    white-space:nowrap; letter-spacing:1px;
+  }
+  .toast.ok  { border-color:#4caf7d; color:#4caf7d; }
+  .toast.err { border-color:#e05555; color:#e05555; }
+
+  /* --- HISTORIA --- */
+  .history-title {
+    font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:3px;
+    color:#5a5248; text-align:center; margin:24px auto 10px; max-width:420px;
+  }
+  .history-list { max-width:420px; margin:0 auto; display:flex; flex-direction:column; gap:6px; }
+  .h-row {
+    background:#1a1814; border:1px solid #2e2a22; border-radius:6px;
+    padding:12px 14px; display:flex; justify-content:space-between; align-items:center;
+  }
+  .h-date { font-size:12px; color:#8a8070; }
+  .h-time { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:2px; color:#e8e0d0; }
+  .h-note { font-size:11px; color:#5a5248; margin-top:2px; }
+
+  /* --- MODAL wyboru imienia --- */
+  #name-modal {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85);
+    z-index:900; align-items:center; justify-content:center; padding:24px;
+  }
+  #name-modal.open { display:flex; }
+  .modal-box {
+    background:#141210; border:1px solid #2e2a22; border-radius:10px;
+    padding:24px; width:100%; max-width:340px;
+  }
+  .modal-box h2 { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:3px; color:#f5a623; margin-bottom:6px; }
+  .modal-box p  { font-size:12px; color:#5a5248; letter-spacing:1px; margin-bottom:18px; }
+  .name-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .name-opt {
+    border:1px solid #2e2a22; border-radius:6px; background:#0f0e0c;
+    padding:14px 10px; font-family:'Bebas Neue',sans-serif; font-size:18px;
+    letter-spacing:2px; color:#e8e0d0; cursor:pointer; text-align:center;
+    transition:all 0.15s;
+  }
+  .name-opt:hover { border-color:#f5a623; color:#f5a623; }
+</style>
+</head>
+<body>
+
+<div class="logo">Piętro Cafe</div>
+<div class="sub">godziny pracy</div>
+
+<!-- IMIĘ -->
+<div class="card">
+  <div class="card-title">Pracownik</div>
+  <div class="name-row">
+    <div class="name-display" id="nameDisplay">—</div>
+    <button class="name-change" onclick="openNameModal()">zmień</button>
+  </div>
+</div>
+
+<!-- DATA -->
+<div class="card">
+  <div class="card-title">Data</div>
+  <input type="date" id="dateInput">
+</div>
+
+<!-- ZMIANA -->
+<div class="card">
+  <div class="card-title">Zmiana</div>
+  <div class="shift-row">
+    <div class="shift-btn" id="shift1" onclick="setShift(1)">
+      <div class="s-label">Zmiana 1</div>
+      <div class="s-time">9:15 — 16:00</div>
+    </div>
+    <div class="shift-btn" id="shift2" onclick="setShift(2)">
+      <div class="s-label">Zmiana 2</div>
+      <div class="s-time">16:00 — 22:00</div>
+    </div>
+  </div>
+</div>
+
+<!-- GODZINY -->
+<div class="card">
+  <div class="card-title" style="margin-bottom:14px">Godziny</div>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    <div class="time-row">
+      <span class="time-lbl">OD</span>
+      <select id="hOd"></select>
+      <span class="time-sep">:</span>
+      <select id="mOd"></select>
+    </div>
+    <div class="time-row">
+      <span class="time-lbl">DO</span>
+      <select id="hDo"></select>
+      <span class="time-sep">:</span>
+      <select id="mDo"></select>
+    </div>
+  </div>
+</div>
+
+<!-- NOTATKA -->
+<div class="card">
+  <div class="card-title">Notatka (opcjonalnie)</div>
+  <textarea id="notatka" placeholder="np. przyuczanie, zmiana z…"></textarea>
+</div>
+
+<button class="save-btn" id="saveBtn" onclick="zapisz()">ZAPISZ ZMIANĘ</button>
+
+<!-- HISTORIA -->
+<div class="history-title" id="historyTitle" style="display:none">Ostatnie wpisy</div>
+<div class="history-list" id="historyList"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL IMIENIA -->
+<div id="name-modal">
+  <div class="modal-box">
+    <h2>Kto to?</h2>
+    <p>Wybierz swoje imię — zostanie zapamiętane na tym telefonie.</p>
+    <div class="name-grid" id="nameGrid"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  KONFIGURACJA — edytuj listę pracowników
+// ═══════════════════════════════════════════
+const NAMES = ['Justyna', 'Gaba', 'Weronika', 'Julia', 'Angelika'];
+
+const SUPABASE_URL = 'https://pzkvbtdpgcazkiwpxihp.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6a3ZidGRwZ2Nhemtpd3B4aWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjU4NzQsImV4cCI6MjA5NDEwMTg3NH0.2P7hSYht2T0p7wo4M8Wd3v43zOWtIlm68nHhhXUpH7U';
+const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
+
+// ─── INIT ───────────────────────────────────
+function pad(n) { return String(n).padStart(2,'0'); }
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function buildSelects() {
+  const hours = Array.from({length:24}, (_,i) => pad(i));
+  const mins  = Array.from({length:12}, (_,i) => pad(i*5));
+  ['hOd','hDo'].forEach(id => {
+    const s = document.getElementById(id);
+    hours.forEach(h => { const o = document.createElement('option'); o.value = o.textContent = h; s.appendChild(o); });
+  });
+  ['mOd','mDo'].forEach(id => {
+    const s = document.getElementById(id);
+    mins.forEach(m => { const o = document.createElement('option'); o.value = o.textContent = m; s.appendChild(o); });
+  });
+}
+
+function setTime(hOd, mOd, hDo, mDo) {
+  document.getElementById('hOd').value = hOd;
+  document.getElementById('mOd').value = mOd;
+  document.getElementById('hDo').value = hDo;
+  document.getElementById('mDo').value = mDo;
+}
+
+function setShift(n) {
+  document.getElementById('shift1').classList.toggle('active', n===1);
+  document.getElementById('shift2').classList.toggle('active', n===2);
+  if (n===1) setTime('09','15','16','00');
+  if (n===2) setTime('16','00','22','00');
+  // clear active when user manually changes dropdowns
+  ['hOd','mOd','hDo','mDo'].forEach(id => {
+    document.getElementById(id).addEventListener('change', clearShift, {once:true});
+  });
+}
+
+function clearShift() {
+  document.getElementById('shift1').classList.remove('active');
+  document.getElementById('shift2').classList.remove('active');
+}
+
+// ─── IMIĘ ────────────────────────────────────
+function openNameModal() { document.getElementById('name-modal').classList.add('open'); }
+function closeNameModal() { document.getElementById('name-modal').classList.remove('open'); }
+
+function selectName(name) {
+  localStorage.setItem('pietro_imie', name);
+  document.getElementById('nameDisplay').textContent = name;
+  closeNameModal();
+  loadHistory(name);
+}
+
+function buildNameGrid() {
+  const grid = document.getElementById('nameGrid');
+  grid.innerHTML = NAMES.map(n =>
+    `<button class="name-opt" onclick="selectName('${n}')">${n}</button>`
+  ).join('');
+}
+
+// ─── HISTORIA ────────────────────────────────
+const DAY_PL = ['Nd','Pn','Wt','Śr','Cz','Pt','Sb'];
+
+async function loadHistory(imie) {
+  if (!imie) return;
+  const url = `${SUPABASE_URL}/rest/v1/zmiany?select=data,od,do,notatka&imie=eq.${encodeURIComponent(imie)}&order=data.desc,created_at.desc&limit=10`;
+  try {
+    const res = await fetch(url, { headers: HEADERS });
+    const rows = await res.json();
+    if (!rows.length) { document.getElementById('historyTitle').style.display = 'none'; return; }
+    document.getElementById('historyTitle').style.display = 'block';
+    document.getElementById('historyList').innerHTML = rows.map(r => {
+      const d = new Date(r.data + 'T12:00:00');
+      const dayStr = DAY_PL[d.getDay()] + ' ' + pad(d.getDate()) + '.' + pad(d.getMonth()+1);
+      return `<div class="h-row">
+        <div>
+          <div class="h-date">${dayStr}</div>
+          ${r.notatka ? `<div class="h-note">${r.notatka}</div>` : ''}
+        </div>
+        <div class="h-time">${r.od.slice(0,5)} – ${r.do.slice(0,5)}</div>
+      </div>`;
+    }).join('');
+  } catch(e) { console.warn(e); }
+}
+
+// ─── ZAPIS ───────────────────────────────────
+async function zapisz() {
+  const imie = localStorage.getItem('pietro_imie');
+  if (!imie) { openNameModal(); return; }
+
+  const data   = document.getElementById('dateInput').value;
+  const od     = document.getElementById('hOd').value + ':' + document.getElementById('mOd').value;
+  const doVal  = document.getElementById('hDo').value + ':' + document.getElementById('mDo').value;
+  const notatka = document.getElementById('notatka').value.trim();
+
+  if (!data) { showToast('Wybierz datę', 'err'); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = 'ZAPISYWANIE...';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/zmiany`, {
+      method: 'POST',
+      headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ data, imie, od, do: doVal, notatka: notatka || null })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    showToast('✓ Zapisano!', 'ok');
+    document.getElementById('notatka').value = '';
+    loadHistory(imie);
+  } catch(e) {
+    showToast('Błąd: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'ZAPISZ ZMIANĘ';
+  }
+}
+
+// ─── TOAST ───────────────────────────────────
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + (type||'');
+  t.style.display = 'block';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.style.display = 'none', 2800);
+}
+
+// ─── START ───────────────────────────────────
+buildSelects();
+buildNameGrid();
+document.getElementById('dateInput').value = todayStr();
+setShift(1);
+
+const savedName = localStorage.getItem('pietro_imie');
+if (savedName) {
+  document.getElementById('nameDisplay').textContent = savedName;
+  loadHistory(savedName);
+} else {
+  openNameModal();
+}
+</script>
+<script src="nav.js"></script>
+</body>
+</html>

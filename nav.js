@@ -3,6 +3,7 @@
     { href: 'index.html',         icon: '⌂', label: 'Panel główny' },
     { href: 'przepisy.html',      icon: '☕', label: 'Przepisy' },
     { href: 'wrzuc_paragon.html', icon: '🧾', label: 'Wrzuć paragon' },
+    { href: 'godziny.html',       icon: '🕐', label: 'Godziny pracy' },
   ];
 
   const currentPage = location.pathname.split('/').pop() || 'index.html';
