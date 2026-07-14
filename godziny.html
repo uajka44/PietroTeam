@@ -281,8 +281,6 @@ function clearShift() {
 // ─── IMIĘ ────────────────────────────────────
 function openNameModal() { document.getElementById('name-modal').classList.add('open'); }
 function closeNameModal() {
-  const saved = localStorage.getItem('pietro_imie');
-  if (!saved) return; // nie pozwól zamknąć bez wyboru przy pierwszym razie
   document.getElementById('name-modal').classList.remove('open');
   document.getElementById('addNameWrap').style.display = 'none';
   document.getElementById('addNameBtn').textContent = '+ Dodaj nową osobę';
