@@ -155,6 +155,7 @@
     <div id="uproszczonaBox" style="display:none; margin-top:6px; padding:8px 12px; border-radius:4px; font-size:11px;"></div>
 
     <div id="warnBox" class="warn-box" style="display:none"></div>
+  <div id="dupBox" style="display:none; margin-top:10px; padding:10px 12px; border-radius:4px; font-size:12px; line-height:1.6; background:#fff3cd; border:1px solid #ffc107; color:#856404;"></div>
   </div>
 
   <div class="confirm-section" id="confirmSection">
@@ -188,6 +189,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 let currentFile = null;
 let currentResult = null;
+let duplicateRecord = null;
 
 function handleFile(file) {
   if (!file) return;
@@ -265,7 +267,11 @@ function pokazWynik(data) {
   const fmtPln = v => (v !== null && v !== undefined) ? parseFloat(v).toFixed(2) : null;
 
   document.getElementById('resultSub').textContent = data.dostawca === 'Biedronka' ? 'BIEDRONKA' : 'NIEZNANY DOSTAWCA';
-  document.getElementById('rNr').textContent = fmt(d.numer_faktury);
+  const nr = fmt(d.numer_faktury);
+  const rNr = document.getElementById('rNr');
+  if (nr !== '—' && nr.length > 4) {
+    rNr.innerHTML = nr.slice(0,-4) + '<span style="font-weight:700;color:#f5a623">' + nr.slice(-4) + '</span>';
+  } else { rNr.textContent = nr; }
   document.getElementById('rData').textContent = fmt(d.data);
   if (document.getElementById('rNipS')) document.getElementById('rNipS').textContent = fmt(d.nip_sprzedawcy);
 
@@ -358,8 +364,27 @@ function pokazWynik(data) {
     warn.style.display = 'block';
   } else { warn.style.display = 'none'; }
 
+  document.getElementById('dupBox').style.display = 'none';
+  duplicateRecord = null;
+  if (d.numer_faktury) checkDuplicate(d.numer_faktury);
+
   showEl('resultCard');
   showEl('confirmSection');
+}
+
+async function checkDuplicate(nr) {
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/paragony?select=id,created_at,plik_url&notatka=like.*${encodeURIComponent(nr)}*&plik_url=neq.${encodeURIComponent(currentResult.plik_url)}&limit=3`;
+    const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } });
+    const rows = await res.json();
+    if (rows && rows.length > 0) {
+      duplicateRecord = rows[0];
+      const kiedy = rows[0].created_at ? rows[0].created_at.slice(0,16).replace('T',' ') : '?';
+      const dupBox = document.getElementById('dupBox');
+      dupBox.innerHTML = `⚠️ <strong>Ta faktura była już wrzucona</strong> (${kiedy})<br>Po potwierdzeniu stara zostanie zastąpiona.`;
+      dupBox.style.display = 'block';
+    }
+  } catch(e) { console.warn('checkDuplicate:', e); }
 }
 
 async function potwierdz(ok) {
@@ -376,15 +401,18 @@ async function wyslijZProblemem() {
 
 async function zapiszStatus(status, notatka) {
   if (!currentResult || !currentResult.plik_url) return;
+  const headers = {
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'apikey': SUPABASE_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=minimal',
+  };
   try {
+    if (duplicateRecord) {
+      await fetch(SUPABASE_URL + '/rest/v1/paragony?id=eq.' + duplicateRecord.id, { method: 'DELETE', headers });
+    }
     await fetch(SUPABASE_URL + '/rest/v1/paragony?plik_url=eq.' + encodeURIComponent(currentResult.plik_url), {
-      method: 'PATCH',
-      headers: {
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'apikey': SUPABASE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal',
-      },
+      method: 'PATCH', headers,
       body: JSON.stringify({ status: status, notatka: notatka }),
     });
   } catch (e) { console.warn(e); }
@@ -396,7 +424,7 @@ function showSuccess(ok) {
   document.getElementById('successTitle').className = ok ? 'green' : 'amber';
   document.getElementById('successTitle').textContent = ok ? 'Wysłano!' : 'Wysłano z uwagą';
   document.getElementById('successMsg').innerHTML = ok
-    ? 'Paragon potwierdzony.<br>Możesz zamknąć tę stronę.'
+    ? (duplicateRecord ? 'Zastąpiono poprzednią wersję faktury.<br>Możesz zamknąć tę stronę.' : 'Paragon potwierdzony.<br>Możesz zamknąć tę stronę.')
     : 'Paragon wysłany.<br>Szef sprawdzi dane ręcznie.';
   showEl('successCard');
 }
