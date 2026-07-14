@@ -204,6 +204,23 @@
     <h2>Kto to?</h2>
     <p>Wybierz swoje imię — zostanie zapamiętane na tym telefonie.</p>
     <div class="name-grid" id="nameGrid"></div>
+    <div id="addNameWrap" style="display:none; margin-top:12px;">
+      <input id="newNameInput" type="text" placeholder="Wpisz imię…"
+        style="width:100%;background:#0f0e0c;border:1px solid #2e2a22;border-radius:4px;color:#e8e0d0;font-family:'Courier Prime',monospace;font-size:15px;padding:10px 12px;margin-bottom:8px;">
+      <button onclick="confirmNewName()"
+        style="width:100%;background:#f5a623;color:#0f0e0c;border:none;border-radius:4px;padding:11px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;">
+        ZATWIERDŹ
+      </button>
+    </div>
+    <button onclick="toggleAddName()"
+      style="width:100%;margin-top:10px;background:transparent;border:1px solid #2e2a22;border-radius:4px;color:#5a5248;font-family:'Courier Prime',monospace;font-size:12px;letter-spacing:1px;padding:10px;cursor:pointer;"
+      id="addNameBtn">
+      + Dodaj nową osobę
+    </button>
+    <button onclick="closeNameModal()" id="cancelNameBtn"
+      style="width:100%;margin-top:8px;background:transparent;border:none;color:#3e3a32;font-family:'Courier Prime',monospace;font-size:12px;letter-spacing:1px;padding:8px;cursor:pointer;">
+      Anuluj
+    </button>
   </div>
 </div>
 
@@ -263,7 +280,29 @@ function clearShift() {
 
 // ─── IMIĘ ────────────────────────────────────
 function openNameModal() { document.getElementById('name-modal').classList.add('open'); }
-function closeNameModal() { document.getElementById('name-modal').classList.remove('open'); }
+function closeNameModal() {
+  const saved = localStorage.getItem('pietro_imie');
+  if (!saved) return; // nie pozwól zamknąć bez wyboru przy pierwszym razie
+  document.getElementById('name-modal').classList.remove('open');
+  document.getElementById('addNameWrap').style.display = 'none';
+  document.getElementById('addNameBtn').textContent = '+ Dodaj nową osobę';
+}
+
+function toggleAddName() {
+  const wrap = document.getElementById('addNameWrap');
+  const btn  = document.getElementById('addNameBtn');
+  const open = wrap.style.display === 'block';
+  wrap.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? '+ Dodaj nową osobę' : '— Anuluj dodawanie';
+  if (!open) document.getElementById('newNameInput').focus();
+}
+
+function confirmNewName() {
+  const val = document.getElementById('newNameInput').value.trim();
+  if (!val) return;
+  document.getElementById('newNameInput').value = '';
+  selectName(val);
+}
 
 function selectName(name) {
   localStorage.setItem('pietro_imie', name);
