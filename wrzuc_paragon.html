@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Wrzuć paragon — Piętro Cafe</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0f0e0c; color: #e8e0d0;
+    font-family: 'Courier Prime', monospace;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 24px 16px 48px;
+  }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: #f5a623; letter-spacing: 4px; text-align: center; margin-bottom: 4px; margin-top: 8px; }
+  .sub { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #8a8070; text-align: center; margin-bottom: 32px; }
+  .card { background: #1a1814; border: 1px solid #2e2a22; border-radius: 8px; padding: 28px 20px; width: 100%; max-width: 420px; }
+  .card h2 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; color: #e8e0d0; margin-bottom: 6px; }
+  .card > p { font-size: 13px; color: #8a8070; margin-bottom: 24px; line-height: 1.6; }
+
+  .camera-btn { display: block; width: 100%; background: #f5a623; color: #0f0e0c; border: none; border-radius: 6px; padding: 22px; font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 3px; cursor: pointer; position: relative; overflow: hidden; margin-bottom: 10px; transition: background 0.2s; }
+  .camera-btn:hover { background: #c4841c; }
+  .camera-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+  .gallery-btn { display: block; width: 100%; background: transparent; color: #8a8070; border: 1px solid #2e2a22; border-radius: 6px; padding: 14px; font-family: 'Courier Prime', monospace; font-size: 13px; cursor: pointer; position: relative; overflow: hidden; transition: all 0.2s; }
+  .gallery-btn:hover { border-color: #f5a623; color: #f5a623; }
+  .gallery-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+  .preview-wrap { display: none; margin-top: 20px; }
+  .preview-wrap img { width: 100%; max-height: 260px; object-fit: contain; border: 1px solid #2e2a22; border-radius: 4px; background: #0f0e0c; margin-bottom: 10px; }
+  .img-info { font-size: 11px; color: #8a8070; margin-bottom: 16px; }
+
+  .scan-btn { display: block; width: 100%; background: #f5a623; color: #0f0e0c; border: none; border-radius: 6px; padding: 18px; font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; cursor: pointer; transition: background 0.2s; }
+  .scan-btn:hover { background: #c4841c; }
+
+  .progress { display: none; text-align: center; padding: 28px 0; }
+  .spinner { display: inline-block; width: 40px; height: 40px; border: 3px solid #2e2a22; border-top-color: #f5a623; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 14px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .progress-label { font-size: 12px; color: #8a8070; letter-spacing: 2px; text-transform: uppercase; }
+  .progress-step { font-size: 11px; color: #4a4438; margin-top: 6px; }
+
+  .result-card { display: none; background: #faf8f3; color: #1a1814; border-radius: 6px; margin-top: 20px; padding: 24px 20px; font-family: 'Courier Prime', monospace; }
+  .result-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; text-align: center; margin-bottom: 4px; }
+  .result-sub { text-align: center; font-size: 10px; color: #888; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+  .result-divider { border: none; border-top: 1px dashed #ccc; margin: 12px 0; }
+  .result-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+  .result-row .lbl { color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding-top: 2px; flex-shrink: 0; }
+  .result-row .val { text-align: right; font-weight: 700; word-break: break-word; }
+  .result-row.big .lbl, .result-row.big .val { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; color: #1a1814; }
+  .warn-box { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 10px 12px; font-size: 12px; color: #856404; margin: 12px 0; line-height: 1.5; }
+  .red-lbl { color: #1565c0 !important; font-weight: 700; }
+  .red-val { color: #1565c0 !important; font-size: 15px !important; }
+  .key-row { margin-bottom: 10px; }
+
+  .confirm-section { display: none; margin-top: 20px; }
+  .confirm-label { font-size: 13px; color: #8a8070; text-align: center; margin-bottom: 14px; }
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn-ok { background: #4caf7d; color: #0f0e0c; border: none; border-radius: 6px; padding: 16px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; cursor: pointer; transition: background 0.2s; }
+  .btn-ok:hover { background: #3a9068; }
+  .btn-nok { background: transparent; color: #e05252; border: 1px solid #e05252; border-radius: 6px; padding: 16px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; }
+  .btn-nok:hover { background: #e05252; color: #fff; }
+
+  .problem-section { display: none; margin-top: 16px; }
+  .problem-section label { display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #8a8070; margin-bottom: 6px; }
+  .problem-section textarea { width: 100%; background: #0f0e0c; border: 1px solid #2e2a22; border-radius: 4px; padding: 12px; color: #e8e0d0; font-family: 'Courier Prime', monospace; font-size: 13px; resize: vertical; min-height: 80px; outline: none; }
+  .problem-section textarea:focus { border-color: #f5a623; }
+  .send-problem-btn { display: block; width: 100%; margin-top: 10px; background: #f5a623; color: #0f0e0c; border: none; border-radius: 6px; padding: 14px; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; cursor: pointer; }
+
+  .success-card { display: none; text-align: center; padding: 32px 20px; background: #1a1814; border: 1px solid #2e2a22; border-radius: 8px; width: 100%; max-width: 420px; margin-top: 20px; }
+  .success-card .icon { font-size: 56px; margin-bottom: 12px; }
+  .success-card h3 { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 3px; margin-bottom: 8px; }
+  .success-card h3.green { color: #4caf7d; }
+  .success-card h3.amber { color: #f5a623; }
+  .success-card p { font-size: 13px; color: #8a8070; margin-bottom: 24px; line-height: 1.6; }
+  .again-btn { background: transparent; color: #f5a623; border: 1px solid #f5a623; border-radius: 6px; padding: 14px 28px; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; cursor: pointer; }
+  .again-btn:hover { background: #f5a623; color: #0f0e0c; }
+
+  .error-box { display: none; background: rgba(224,82,82,0.1); border: 1px solid #e05252; border-radius: 4px; padding: 14px; margin-top: 16px; font-size: 12px; color: #e05252; line-height: 1.5; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<div class="logo">Piętro Cafe</div>
+<div class="sub">Wrzuć paragon</div>
+
+<div class="card" id="uploadCard">
+  <h2>📄 Nowy paragon</h2>
+  <p>Zrób zdjęcie paragonu. Sprawdzimy dane automatycznie — potwierdź czy się zgadzają.</p>
+
+  <button class="camera-btn">
+    📷 ZRÓB ZDJĘCIE
+    <input type="file" accept="image/*" capture="environment" onchange="handleFile(this.files[0])">
+  </button>
+  <button class="gallery-btn">
+    📁 wybierz z galerii lub pliku
+    <input type="file" accept="image/*,application/pdf" onchange="handleFile(this.files[0])">
+  </button>
+
+  <div class="preview-wrap" id="previewWrap">
+    <img id="previewImg" alt="Podgląd">
+    <div class="img-info" id="imgInfo"></div>
+    <button class="scan-btn" onclick="skanuj()">🔍 SKANUJ I SPRAWDŹ DANE</button>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="spinner"></div>
+    <div class="progress-label" id="progressLabel">Przygotowywanie...</div>
+    <div class="progress-step" id="progressStep"></div>
+  </div>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-title">SPRAWDŹ DANE</div>
+    <div class="result-sub" id="resultSub"></div>
+    <hr class="result-divider">
+
+    <!-- NR + DATA -->
+    <div class="result-row">
+      <span class="lbl">Nr faktury</span>
+      <span class="val" id="rNr">—</span>
+    </div>
+    <div class="result-row key-row">
+      <span class="lbl red-lbl">DATA ★</span>
+      <span class="val red-val" id="rData">—</span>
+    </div>
+    <div class="result-row">
+      <span class="lbl">NIP sprzedawcy</span>
+      <span class="val" id="rNipS">—</span>
+    </div>
+
+    <hr class="result-divider">
+
+    <!-- NIP NABYWCY — sprawdzenie -->
+    <div id="nipBox" style="padding:10px 12px; border-radius:4px; margin-bottom:8px; font-size:13px;"></div>
+
+    <hr class="result-divider">
+
+    <!-- Sp: i PTU: jak na paragonie -->
+    <div id="spLines" style="font-family:'Courier Prime',monospace; font-size:13px; margin-bottom:6px;"></div>
+    <div id="ptuLines" style="font-family:'Courier Prime',monospace; font-size:14px; font-weight:700; color:#1565c0; margin-bottom:6px;"></div>
+
+    <hr class="result-divider">
+
+    <!-- SUMA PLN -->
+    <div class="result-row big key-row" style="margin-top:4px;">
+      <span class="lbl red-lbl">SUMA PLN ★</span>
+      <span class="val red-val" id="rSuma">—</span>
+    </div>
+    <div id="kaucjaRow" style="display:none; text-align:right; font-size:12px; color:#888; margin-top:2px;"></div>
+
+    <!-- Walidacja sum -->
+    <div id="validBox" style="display:none; margin-top:10px; padding:10px 12px; border-radius:4px; font-size:12px; line-height:1.6;"></div>
+
+    <!-- Komunikat faktura uproszczona -->
+    <div id="uproszczonaBox" style="display:none; margin-top:6px; padding:8px 12px; border-radius:4px; font-size:11px;"></div>
+
+    <div id="warnBox" class="warn-box" style="display:none"></div>
+  </div>
+
+  <div class="confirm-section" id="confirmSection">
+    <div class="confirm-label">Czy powyższe dane się zgadzają?</div>
+    <div class="btn-row">
+      <button class="btn-ok" onclick="potwierdz(true)">✓ TAK</button>
+      <button class="btn-nok" onclick="potwierdz(false)">✗ NIE</button>
+    </div>
+  </div>
+
+  <div class="problem-section" id="problemSection">
+    <label>Co jest nie tak? (opcjonalnie)</label>
+    <textarea id="problemText" placeholder="np. zły numer, inne kwoty..."></textarea>
+    <button class="send-problem-btn" onclick="wyslijZProblemem()">WYŚLIJ MIMO TO</button>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+</div>
+
+<div class="success-card" id="successCard">
+  <div class="icon" id="successIcon">✅</div>
+  <h3 id="successTitle" class="green">Wysłano!</h3>
+  <p id="successMsg">Paragon potwierdzony.<br>Możesz zamknąć tę stronę.</p>
+  <button class="again-btn" onclick="resetForm()">↺ Wrzuć kolejny</button>
+</div>
+
+<script>
+const FN_URL = 'https://pzkvbtdpgcazkiwpxihp.supabase.co/functions/v1/skanuj-paragon';
+const SUPABASE_URL = 'https://pzkvbtdpgcazkiwpxihp.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6a3ZidGRwZ2Nhemtpd3B4aWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjU4NzQsImV4cCI6MjA5NDEwMTg3NH0.2P7hSYht2T0p7wo4M8Wd3v43zOWtIlm68nHhhXUpH7U';
+
+let currentFile = null;
+let currentResult = null;
+
+function handleFile(file) {
+  if (!file) return;
+  hideError(); hideEl('resultCard'); hideEl('confirmSection'); hideEl('problemSection');
+  currentFile = file;
+  const img = document.getElementById('previewImg');
+  if (file.type.startsWith('image/')) {
+    img.src = URL.createObjectURL(file);
+    img.style.display = 'block';
+  } else {
+    img.style.display = 'none';
+  }
+  document.getElementById('imgInfo').textContent = file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+  showEl('previewWrap');
+}
+
+async function skanuj() {
+  if (!currentFile) return;
+
+  hideError(); hideEl('previewWrap'); hideEl('resultCard'); hideEl('confirmSection'); hideEl('problemSection');
+  showProgress('Wysyłanie...', 'Trwa kompresja i upload zdjęcia');
+
+  try {
+    let fileToSend = currentFile;
+    if (currentFile.type.startsWith('image/')) {
+      showProgress('Kompresowanie...', 'Zmniejszamy: ' + Math.round(currentFile.size/1024) + ' KB');
+      fileToSend = await resizeImage(currentFile);
+      showProgress('Skompresowano', 'Wynik: ' + Math.round(fileToSend.size/1024) + ' KB — wysyłam do serwera...');
+    }
+    showProgress('Skanowanie OCR...', 'Azure analizuje paragon — może potrwać ~15-20 sek.');
+
+    const formData = new FormData();
+    const fileName = 'paragon_' + Date.now() + (currentFile.type === 'application/pdf' ? '.pdf' : '.jpg');
+    formData.append('file', fileToSend instanceof Blob ? new File([fileToSend], fileName, {type: 'image/jpeg'}) : fileToSend, fileName);
+
+    const resp = await fetch(FN_URL, { method: 'POST', body: formData });
+    const data = await resp.json();
+
+    // Obsługa limitu dziennego
+    if (resp.status === 429) {
+      hideProgress();
+      showEl('previewWrap');
+      showError('🚫 ' + (data.komunikat || 'Dzienny limit skanowań wyczerpany. Spróbuj jutro.'));
+      return;
+    }
+
+    if (!resp.ok || data.error) throw new Error(data.error || 'Błąd serwera ' + resp.status);
+
+    currentResult = data;
+    hideProgress();
+
+    // Informacja o pozostałych skanowaniach
+    if (data.limit) {
+      const pozostalo = data.limit.pozostalo;
+      if (pozostalo <= 3 && pozostalo > 0) {
+        const info = document.createElement('div');
+        info.style.cssText = 'background:#fff3cd;border:1px solid #ffc107;border-radius:4px;padding:8px 12px;margin-top:10px;font-size:12px;color:#856404;';
+        info.textContent = 'ℹ️ Zostały Ci ' + pozostalo + ' skanowania na dziś (limit: ' + data.limit.limit + ').';
+        document.getElementById('uploadCard').prepend(info);
+        setTimeout(() => info.remove(), 6000);
+      }
+    }
+    pokazWynik(data);
+  } catch (err) {
+    hideProgress();
+    showEl('previewWrap');
+    showError('Coś poszło nie tak:\n' + err.message);
+  }
+}
+
+function pokazWynik(data) {
+  const d = data.dane || {};
+  const NIP_WLASCICIELA = '8133198620';
+  const fmt = v => (v !== null && v !== undefined) ? String(v) : '—';
+  const fmtPln = v => (v !== null && v !== undefined) ? parseFloat(v).toFixed(2) : null;
+
+  document.getElementById('resultSub').textContent = data.dostawca === 'Biedronka' ? 'BIEDRONKA' : 'NIEZNANY DOSTAWCA';
+  document.getElementById('rNr').textContent = fmt(d.numer_faktury);
+  document.getElementById('rData').textContent = fmt(d.data);
+  if (document.getElementById('rNipS')) document.getElementById('rNipS').textContent = fmt(d.nip_sprzedawcy);
+
+  // === NIP NABYWCY — sprawdzenie ===
+  const nipBox = document.getElementById('nipBox');
+  const nipOdczytany = d.nip_nabywcy ? String(d.nip_nabywcy).replace(/\s/g, '') : null;
+  if (!nipOdczytany) {
+    nipBox.style.background = '#ffebee'; nipBox.style.color = '#b71c1c';
+    nipBox.style.border = '2px solid #e53935';
+    nipBox.innerHTML = '❌ <strong>BRAK NIP NABYWCY</strong><br>Paragon nie ma NIP-u — nie jest fakturą uproszczoną!';
+  } else if (nipOdczytany === NIP_WLASCICIELA) {
+    nipBox.style.background = '#e8f5e9'; nipBox.style.color = '#2e7d32';
+    nipBox.style.border = '1px solid #a5d6a7';
+    nipBox.innerHTML = '✓ NIP NABYWCY: <strong>' + nipOdczytany + '</strong> — zgadza się';
+  } else {
+    nipBox.style.background = '#ffebee'; nipBox.style.color = '#b71c1c';
+    nipBox.style.border = '2px solid #e53935';
+    nipBox.innerHTML = '❌ <strong>ZŁY NIP NABYWCY!</strong><br>' +
+      'Na paragonie: <strong>' + nipOdczytany + '</strong><br>' +
+      'Powinno być: <strong>' + NIP_WLASCICIELA + '</strong><br>' +
+      'Sprawdź czy kasjer wbił właściwy NIP!';
+  }
+
+  // === Sp: linie (jak na paragonie) ===
+  const spLines = document.getElementById('spLines');
+  if (d.sp_str) {
+    spLines.textContent = 'Sp: ' + d.sp_str;
+    spLines.style.display = 'block';
+  } else { spLines.style.display = 'none'; }
+
+  // === PTU: linie (jak na paragonie, czerwone) ===
+  const ptuLines = document.getElementById('ptuLines');
+  if (d.ptu_str) {
+    ptuLines.textContent = 'PTU: ' + d.ptu_str;
+    ptuLines.style.display = 'block';
+  } else { ptuLines.style.display = 'none'; }
+
+  // === SUMA PLN ===
+  const sumaVal = fmtPln(d.suma_pln);
+  document.getElementById('rSuma').textContent = sumaVal ? sumaVal + ' PLN' : '—';
+
+  const kaucjaRow = document.getElementById('kaucjaRow');
+  if (d.kaucja) {
+    kaucjaRow.style.display = 'block';
+    kaucjaRow.textContent = '+ ' + fmtPln(d.kaucja) + ' PLN kaucja = ' + fmtPln(d.do_zaplaty) + ' PLN do zapłaty';
+  } else { kaucjaRow.style.display = 'none'; }
+
+  // === WALIDACJA sum Sp: ===
+  const validBox = document.getElementById('validBox');
+  if (data.walidacja) {
+    validBox.style.display = 'block';
+    if (data.walidacja.ok) {
+      validBox.style.background = '#e8f5e9'; validBox.style.color = '#2e7d32';
+      validBox.style.border = '1px solid #a5d6a7';
+      validBox.textContent = '✓ Suma kontrolna OK: Sp:(' + d.sp_str + ') = ' + fmtPln(data.walidacja.suma_sp) + ' PLN';
+    } else {
+      validBox.style.background = '#ffebee'; validBox.style.color = '#b71c1c';
+      validBox.style.border = '1px solid #ef9a9a';
+      // Pokaż też kwoty netto przy błędzie walidacji
+      let nettoInfo = '';
+      ['a','b','c'].forEach(k => {
+        if (d['netto_' + k] !== null && d['netto_' + k] !== undefined) {
+          nettoInfo += 'Netto ' + k.toUpperCase() + ': ' + fmtPln(d['netto_' + k]) + ' PLN  ';
+        }
+      });
+      validBox.innerHTML = '⚠ ROZBIEŻNOŚĆ: ' + data.walidacja.roznica + ' PLN<br>' +
+        'Sp:(' + d.sp_str + ') = ' + fmtPln(data.walidacja.suma_sp) + ' PLN vs SUMA PLN ' + fmtPln(d.suma_pln) + ' PLN' +
+        (nettoInfo ? '<br><small style="color:#888">' + nettoInfo.trim() + '</small>' : '');
+    }
+  } else { validBox.style.display = 'none'; }
+
+  // === FAKTURA UPROSZCZONA ===
+  const upBox = document.getElementById('uproszczonaBox');
+  if (d.faktura_uproszczona === true) {
+    upBox.style.display = 'block';
+    upBox.style.background = '#e8f5e9'; upBox.style.color = '#2e7d32';
+    upBox.style.border = '1px solid #a5d6a7';
+    upBox.textContent = '✓ Faktura uproszczona (≤450 zł) — VAT do odliczenia';
+  } else if (d.faktura_uproszczona === false) {
+    upBox.style.display = 'block';
+    upBox.style.background = '#fff3e0'; upBox.style.color = '#e65100';
+    upBox.style.border = '1px solid #ffcc80';
+    upBox.textContent = '⚠ Kwota > 450 zł — nie jest fakturą uproszczoną';
+  } else { upBox.style.display = 'none'; }
+
+  // === WARN nieznany dostawca ===
+  const warn = document.getElementById('warnBox');
+  if (data.dostawca !== 'Biedronka') {
+    warn.textContent = '⚠️ Nie rozpoznano Biedronki — sprawdź dane ręcznie.';
+    warn.style.display = 'block';
+  } else { warn.style.display = 'none'; }
+
+  showEl('resultCard');
+  showEl('confirmSection');
+}
+
+async function potwierdz(ok) {
+  hideEl('confirmSection');
+  if (ok) { await zapiszStatus('potwierdzony', ''); showSuccess(true); }
+  else { showEl('problemSection'); }
+}
+
+async function wyslijZProblemem() {
+  const notatka = document.getElementById('problemText').value.trim();
+  await zapiszStatus('problem', notatka);
+  showSuccess(false);
+}
+
+async function zapiszStatus(status, notatka) {
+  if (!currentResult || !currentResult.plik_url) return;
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/paragony?plik_url=eq.' + encodeURIComponent(currentResult.plik_url), {
+      method: 'PATCH',
+      headers: {
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'apikey': SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({ status: status, notatka: notatka }),
+    });
+  } catch (e) { console.warn(e); }
+}
+
+function showSuccess(ok) {
+  hideEl('uploadCard');
+  document.getElementById('successIcon').textContent = ok ? '✅' : '⚠️';
+  document.getElementById('successTitle').className = ok ? 'green' : 'amber';
+  document.getElementById('successTitle').textContent = ok ? 'Wysłano!' : 'Wysłano z uwagą';
+  document.getElementById('successMsg').innerHTML = ok
+    ? 'Paragon potwierdzony.<br>Możesz zamknąć tę stronę.'
+    : 'Paragon wysłany.<br>Szef sprawdzi dane ręcznie.';
+  showEl('successCard');
+}
+
+function resizeImage(file) {
+  return new Promise(resolve => {
+    const MAX = 1800, Q = 0.82;
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h*MAX/w); w = MAX; }
+        else        { w = Math.round(w*MAX/h); h = MAX; }
+      }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      c.toBlob(b => resolve(b), 'image/jpeg', Q);
+    };
+    img.onerror = () => resolve(file);
+    img.src = url;
+  });
+}
+
+function showEl(id) { const e = document.getElementById(id); if (e) e.style.display = 'block'; }
+function hideEl(id) { const e = document.getElementById(id); if (e) e.style.display = 'none'; }
+function showProgress(label, step) { document.getElementById('progressLabel').textContent = label; document.getElementById('progressStep').textContent = step || ''; showEl('progress'); }
+function hideProgress() { hideEl('progress'); }
+function showError(msg) { const b = document.getElementById('errorBox'); b.textContent = msg; b.style.display = 'block'; }
+function hideError() { const b = document.getElementById('errorBox'); b.style.display = 'none'; }
+function resetForm() {
+  currentFile = null; currentResult = null;
+  showEl('uploadCard'); hideEl('successCard'); hideEl('previewWrap');
+  hideEl('resultCard'); hideEl('confirmSection'); hideEl('problemSection');
+  hideError(); hideProgress();
+  document.getElementById('previewImg').src = '';
+  document.getElementById('problemText').value = '';
+  document.querySelectorAll('input[type="file"]').forEach(i => i.value = '');
+}
+</script>
+</body>
+</html>
