@@ -4,6 +4,7 @@
     { href: 'przepisy.html',      icon: '☕', label: 'Przepisy' },
     { href: 'wrzuc_paragon.html', icon: '🧾', label: 'Wrzuć paragon' },
     { href: 'godziny.html',       icon: '🕐', label: 'Godziny pracy' },
+    { href: 'grafik.html',        icon: '📅', label: 'Grafik' },
   ];
 
   const currentPage = location.pathname.split('/').pop() || 'index.html';

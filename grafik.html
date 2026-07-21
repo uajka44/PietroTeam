@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Grafik — Piętro Cafe</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: #0f0e0c; color: #e8e0d0;
+    font-family: 'Courier Prime', monospace;
+    min-height: 100vh; padding: 24px 16px 80px;
+  }
+
+  .logo { font-family:'Bebas Neue',sans-serif; font-size:28px; color:#f5a623; letter-spacing:5px; text-align:center; }
+  .sub  { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:#5a5248; text-align:center; margin-bottom:20px; }
+
+  /* --- NAWIGACJA MIESIĘCY --- */
+  .month-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: 420px; margin: 0 auto 18px;
+    background: #1a1814; border: 1px solid #2e2a22; border-radius: 8px;
+    padding: 4px;
+  }
+  .month-btn {
+    background: none; border: none; color: #8a8070; font-size: 20px;
+    cursor: pointer; padding: 10px 16px; border-radius: 6px; transition: all 0.15s;
+  }
+  .month-btn:hover { color: #f5a623; background: #0f0e0c; }
+  .month-label {
+    font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px;
+    color: #e8e0d0; text-align: center; flex: 1;
+  }
+
+  /* --- DZIEŃ --- */
+  .day-list { max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+
+  .day-card {
+    background: #1a1814; border: 1px solid #2e2a22; border-radius: 8px;
+    padding: 12px 14px;
+    opacity: 1; transition: opacity 0.1s;
+  }
+  .day-card.past { opacity: 0.45; }
+  .day-card.today { border-color: #f5a623; }
+  .day-card.weekend { background: #181512; }
+
+  .day-head {
+    display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px;
+  }
+  .day-num {
+    font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px;
+    color: #e8e0d0;
+  }
+  .day-card.today .day-num { color: #f5a623; }
+  .day-name { font-size: 11px; color: #5a5248; letter-spacing: 2px; text-transform: uppercase; }
+  .today-badge {
+    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    color: #f5a623; background: #2a1e08; border: 1px solid #f5a623;
+    border-radius: 3px; padding: 2px 6px; margin-left: auto;
+  }
+
+  .shift-row { display: flex; gap: 8px; align-items: flex-start; }
+  .shift-lbl {
+    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    color: #3e3a32; width: 28px; flex-shrink: 0; padding-top: 1px;
+  }
+  .shift-names { font-size: 13px; color: #8a8070; flex: 1; line-height: 1.5; }
+  .shift-names .me { color: #f5a623; font-weight: 700; }
+  .shift-names .other { color: #8a8070; }
+  .shift-empty { color: #2e2a22; font-size: 12px; }
+
+  /* --- SPINNER / STANY --- */
+  .state-box {
+    max-width: 420px; margin: 40px auto; text-align: center;
+    color: #5a5248; font-size: 13px; letter-spacing: 1px;
+  }
+  .spinner {
+    display: inline-block; width: 32px; height: 32px;
+    border: 2px solid #2e2a22; border-top-color: #f5a623;
+    border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* --- SETUP --- */
+</style>
+</head>
+<body>
+
+<div class="logo">Piętro Cafe</div>
+<div class="sub">grafik pracy</div>
+
+<div id="mainSection">
+  <div class="month-nav">
+    <button class="month-btn" onclick="changeMonth(-1)">‹</button>
+    <div class="month-label" id="monthLabel"></div>
+    <button class="month-btn" onclick="changeMonth(1)">›</button>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+const MIESIACE_ARKUSZ = ['styczeń','luty','marzec','kwiecień','maj','czerwiec',
+                         'lipiec','sierpień','wrzesień','październik','listopad','grudzień'];
+const MIESIACE_DISPLAY = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec',
+                          'Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+const DNI = ['Nd','Pn','Wt','Śr','Cz','Pt','Sb'];
+
+const SHEET_ID = '1oT_PYdf-UnFosZ_AlVaN3d-qsMogRUs-O3gyfCMwWXM';
+
+let currentYear  = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+
+// ─── NAWIGACJA ────────────────────────────────
+function changeMonth(delta) {
+  currentMonth += delta;
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if (currentMonth < 0)  { currentMonth = 11; currentYear--; }
+  loadMonth(currentYear, currentMonth);
+}
+
+// ─── ŁADOWANIE ───────────────────────────────
+async function loadMonth(year, month) {
+  const label = MIESIACE_DISPLAY[month] + ' ' + year;
+  document.getElementById('monthLabel').textContent = label;
+  const content = document.getElementById('content');
+  content.innerHTML = `<div class="state-box"><div class="spinner"></div><br>Ładowanie…</div>`;
+
+  const shortYear = String(year).slice(2);
+  const sheetName = MIESIACE_ARKUSZ[month] + ' ' + shortYear;
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const csv = await res.text();
+    if (csv.includes('Workbook not found') || csv.trim().length < 5) {
+      content.innerHTML = `<div class="state-box">Brak grafiku dla: <strong>${label}</strong></div>`;
+      return;
+    }
+    const rows = parseCSV(csv);
+    render(rows, year, month);
+  } catch(e) {
+    content.innerHTML = `<div class="state-box">Błąd połączenia.<br><small>${e.message}</small></div>`;
+  }
+}
+
+// ─── RENDER ──────────────────────────────────
+function render(rows, year, month) {
+  const myName  = (localStorage.getItem('pietro_imie') || '').toLowerCase();
+  const today   = new Date();
+  const todayStr = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+
+  // Parsuj wiersze: kolA=data (MM/DD lub tekst), kolC=zm1, kolD=zm2
+  const days = [];
+  rows.forEach(row => {
+    if (!row[0]) return;
+    const raw = String(row[0]).trim();
+    // obsłuż format MM/DD lub DD.MM lub datę ISO
+    let d = null;
+    const m1 = raw.match(/^(\d{1,2})\/(\d{1,2})$/);   // 07/01
+    const m2 = raw.match(/^(\d{1,2})\.(\d{1,2})\.?$/); // 01.07
+    if (m1) d = new Date(year, parseInt(m1[1])-1, parseInt(m1[2]));
+    else if (m2) d = new Date(year, parseInt(m2[2])-1, parseInt(m2[1]));
+    else { d = new Date(raw); }
+    if (!d || isNaN(d)) return;
+    // Upewnij się że to właściwy miesiąc
+    if (d.getMonth() !== month) return;
+    days.push({ date: d, zm1: String(row[2]||'').trim(), zm2: String(row[3]||'').trim() });
+  });
+
+  if (!days.length) {
+    document.getElementById('content').innerHTML =
+      `<div class="state-box">Brak danych dla tego miesiąca.</div>`;
+    return;
+  }
+
+  function highlightNames(str) {
+    if (!str) return '<span class="shift-empty">—</span>';
+    return str.split(/[,;]+/).map(n => {
+      const name = n.trim();
+      if (!name) return '';
+      const cls = myName && name.toLowerCase().includes(myName) ? 'me' : 'other';
+      return `<span class="${cls}">${name}</span>`;
+    }).filter(Boolean).join(', ');
+  }
+
+  const html = days.map(({date, zm1, zm2}) => {
+    const dateStr = `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`;
+    const isToday   = dateStr === todayStr;
+    const isPast    = date < today && !isToday;
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    const classes   = ['day-card', isToday?'today':'', isPast?'past':'', isWeekend?'weekend':''].filter(Boolean).join(' ');
+    const dayLabel  = DNI[date.getDay()] + ' ' + pad(date.getDate()) + '.' + pad(date.getMonth()+1);
+
+    return `<div class="${classes}">
+      <div class="day-head">
+        <div class="day-num">${dayLabel}</div>
+        ${isToday ? '<span class="today-badge">DZIŚ</span>' : ''}
+      </div>
+      <div class="shift-row">
+        <div class="shift-lbl">ZM1</div>
+        <div class="shift-names">${highlightNames(zm1)}</div>
+      </div>
+      <div class="shift-row">
+        <div class="shift-lbl">ZM2</div>
+        <div class="shift-names">${highlightNames(zm2)}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('content').innerHTML = `<div class="day-list">${html}</div>`;
+}
+
+function parseCSV(text) {
+  return text.split('\n').map(line => {
+    const fields = [];
+    let inQuote = false, field = '';
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQuote = !inQuote; }
+      else if (c === ',' && !inQuote) { fields.push(field.trim()); field = ''; }
+      else { field += c; }
+    }
+    fields.push(field.trim());
+    return fields;
+  }).filter(row => row.some(f => f));
+}
+
+function pad(n) { return String(n).padStart(2,'0'); }
+
+loadMonth(currentYear, currentMonth);
+</script>
+<script src="nav.js"></script>
+</body>
+</html>
