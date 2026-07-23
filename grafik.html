@@ -177,13 +177,14 @@ function render(rows, year, month) {
   }
 
   const NAME_COLORS = [
-    '#e8855a','#6ab4e8','#7dd67d','#c97de8','#e8c45a',
-    '#e86a8f','#5ae8c4','#e8a05a','#a0c8f0','#b5e87d',
+    '#e85a5a','#e8855a','#e8c44a','#7dd67d','#5ae8c4',
+    '#5ab4e8','#5a7de8','#c97de8','#e86a8f','#a0e85a',
+    '#5ae8e8','#e8a030','#d4e85a','#e85ab4','#30c8e8',
   ];
   function nameColor(name) {
-    let h = 0;
-    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
-    return NAME_COLORS[h % NAME_COLORS.length];
+    let h = 5381;
+    for (let i = 0; i < name.length; i++) h = ((h * 33) ^ name.charCodeAt(i)) & 0xffff;
+    return NAME_COLORS[Math.abs(h) % NAME_COLORS.length];
   }
 
   function highlightNames(str) {
@@ -193,9 +194,9 @@ function render(rows, year, month) {
       if (!name) return '';
       const isMe = myName && name.toLowerCase().includes(myName);
       const color = nameColor(name.toLowerCase());
-      const weight = isMe ? 'font-weight:700;' : '';
-      return `<span style="color:${color};${weight}">${name}</span>`;
-    }).filter(Boolean).join('<span style="color:#3e3a32"> · </span>');
+      const border = isMe ? `2px solid ${color}` : `1px solid ${color}88`;
+      return `<span style="color:${color};background:${color}1a;border:${border};font-weight:700;padding:2px 10px;border-radius:20px;display:inline-block;margin:2px 2px;font-size:12px;">${name}</span>`;
+    }).filter(Boolean).join(' ');
   }
 
   const html = days.map(({date, zm1, zm2}) => {
