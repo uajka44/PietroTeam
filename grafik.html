@@ -176,14 +176,26 @@ function render(rows, year, month) {
     return;
   }
 
+  const NAME_COLORS = [
+    '#e8855a','#6ab4e8','#7dd67d','#c97de8','#e8c45a',
+    '#e86a8f','#5ae8c4','#e8a05a','#a0c8f0','#b5e87d',
+  ];
+  function nameColor(name) {
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
+    return NAME_COLORS[h % NAME_COLORS.length];
+  }
+
   function highlightNames(str) {
     if (!str) return '<span class="shift-empty">—</span>';
     return str.split(/[,;]+/).map(n => {
       const name = n.trim();
       if (!name) return '';
-      const cls = myName && name.toLowerCase().includes(myName) ? 'me' : 'other';
-      return `<span class="${cls}">${name}</span>`;
-    }).filter(Boolean).join(', ');
+      const isMe = myName && name.toLowerCase().includes(myName);
+      const color = nameColor(name.toLowerCase());
+      const weight = isMe ? 'font-weight:700;' : '';
+      return `<span style="color:${color};${weight}">${name}</span>`;
+    }).filter(Boolean).join('<span style="color:#3e3a32"> · </span>');
   }
 
   const html = days.map(({date, zm1, zm2}) => {
@@ -193,8 +205,9 @@ function render(rows, year, month) {
     const isWeekend = date.getDay() === 0 || date.getDay() === 6;
     const classes   = ['day-card', isToday?'today':'', isPast?'past':'', isWeekend?'weekend':''].filter(Boolean).join(' ');
     const dayLabel  = DNI[date.getDay()] + ' ' + pad(date.getDate()) + '.' + pad(date.getMonth()+1);
+    const todayAttr = isToday ? ' id="today-card"' : '';
 
-    return `<div class="${classes}">
+    return `<div class="${classes}"${todayAttr}>
       <div class="day-head">
         <div class="day-num">${dayLabel}</div>
         ${isToday ? '<span class="today-badge">DZIŚ</span>' : ''}
@@ -211,6 +224,11 @@ function render(rows, year, month) {
   }).join('');
 
   document.getElementById('content').innerHTML = `<div class="day-list">${html}</div>`;
+
+  const todayCard = document.getElementById('today-card');
+  if (todayCard) {
+    setTimeout(() => todayCard.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+  }
 }
 
 function parseCSV(text) {
