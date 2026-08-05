@@ -194,6 +194,9 @@
 <!-- HISTORIA -->
 <div class="history-title" id="historyTitle" style="display:none">Ostatnie wpisy</div>
 <div class="history-list" id="historyList"></div>
+<button id="copyBtn" onclick="copyHours()" style="display:none;margin:14px auto 0;max-width:420px;width:100%;background:transparent;border:1px solid #2e2a22;border-radius:6px;color:#8a8070;font-family:'Courier Prime',monospace;font-size:13px;letter-spacing:2px;padding:13px;cursor:pointer;display:none;">
+  📋 KOPIUJ DO MESSENGERA
+</button>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -318,6 +321,21 @@ function buildNameGrid() {
 
 // ─── HISTORIA ────────────────────────────────
 const DAY_PL = ['Nd','Pn','Wt','Śr','Cz','Pt','Sb'];
+const MIESIACE_PL = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+
+function calcMin(od, doVal) {
+  const [h1,m1] = od.split(':').map(Number);
+  const [h2,m2] = doVal.split(':').map(Number);
+  let diff = (h2*60+m2) - (h1*60+m1);
+  if (diff <= 0) diff += 24*60;
+  return diff;
+}
+function fmtMin(min) {
+  const h = Math.floor(min/60), m = min%60;
+  return h + 'h' + (m ? ' ' + m + 'min' : '');
+}
+
+let _lastRows = [], _lastImie = '', _lastMiesiac = '';
 
 async function loadHistory(imie) {
   if (!imie) return;
@@ -336,39 +354,55 @@ async function loadHistory(imie) {
       title.style.display = 'block';
       title.textContent = 'Brak zmian w tym miesiącu';
       list.innerHTML = '';
+      document.getElementById('copyBtn').style.display = 'none';
       return;
     }
 
-    // licz łączne godziny
-    let totalMin = 0;
-    rows.forEach(r => {
-      const [h1,m1] = r.od.split(':').map(Number);
-      const [h2,m2] = r.do.split(':').map(Number);
-      totalMin += (h2*60+m2) - (h1*60+m1);
-    });
-    const totalH = Math.floor(totalMin/60);
-    const totalM = totalMin % 60;
+    _lastRows = rows; _lastImie = imie;
+    _lastMiesiac = MIESIACE_PL[now.getMonth()] + ' ' + now.getFullYear();
 
-    const miesiacNazwy = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+    const totalMin = rows.reduce((s,r) => s + calcMin(r.od, r.do), 0);
+
     title.style.display = 'block';
-    title.innerHTML = `${miesiacNazwy[now.getMonth()]} &nbsp;·&nbsp; ${rows.length} zmian &nbsp;·&nbsp; <span style="color:#f5a623">${totalH}h ${totalM > 0 ? totalM+'min' : ''}</span>`;
+    title.innerHTML = `${MIESIACE_PL[now.getMonth()]} &nbsp;·&nbsp; ${rows.length} zmian &nbsp;·&nbsp; <span style="color:#f5a623">${fmtMin(totalMin)}</span>`;
 
     list.innerHTML = rows.map(r => {
       const d = new Date(r.data + 'T12:00:00');
       const dayStr = DAY_PL[d.getDay()] + ' ' + pad(d.getDate()) + '.' + pad(d.getMonth()+1);
-      const [h1,m1] = r.od.split(':').map(Number);
-      const [h2,m2] = r.do.split(':').map(Number);
-      const dur = (h2*60+m2) - (h1*60+m1);
-      const durStr = Math.floor(dur/60) + 'h' + (dur%60 ? ' '+dur%60+'min' : '');
+      const durStr = fmtMin(calcMin(r.od, r.do));
       return `<div class="h-row">
         <div>
-          <div class="h-date">${dayStr} <span style="color:#3e3a32;font-size:10px">${durStr}</span></div>
+          <div class="h-date">${dayStr} <span style="color:#5a5248;font-size:10px">${durStr}</span></div>
           ${r.notatka ? `<div class="h-note">${r.notatka}</div>` : ''}
         </div>
         <div class="h-time">${r.od.slice(0,5)} – ${r.do.slice(0,5)}</div>
       </div>`;
     }).join('');
+
+    document.getElementById('copyBtn').style.display = 'block';
   } catch(e) { console.warn(e); }
+}
+
+function copyHours() {
+  const totalMin = _lastRows.reduce((s,r) => s + calcMin(r.od, r.do), 0);
+  const lines = [
+    `${_lastImie} — ${_lastMiesiac}`,
+    `${'─'.repeat(28)}`,
+    ..._lastRows.slice().reverse().map(r => {
+      const d = new Date(r.data + 'T12:00:00');
+      const dayStr = DAY_PL[d.getDay()] + ' ' + pad(d.getDate()) + '.' + pad(d.getMonth()+1);
+      const dur = fmtMin(calcMin(r.od, r.do));
+      const note = r.notatka ? `  (${r.notatka})` : '';
+      return `${dayStr}  ${r.od.slice(0,5)}–${r.do.slice(0,5)}  ${dur}${note}`;
+    }),
+    `${'─'.repeat(28)}`,
+    `Łącznie: ${_lastRows.length} zmian · ${fmtMin(totalMin)}`,
+  ];
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    showToast('✓ Skopiowano!', 'ok');
+  }).catch(() => {
+    showToast('Błąd kopiowania', 'err');
+  });
 }
 
 // ─── ZAPIS ───────────────────────────────────
