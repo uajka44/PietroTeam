@@ -431,12 +431,12 @@ async function confirmDel() {
     document.getElementById('delReason').style.borderColor = '#e05555';
     return;
   }
-  const origRow = _rowsMap[_delId];
-  const origNota = origRow?.notatka || '';
+  const id = _delId;                         // zapisz przed closeDel()
+  const origNota = (_rowsMap[id]?.notatka) || '';
   const notatkaNew = 'Usunięto: ' + reason + (origNota ? ' · ' + origNota : '');
-  closeDel();
+  closeDel();                                 // bezpieczne — id już zapisane
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/zmiany?id=eq.${_delId}`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/zmiany?id=eq.${id}`, {
       method: 'PATCH',
       headers: HEADERS,
       body: JSON.stringify({ usuniety: true, notatka: notatkaNew })
