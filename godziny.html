@@ -101,11 +101,18 @@
   .history-list { max-width:420px; margin:0 auto; display:flex; flex-direction:column; gap:6px; }
   .h-row {
     background:#1a1814; border:1px solid #2e2a22; border-radius:6px;
-    padding:12px 14px; display:flex; justify-content:space-between; align-items:center;
+    padding:12px 14px; display:flex; justify-content:space-between; align-items:center; gap:8px;
   }
+  .h-row.deleted { opacity:0.38; }
+  .h-row.deleted .h-date, .h-row.deleted .h-time { text-decoration:line-through; }
   .h-date { font-size:12px; color:#8a8070; }
   .h-time { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:2px; color:#e8e0d0; }
   .h-note { font-size:11px; color:#5a5248; margin-top:2px; }
+  .del-btn {
+    background:none; border:1px solid #3e3a32; border-radius:4px; color:#5a5248;
+    font-size:14px; padding:4px 8px; cursor:pointer; flex-shrink:0; transition:all 0.15s;
+  }
+  .del-btn:hover { border-color:#e05555; color:#e05555; }
 
   /* --- MODAL wyboru imienia --- */
   #name-modal {
@@ -200,6 +207,17 @@
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<!-- MODAL POWODU USUNIĘCIA -->
+<div id="del-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:900;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#141210;border:1px solid #e05555;border-radius:10px;padding:24px;width:100%;max-width:340px;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:#e05555;margin-bottom:6px;">Usuń wpis</div>
+    <p style="font-size:12px;color:#5a5248;letter-spacing:1px;margin-bottom:14px;">Podaj powód — właściciel to zobaczy.</p>
+    <textarea id="delReason" placeholder="np. błędna godzina, wpisałam dwa razy…" style="width:100%;background:#0f0e0c;border:1px solid #2e2a22;border-radius:4px;color:#e8e0d0;font-family:'Courier Prime',monospace;font-size:13px;padding:10px;resize:none;min-height:80px;margin-bottom:10px;display:block;" oninput="this.style.borderColor='#2e2a22'"></textarea>
+    <button onclick="confirmDel()" style="width:100%;background:#e05555;border:none;border-radius:5px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;padding:12px;cursor:pointer;margin-bottom:8px;">USUŃ</button>
+    <button onclick="closeDel()" style="width:100%;background:transparent;border:1px solid #2e2a22;border-radius:5px;color:#5a5248;font-family:'Courier Prime',monospace;font-size:12px;padding:10px;cursor:pointer;">Anuluj</button>
+  </div>
+</div>
 
 <!-- MODAL IMIENIA -->
 <div id="name-modal">
@@ -336,13 +354,14 @@ function fmtMin(min) {
 }
 
 let _lastRows = [], _lastImie = '', _lastMiesiac = '';
+let _rowsMap = {}, _delId = null;
 
 async function loadHistory(imie) {
   if (!imie) return;
   const now = new Date();
   const monthFrom = `${now.getFullYear()}-${pad(now.getMonth()+1)}-01`;
   const monthTo   = `${now.getFullYear()}-${pad(now.getMonth()+1)}-31`;
-  const url = `${SUPABASE_URL}/rest/v1/zmiany?select=data,od,do,notatka&imie=eq.${encodeURIComponent(imie)}&data=gte.${monthFrom}&data=lte.${monthTo}&order=data.desc`;
+  const url = `${SUPABASE_URL}/rest/v1/zmiany?select=id,data,od,do,notatka,usuniety&imie=eq.${encodeURIComponent(imie)}&data=gte.${monthFrom}&data=lte.${monthTo}&order=data.desc`;
   try {
     const res = await fetch(url, { headers: HEADERS });
     const rows = await res.json();
@@ -358,29 +377,74 @@ async function loadHistory(imie) {
       return;
     }
 
-    _lastRows = rows; _lastImie = imie;
+    _rowsMap = {};
+    rows.forEach(r => _rowsMap[r.id] = r);
+    _lastRows = rows.filter(r => !r.usuniety);
+    _lastImie = imie;
     _lastMiesiac = MIESIACE_PL[now.getMonth()] + ' ' + now.getFullYear();
 
-    const totalMin = rows.reduce((s,r) => s + calcMin(r.od, r.do), 0);
+    const active = rows.filter(r => !r.usuniety);
+    const totalMin = active.reduce((s,r) => s + calcMin(r.od, r.do), 0);
 
     title.style.display = 'block';
-    title.innerHTML = `${MIESIACE_PL[now.getMonth()]} &nbsp;·&nbsp; ${rows.length} zmian &nbsp;·&nbsp; <span style="color:#f5a623">${fmtMin(totalMin)}</span>`;
+    title.innerHTML = `${MIESIACE_PL[now.getMonth()]} &nbsp;·&nbsp; ${active.length} zmian &nbsp;·&nbsp; <span style="color:#f5a623">${fmtMin(totalMin)}</span>`;
 
     list.innerHTML = rows.map(r => {
       const d = new Date(r.data + 'T12:00:00');
       const dayStr = DAY_PL[d.getDay()] + ' ' + pad(d.getDate()) + '.' + pad(d.getMonth()+1);
       const durStr = fmtMin(calcMin(r.od, r.do));
-      return `<div class="h-row">
-        <div>
+      const del = r.usuniety;
+      const noteHtml = del && r.notatka
+        ? `<div class="h-note" style="color:#a05020">${r.notatka}</div>`
+        : r.notatka ? `<div class="h-note">${r.notatka}</div>` : '';
+      return `<div class="h-row${del ? ' deleted' : ''}">
+        <div style="flex:1">
           <div class="h-date">${dayStr} <span style="color:#5a5248;font-size:10px">${durStr}</span></div>
-          ${r.notatka ? `<div class="h-note">${r.notatka}</div>` : ''}
+          ${noteHtml}
         </div>
         <div class="h-time">${r.od.slice(0,5)} – ${r.do.slice(0,5)}</div>
+        ${!del ? `<button class="del-btn" onclick="usunWpis('${r.id}')">🗑</button>` : ''}
       </div>`;
     }).join('');
 
     document.getElementById('copyBtn').style.display = 'block';
   } catch(e) { console.warn(e); }
+}
+
+function usunWpis(id) {
+  _delId = id;
+  document.getElementById('delReason').value = '';
+  document.getElementById('delReason').style.borderColor = '#2e2a22';
+  const modal = document.getElementById('del-modal');
+  modal.style.display = 'flex';
+  setTimeout(() => document.getElementById('delReason').focus(), 150);
+}
+
+function closeDel() {
+  document.getElementById('del-modal').style.display = 'none';
+  _delId = null;
+}
+
+async function confirmDel() {
+  const reason = document.getElementById('delReason').value.trim();
+  if (!reason) {
+    document.getElementById('delReason').style.borderColor = '#e05555';
+    return;
+  }
+  const origRow = _rowsMap[_delId];
+  const origNota = origRow?.notatka || '';
+  const notatkaNew = 'Usunięto: ' + reason + (origNota ? ' · ' + origNota : '');
+  closeDel();
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/zmiany?id=eq.${_delId}`, {
+      method: 'PATCH',
+      headers: HEADERS,
+      body: JSON.stringify({ usuniety: true, notatka: notatkaNew })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    showToast('Wpis usunięty', 'ok');
+    loadHistory(localStorage.getItem('pietro_imie'));
+  } catch(e) { showToast('Błąd: ' + e.message, 'err'); }
 }
 
 function copyHours() {
