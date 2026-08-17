@@ -77,6 +77,53 @@
   .again-btn:hover { background: #f5a623; color: #0f0e0c; }
 
   .error-box { display: none; background: rgba(224,82,82,0.1); border: 1px solid #e05252; border-radius: 4px; padding: 14px; margin-top: 16px; font-size: 12px; color: #e05252; line-height: 1.5; white-space: pre-wrap; }
+
+  .help-link {
+    display: block; width: 100%; margin-top: 10px;
+    background: none; border: none; color: #5a5248;
+    font-family: 'Courier Prime', monospace; font-size: 12px;
+    letter-spacing: 1px; cursor: pointer; padding: 8px 0; text-align: center;
+    transition: color 0.15s;
+  }
+  .help-link:hover { color: #f5a623; }
+
+  #helpModal {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+    z-index: 999; overflow-y: auto; padding: 24px;
+    align-items: flex-start; justify-content: center;
+  }
+  #helpModal.open { display: flex; }
+  .help-box {
+    background: #1a1814; border: 1px solid #2e2a22; border-radius: 10px;
+    max-width: 380px; width: 100%; padding: 24px; margin: auto;
+  }
+  .help-box h3 {
+    font-family: 'Bebas Neue', sans-serif; font-size: 20px;
+    letter-spacing: 3px; color: #f5a623; margin-bottom: 4px;
+  }
+  .help-box .help-sub {
+    font-size: 11px; color: #5a5248; letter-spacing: 1px; margin-bottom: 18px;
+  }
+  .help-steps { list-style: none; padding: 0; margin: 18px 0; display: flex; flex-direction: column; gap: 10px; }
+  .help-steps li {
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 13px; color: #c8c0b0; line-height: 1.5;
+  }
+  .help-steps li .step-num {
+    background: #2e2a22; color: #f5a623; font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px; letter-spacing: 1px; border-radius: 50%;
+    width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .help-steps li strong { color: #e8e0d0; }
+  .help-steps li .hl { color: #e8496a; font-weight: 700; }
+  .help-close {
+    display: block; width: 100%; margin-top: 18px;
+    background: transparent; border: 1px solid #2e2a22; border-radius: 6px;
+    color: #8a8070; font-family: 'Courier Prime', monospace; font-size: 13px;
+    letter-spacing: 1px; padding: 12px; cursor: pointer; transition: all 0.15s;
+  }
+  .help-close:hover { border-color: #f5a623; color: #f5a623; }
 </style>
 </head>
 <body>
@@ -95,6 +142,10 @@
   <button class="gallery-btn">
     📁 wybierz z galerii lub pliku
     <input type="file" accept="image/*,application/pdf" onchange="handleFile(this.files[0])">
+  </button>
+
+  <button class="help-link" onclick="document.getElementById('helpModal').classList.add('open')">
+    ❓ Jak zrobić dobre zdjęcie paragonu?
   </button>
 
   <div class="preview-wrap" id="previewWrap">
@@ -180,6 +231,90 @@
   <h3 id="successTitle" class="green">Wysłano!</h3>
   <p id="successMsg">Paragon potwierdzony.<br>Możesz zamknąć tę stronę.</p>
   <button class="again-btn" onclick="resetForm()">↺ Wrzuć kolejny</button>
+</div>
+
+<!-- MODAL POMOCY -->
+<div id="helpModal">
+  <div class="help-box">
+    <h3>Jak zrobić zdjęcie?</h3>
+    <p class="help-sub">3 zasady dobrego zdjęcia paragonu</p>
+
+    <!-- Ilustracja SVG -->
+    <svg viewBox="0 0 260 310" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:280px;display:block;margin:0 auto;">
+      <!-- Tło paragonu -->
+      <rect x="30" y="8" width="200" height="272" rx="5" fill="#faf8f3" stroke="#d0c8b8" stroke-width="1.5"/>
+      <!-- Linia perforacji na górze -->
+      <line x1="30" y1="22" x2="230" y2="22" stroke="#d0c8b8" stroke-width="1" stroke-dasharray="4,3"/>
+
+      <!-- Treść paragonu — symulacja linii tekstu -->
+      <rect x="90" y="30" width="80" height="7" rx="2" fill="#e8e0d0"/> <!-- logo -->
+      <rect x="50" y="44" width="160" height="5" rx="2" fill="#eee"/>
+      <rect x="60" y="54" width="140" height="5" rx="2" fill="#eee"/>
+      <rect x="50" y="68" width="160" height="4" rx="2" fill="#e5e0d8"/>
+
+      <!-- Produkty -->
+      <rect x="42" y="80" width="110" height="4" rx="1" fill="#ddd"/>
+      <rect x="185" y="80" width="38" height="4" rx="1" fill="#ddd"/>
+      <rect x="42" y="89" width="95" height="4" rx="1" fill="#ddd"/>
+      <rect x="185" y="89" width="38" height="4" rx="1" fill="#ddd"/>
+      <rect x="42" y="98" width="120" height="4" rx="1" fill="#ddd"/>
+      <rect x="185" y="98" width="38" height="4" rx="1" fill="#ddd"/>
+      <rect x="42" y="107" width="85" height="4" rx="1" fill="#ddd"/>
+      <rect x="185" y="107" width="38" height="4" rx="1" fill="#ddd"/>
+      <rect x="42" y="116" width="100" height="4" rx="1" fill="#ddd"/>
+      <rect x="185" y="116" width="38" height="4" rx="1" fill="#ddd"/>
+
+      <!-- Separator -->
+      <line x1="42" y1="127" x2="220" y2="127" stroke="#ccc" stroke-width="1" stroke-dasharray="3,2"/>
+
+      <!-- SUMA PLN -->
+      <rect x="42" y="133" width="60" height="6" rx="2" fill="#c8c0b0"/>
+      <rect x="170" y="133" width="52" height="8" rx="2" fill="#888"/>
+
+      <!-- PTU, NIP itp. -->
+      <rect x="42" y="147" width="130" height="4" rx="1" fill="#ddd"/>
+      <rect x="42" y="156" width="100" height="4" rx="1" fill="#ddd"/>
+      <rect x="42" y="165" width="115" height="4" rx="1" fill="#ddd"/>
+      <rect x="42" y="174" width="90" height="4" rx="1" fill="#ddd"/>
+      <rect x="42" y="183" width="140" height="4" rx="1" fill="#ddd"/>
+      <rect x="42" y="192" width="120" height="4" rx="1" fill="#ddd"/>
+      <rect x="42" y="201" width="80" height="4" rx="1" fill="#ddd"/>
+
+      <!-- Różowa ramka — numer faktury -->
+      <rect x="34" y="218" width="192" height="54" rx="4" fill="#fff0f4" stroke="#e8496a" stroke-width="2.5"/>
+      <text x="130" y="233" text-anchor="middle" font-family="monospace" font-size="8" fill="#9a6070">Niniejszy paragon stanowi fakturę uproszczoną.</text>
+      <text x="130" y="244" text-anchor="middle" font-family="monospace" font-size="8" fill="#9a6070">Numer faktury uproszczonej:</text>
+      <text x="130" y="260" text-anchor="middle" font-family="monospace" font-size="13" fill="#c0202a" font-weight="bold" letter-spacing="1">5528 2607 0333 8202</text>
+
+      <!-- Strzałka i etykieta -->
+      <line x1="130" y1="278" x2="130" y2="290" stroke="#e8496a" stroke-width="2" marker-end="url(#arr)"/>
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#e8496a"/>
+        </marker>
+      </defs>
+      <text x="130" y="304" text-anchor="middle" font-family="sans-serif" font-size="9" fill="#e8496a" font-weight="bold">TEN NUMER MUSI BYĆ NA ZDJĘCIU</text>
+    </svg>
+
+    <ul class="help-steps">
+      <li>
+        <span class="step-num">1</span>
+        <span>Połóż paragon na płaskiej, jasnej powierzchni.</span>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <span>Sfotografuj go <strong>w całości</strong> — od górnej krawędzi aż po <span class="hl">różową ramkę na samym dole</span>. Ten fragment zawiera numer faktury uproszczonej i <strong>musi być widoczny</strong>.</span>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <span>Sprawdź przed wysłaniem, że <span class="hl">liczba w różowej ramce</span> jest wyraźna i nie ucięta.</span>
+      </li>
+    </ul>
+
+    <button class="help-close" onclick="document.getElementById('helpModal').classList.remove('open')">
+      Rozumiem, zamknij
+    </button>
+  </div>
 </div>
 
 <script>
