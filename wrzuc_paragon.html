@@ -342,11 +342,12 @@ async function skanuj() {
 
 function pokazWynik(data) {
   const d = data.dane || {};
-  const isBiedronka = data.dostawca === 'Biedronka';
+  // Sklepy z własnym parserem mają pola: suma_pln, sp_str, nip_nabywcy, faktura_uproszczona
+  const hasCustomParser = data.dostawca === 'Biedronka' || data.dostawca === 'Kaufland';
   const fmt = v => (v !== null && v !== undefined) ? String(v) : '—';
   const fmtPln = v => (v !== null && v !== undefined) ? parseFloat(v).toFixed(2) : null;
 
-  if (!isBiedronka) {
+  if (!hasCustomParser) {
     // ─── INNY SKLEP (wynik z prebuilt-receipt) ───────────────
     document.getElementById('resultSub').textContent = d.sklep || data.dostawca || 'INNY SKLEP';
     document.getElementById('rNr').textContent = '—';
@@ -372,9 +373,9 @@ function pokazWynik(data) {
     duplicateRecord = null;
 
   } else {
-    // ─── BIEDRONKA ───────────────────────────────────────────
+    // ─── PARSER WŁASNY (Biedronka / Kaufland / ...) ──────────
     const NIP_WLASCICIELA = '8133198620';
-    document.getElementById('resultSub').textContent = 'BIEDRONKA';
+    document.getElementById('resultSub').textContent = (data.dostawca || 'SKLEP').toUpperCase();
     const nr = fmt(d.numer_faktury);
     const rNr = document.getElementById('rNr');
     if (nr !== '—' && nr.length > 4) {
