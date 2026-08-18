@@ -342,111 +342,124 @@ async function skanuj() {
 
 function pokazWynik(data) {
   const d = data.dane || {};
-  const NIP_WLASCICIELA = '8133198620';
+  const isBiedronka = data.dostawca === 'Biedronka';
   const fmt = v => (v !== null && v !== undefined) ? String(v) : '—';
   const fmtPln = v => (v !== null && v !== undefined) ? parseFloat(v).toFixed(2) : null;
 
-  document.getElementById('resultSub').textContent = data.dostawca === 'Biedronka' ? 'BIEDRONKA' : 'NIEZNANY DOSTAWCA';
-  const nr = fmt(d.numer_faktury);
-  const rNr = document.getElementById('rNr');
-  if (nr !== '—' && nr.length > 4) {
-    rNr.innerHTML = nr.slice(0,-4) + '<span style="font-weight:700;color:#f5a623">' + nr.slice(-4) + '</span>';
-  } else { rNr.textContent = nr; }
-  document.getElementById('rData').textContent = fmt(d.data);
-  if (document.getElementById('rNipS')) document.getElementById('rNipS').textContent = fmt(d.nip_sprzedawcy);
-
-  // === NIP NABYWCY — sprawdzenie ===
-  const nipBox = document.getElementById('nipBox');
-  const nipOdczytany = d.nip_nabywcy ? String(d.nip_nabywcy).replace(/\s/g, '') : null;
-  if (!nipOdczytany) {
-    nipBox.style.background = '#ffebee'; nipBox.style.color = '#b71c1c';
-    nipBox.style.border = '2px solid #e53935';
-    nipBox.innerHTML = '❌ <strong>BRAK NIP NABYWCY</strong><br>Paragon nie ma NIP-u — nie jest fakturą uproszczoną!';
-  } else if (nipOdczytany === NIP_WLASCICIELA) {
-    nipBox.style.background = '#e8f5e9'; nipBox.style.color = '#2e7d32';
-    nipBox.style.border = '1px solid #a5d6a7';
-    nipBox.innerHTML = '✓ NIP NABYWCY: <strong>' + nipOdczytany + '</strong> — zgadza się';
-  } else {
-    nipBox.style.background = '#ffebee'; nipBox.style.color = '#b71c1c';
-    nipBox.style.border = '2px solid #e53935';
-    nipBox.innerHTML = '❌ <strong>ZŁY NIP NABYWCY!</strong><br>' +
-      'Na paragonie: <strong>' + nipOdczytany + '</strong><br>' +
-      'Powinno być: <strong>' + NIP_WLASCICIELA + '</strong><br>' +
-      'Sprawdź czy kasjer wbił właściwy NIP!';
-  }
-
-  // === Sp: linie (jak na paragonie) ===
-  const spLines = document.getElementById('spLines');
-  if (d.sp_str) {
-    spLines.textContent = 'Sp: ' + d.sp_str;
-    spLines.style.display = 'block';
-  } else { spLines.style.display = 'none'; }
-
-  // === PTU: linie (jak na paragonie, czerwone) ===
-  const ptuLines = document.getElementById('ptuLines');
-  if (d.ptu_str) {
-    ptuLines.textContent = 'PTU: ' + d.ptu_str;
-    ptuLines.style.display = 'block';
-  } else { ptuLines.style.display = 'none'; }
-
-  // === SUMA PLN ===
-  const sumaVal = fmtPln(d.suma_pln);
-  document.getElementById('rSuma').textContent = sumaVal ? sumaVal + ' PLN' : '—';
-
-  const kaucjaRow = document.getElementById('kaucjaRow');
-  if (d.kaucja) {
-    kaucjaRow.style.display = 'block';
-    kaucjaRow.textContent = '+ ' + fmtPln(d.kaucja) + ' PLN kaucja = ' + fmtPln(d.do_zaplaty) + ' PLN do zapłaty';
-  } else { kaucjaRow.style.display = 'none'; }
-
-  // === WALIDACJA sum Sp: ===
-  const validBox = document.getElementById('validBox');
-  if (data.walidacja) {
-    validBox.style.display = 'block';
-    if (data.walidacja.ok) {
-      validBox.style.background = '#e8f5e9'; validBox.style.color = '#2e7d32';
-      validBox.style.border = '1px solid #a5d6a7';
-      validBox.textContent = '✓ Suma kontrolna OK: Sp:(' + d.sp_str + ') = ' + fmtPln(data.walidacja.suma_sp) + ' PLN';
-    } else {
-      validBox.style.background = '#ffebee'; validBox.style.color = '#b71c1c';
-      validBox.style.border = '1px solid #ef9a9a';
-      // Pokaż też kwoty netto przy błędzie walidacji
-      let nettoInfo = '';
-      ['a','b','c'].forEach(k => {
-        if (d['netto_' + k] !== null && d['netto_' + k] !== undefined) {
-          nettoInfo += 'Netto ' + k.toUpperCase() + ': ' + fmtPln(d['netto_' + k]) + ' PLN  ';
-        }
-      });
-      validBox.innerHTML = '⚠ ROZBIEŻNOŚĆ: ' + data.walidacja.roznica + ' PLN<br>' +
-        'Sp:(' + d.sp_str + ') = ' + fmtPln(data.walidacja.suma_sp) + ' PLN vs SUMA PLN ' + fmtPln(d.suma_pln) + ' PLN' +
-        (nettoInfo ? '<br><small style="color:#888">' + nettoInfo.trim() + '</small>' : '');
-    }
-  } else { validBox.style.display = 'none'; }
-
-  // === FAKTURA UPROSZCZONA ===
-  const upBox = document.getElementById('uproszczonaBox');
-  if (d.faktura_uproszczona === true) {
-    upBox.style.display = 'block';
-    upBox.style.background = '#e8f5e9'; upBox.style.color = '#2e7d32';
-    upBox.style.border = '1px solid #a5d6a7';
-    upBox.textContent = '✓ Faktura uproszczona (≤450 zł) — VAT do odliczenia';
-  } else if (d.faktura_uproszczona === false) {
-    upBox.style.display = 'block';
-    upBox.style.background = '#fff3e0'; upBox.style.color = '#e65100';
-    upBox.style.border = '1px solid #ffcc80';
-    upBox.textContent = '⚠ Kwota > 450 zł — nie jest fakturą uproszczoną';
-  } else { upBox.style.display = 'none'; }
-
-  // === WARN nieznany dostawca ===
-  const warn = document.getElementById('warnBox');
-  if (data.dostawca !== 'Biedronka') {
-    warn.textContent = '⚠️ Nie rozpoznano Biedronki — sprawdź dane ręcznie.';
+  if (!isBiedronka) {
+    // ─── INNY SKLEP (wynik z prebuilt-receipt) ───────────────
+    document.getElementById('resultSub').textContent = d.sklep || data.dostawca || 'INNY SKLEP';
+    document.getElementById('rNr').textContent = '—';
+    document.getElementById('rData').textContent = fmt(d.data) + (d.czas ? ' ' + d.czas : '');
+    if (document.getElementById('rNipS')) document.getElementById('rNipS').textContent = d.telefon ? fmt(d.telefon) : '—';
+    const nipBox = document.getElementById('nipBox');
+    nipBox.style.display = 'none'; nipBox.innerHTML = '';
+    document.getElementById('spLines').style.display = 'none';
+    document.getElementById('ptuLines').style.display = 'none';
+    const sumaVal = fmtPln(d.suma_brutto);
+    document.getElementById('rSuma').textContent = sumaVal ? sumaVal + ' PLN' : '—';
+    const kaucjaRow = document.getElementById('kaucjaRow');
+    if (d.vat_lacznie) {
+      kaucjaRow.style.display = 'block';
+      kaucjaRow.textContent = 'w tym VAT: ' + fmtPln(d.vat_lacznie) + ' PLN';
+    } else { kaucjaRow.style.display = 'none'; }
+    document.getElementById('validBox').style.display = 'none';
+    document.getElementById('uproszczonaBox').style.display = 'none';
+    const warn = document.getElementById('warnBox');
+    warn.textContent = '⚠️ Inny sklep — sprawdź dane ręcznie przed potwierdzeniem.';
     warn.style.display = 'block';
-  } else { warn.style.display = 'none'; }
+    document.getElementById('dupBox').style.display = 'none';
+    duplicateRecord = null;
 
-  document.getElementById('dupBox').style.display = 'none';
-  duplicateRecord = null;
-  if (d.numer_faktury) checkDuplicate(d.numer_faktury);
+  } else {
+    // ─── BIEDRONKA ───────────────────────────────────────────
+    const NIP_WLASCICIELA = '8133198620';
+    document.getElementById('resultSub').textContent = 'BIEDRONKA';
+    const nr = fmt(d.numer_faktury);
+    const rNr = document.getElementById('rNr');
+    if (nr !== '—' && nr.length > 4) {
+      rNr.innerHTML = nr.slice(0,-4) + '<span style="font-weight:700;color:#f5a623">' + nr.slice(-4) + '</span>';
+    } else { rNr.textContent = nr; }
+    document.getElementById('rData').textContent = fmt(d.data);
+    if (document.getElementById('rNipS')) document.getElementById('rNipS').textContent = fmt(d.nip_sprzedawcy);
+
+    const nipBox = document.getElementById('nipBox');
+    nipBox.style.display = 'block';
+    const nipOdczytany = d.nip_nabywcy ? String(d.nip_nabywcy).replace(/\s/g, '') : null;
+    if (!nipOdczytany) {
+      nipBox.style.background = '#ffebee'; nipBox.style.color = '#b71c1c';
+      nipBox.style.border = '2px solid #e53935';
+      nipBox.innerHTML = '❌ <strong>BRAK NIP NABYWCY</strong><br>Paragon nie ma NIP-u — nie jest fakturą uproszczoną!';
+    } else if (nipOdczytany === NIP_WLASCICIELA) {
+      nipBox.style.background = '#e8f5e9'; nipBox.style.color = '#2e7d32';
+      nipBox.style.border = '1px solid #a5d6a7';
+      nipBox.innerHTML = '✓ NIP NABYWCY: <strong>' + nipOdczytany + '</strong> — zgadza się';
+    } else {
+      nipBox.style.background = '#ffebee'; nipBox.style.color = '#b71c1c';
+      nipBox.style.border = '2px solid #e53935';
+      nipBox.innerHTML = '❌ <strong>ZŁY NIP NABYWCY!</strong><br>' +
+        'Na paragonie: <strong>' + nipOdczytany + '</strong><br>' +
+        'Powinno być: <strong>' + NIP_WLASCICIELA + '</strong><br>' +
+        'Sprawdź czy kasjer wbił właściwy NIP!';
+    }
+
+    const spLines = document.getElementById('spLines');
+    if (d.sp_str) { spLines.textContent = 'Sp: ' + d.sp_str; spLines.style.display = 'block'; }
+    else { spLines.style.display = 'none'; }
+
+    const ptuLines = document.getElementById('ptuLines');
+    if (d.ptu_str) { ptuLines.textContent = 'PTU: ' + d.ptu_str; ptuLines.style.display = 'block'; }
+    else { ptuLines.style.display = 'none'; }
+
+    const sumaVal = fmtPln(d.suma_pln);
+    document.getElementById('rSuma').textContent = sumaVal ? sumaVal + ' PLN' : '—';
+
+    const kaucjaRow = document.getElementById('kaucjaRow');
+    if (d.kaucja) {
+      kaucjaRow.style.display = 'block';
+      kaucjaRow.textContent = '+ ' + fmtPln(d.kaucja) + ' PLN kaucja = ' + fmtPln(d.do_zaplaty) + ' PLN do zapłaty';
+    } else { kaucjaRow.style.display = 'none'; }
+
+    const validBox = document.getElementById('validBox');
+    if (data.walidacja) {
+      validBox.style.display = 'block';
+      if (data.walidacja.ok) {
+        validBox.style.background = '#e8f5e9'; validBox.style.color = '#2e7d32';
+        validBox.style.border = '1px solid #a5d6a7';
+        validBox.textContent = '✓ Suma kontrolna OK: Sp:(' + d.sp_str + ') = ' + fmtPln(data.walidacja.suma_sp) + ' PLN';
+      } else {
+        validBox.style.background = '#ffebee'; validBox.style.color = '#b71c1c';
+        validBox.style.border = '1px solid #ef9a9a';
+        let nettoInfo = '';
+        ['a','b','c'].forEach(k => {
+          if (d['netto_' + k] !== null && d['netto_' + k] !== undefined) {
+            nettoInfo += 'Netto ' + k.toUpperCase() + ': ' + fmtPln(d['netto_' + k]) + ' PLN  ';
+          }
+        });
+        validBox.innerHTML = '⚠ ROZBIEŻNOŚĆ: ' + data.walidacja.roznica + ' PLN<br>' +
+          'Sp:(' + d.sp_str + ') = ' + fmtPln(data.walidacja.suma_sp) + ' PLN vs SUMA PLN ' + fmtPln(d.suma_pln) + ' PLN' +
+          (nettoInfo ? '<br><small style="color:#888">' + nettoInfo.trim() + '</small>' : '');
+      }
+    } else { validBox.style.display = 'none'; }
+
+    const upBox = document.getElementById('uproszczonaBox');
+    if (d.faktura_uproszczona === true) {
+      upBox.style.display = 'block';
+      upBox.style.background = '#e8f5e9'; upBox.style.color = '#2e7d32';
+      upBox.style.border = '1px solid #a5d6a7';
+      upBox.textContent = '✓ Faktura uproszczona (≤450 zł) — VAT do odliczenia';
+    } else if (d.faktura_uproszczona === false) {
+      upBox.style.display = 'block';
+      upBox.style.background = '#fff3e0'; upBox.style.color = '#e65100';
+      upBox.style.border = '1px solid #ffcc80';
+      upBox.textContent = '⚠ Kwota > 450 zł — nie jest fakturą uproszczoną';
+    } else { upBox.style.display = 'none'; }
+
+    document.getElementById('warnBox').style.display = 'none';
+    document.getElementById('dupBox').style.display = 'none';
+    duplicateRecord = null;
+    if (d.numer_faktury) checkDuplicate(d.numer_faktury);
+  }
 
   showEl('resultCard');
   showEl('confirmSection');
