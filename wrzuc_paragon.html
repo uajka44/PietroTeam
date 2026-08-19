@@ -55,6 +55,13 @@
 
   .confirm-section { display: none; margin-top: 20px; }
   .confirm-label { font-size: 13px; color: #8a8070; text-align: center; margin-bottom: 14px; }
+  .kat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .kat-btn { background: transparent; border: 1px solid #3e3830; border-radius: 6px; padding: 12px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1.5px; color: #8a8070; cursor: pointer; transition: all 0.15s; }
+  .kat-btn:hover { border-color: #5a5248; color: #e8e0d0; }
+  .kat-kawiarnia { background: #1a150a; border-color: #c07828; color: #e8a850; }
+  .kat-ciasta    { background: #182b08; border-color: #7cb518; color: #a8e050; }
+  .kat-required { font-size: 10px; letter-spacing: 2px; text-align: center; color: #e05252; margin-bottom: 10px; display: none; }
+  .nr-warn { margin-top: 8px; padding: 8px 12px; border-radius: 4px; font-size: 12px; background: #fff3cd; border: 1px solid #ffc107; color: #856404; display: none; }
   .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .btn-ok { background: #4caf7d; color: #0f0e0c; border: none; border-radius: 6px; padding: 16px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; cursor: pointer; transition: background 0.2s; }
   .btn-ok:hover { background: #3a9068; }
@@ -227,7 +234,15 @@
   <div id="dupBox" style="display:none; margin-top:10px; padding:10px 12px; border-radius:4px; font-size:12px; line-height:1.6; background:#fff3cd; border:1px solid #ffc107; color:#856404;"></div>
   </div>
 
+  <div id="nrBox" class="nr-warn"></div>
+
   <div class="confirm-section" id="confirmSection">
+    <div class="confirm-label">Wybierz kategorię:</div>
+    <div class="kat-row">
+      <button class="kat-btn" id="btnKawiarnia" onclick="setKategoria('kawiarnia')">☕ KAWIARNIA</button>
+      <button class="kat-btn" id="btnCiasta"    onclick="setKategoria('ciasta')">🎂 CIASTA</button>
+    </div>
+    <div class="kat-required" id="katRequired">Wybierz kategorię przed potwierdzeniem</div>
     <div class="confirm-label">Czy powyższe dane się zgadzają?</div>
     <div class="btn-row">
       <button class="btn-ok" onclick="potwierdz(true)">✓ TAK</button>
@@ -294,6 +309,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 let currentFile = null;
 let currentResult = null;
+let _kategoria = null;  // null = nie wybrano; 'kawiarnia'→DB null, 'ciasta'
 
 function handleFile(file) {
   if (!file) return;
@@ -400,6 +416,7 @@ function pokazWynik(data) {
     document.getElementById('validBox').style.display = 'none';
     document.getElementById('vatRateBox').style.display = 'none';
     document.getElementById('uproszczonaBox').style.display = 'none';
+    document.getElementById('nrBox').style.display = 'none';
     const warn = document.getElementById('warnBox');
     warn.textContent = '⚠️ Inny sklep — sprawdź dane ręcznie przed potwierdzeniem.';
     warn.style.display = 'block';
@@ -414,6 +431,18 @@ function pokazWynik(data) {
     if (nr !== '—' && nr.length > 4) {
       rNr.innerHTML = nr.slice(0,-4) + '<span style="font-weight:700;color:#f5a623">' + nr.slice(-4) + '</span>';
     } else { rNr.textContent = nr; }
+    // Ostrzeżenie o za krótkim numerze faktury
+    const nrBox = document.getElementById('nrBox');
+    const nrDigits = (d.numer_faktury || '').replace(/\D/g, '');
+    if (nrDigits.length > 0 && nrDigits.length < 10) {
+      nrBox.innerHTML = '⚠️ <strong>KRÓTKI NUMER FAKTURY</strong>: <em>' + (d.numer_faktury || '') + '</em> — tylko ' + nrDigits.length + ' cyfr (powinno być ≥ 10). Sprawdź czy Azure dobrze odczytał numer!';
+      nrBox.style.display = 'block';
+    } else if (!d.numer_faktury) {
+      nrBox.innerHTML = '⚠️ <strong>BRAK NUMERU FAKTURY</strong> — nie udało się odczytać.';
+      nrBox.style.display = 'block';
+    } else {
+      nrBox.style.display = 'none';
+    }
     document.getElementById('rData').textContent = fmt(d.data);
     if (document.getElementById('rNipS')) document.getElementById('rNipS').textContent = fmt(d.nip_sprzedawcy);
 
@@ -525,6 +554,10 @@ function pokazWynik(data) {
 
 
 async function potwierdz(ok) {
+  if (ok && _kategoria === null) {
+    document.getElementById('katRequired').style.display = 'block';
+    return;
+  }
   hideEl('confirmSection');
   if (ok) { await zapiszStatus('potwierdzony', ''); showSuccess(true); }
   else { showEl('problemSection'); }
@@ -547,7 +580,7 @@ async function zapiszStatus(status, notatka) {
   try {
     await fetch(SUPABASE_URL + '/rest/v1/paragony?plik_url=eq.' + encodeURIComponent(currentResult.plik_url), {
       method: 'PATCH', headers,
-      body: JSON.stringify({ status: status }),
+      body: JSON.stringify({ status: status, kategoria: _kategoria === 'kawiarnia' ? null : _kategoria }),
     });
   } catch (e) { console.warn(e); }
 }
@@ -599,8 +632,23 @@ function toggleRawOcr() {
   btn.textContent = open ? '📋 Ukryj tekst OCR ▲' : '📋 Pokaż surowy tekst OCR ▼';
 }
 
+function setKategoria(val) {
+  _kategoria = val;
+  document.getElementById('btnKawiarnia').className = 'kat-btn' + (_kategoria === 'kawiarnia' ? ' kat-kawiarnia' : '');
+  document.getElementById('btnCiasta').className    = 'kat-btn' + (_kategoria === 'ciasta'    ? ' kat-ciasta'    : '');
+  document.getElementById('katRequired').style.display = 'none';
+}
+
+function resetKategoria() {
+  _kategoria = null;
+  document.getElementById('btnKawiarnia').className = 'kat-btn';
+  document.getElementById('btnCiasta').className    = 'kat-btn';
+  document.getElementById('katRequired').style.display = 'none';
+}
+
 function resetForm() {
   currentFile = null; currentResult = null;
+  resetKategoria();
   showEl('uploadCard'); hideEl('successCard'); hideEl('previewWrap');
   hideEl('resultCard'); hideEl('confirmSection'); hideEl('problemSection'); hideEl('rawOcrPanel');
   hideError(); hideProgress();
