@@ -124,6 +124,22 @@
     letter-spacing: 1px; padding: 12px; cursor: pointer; transition: all 0.15s;
   }
   .help-close:hover { border-color: #f5a623; color: #f5a623; }
+
+  .ocr-panel { margin-top: 14px; }
+  .ocr-toggle {
+    display: block; width: 100%;
+    background: none; border: 1px dashed #2e2a22; border-radius: 4px;
+    color: #5a5248; font-family: 'Courier Prime', monospace; font-size: 11px;
+    letter-spacing: 1px; padding: 8px 12px; cursor: pointer;
+    text-align: left; transition: all 0.15s;
+  }
+  .ocr-toggle:hover { border-color: #8a8070; color: #8a8070; }
+  .ocr-textarea {
+    width: 100%; background: #0f0e0c; border: 1px solid #2e2a22; border-radius: 4px;
+    color: #8a8070; font-family: 'Courier Prime', monospace; font-size: 11px;
+    padding: 10px 12px; resize: vertical; height: 220px;
+    line-height: 1.5; margin-top: 8px;
+  }
 </style>
 </head>
 <body>
@@ -151,7 +167,6 @@
   <div class="preview-wrap" id="previewWrap">
     <img id="previewImg" alt="Podgląd">
     <div class="img-info" id="imgInfo"></div>
-    <button class="scan-btn" onclick="skanuj()">🔍 SKANUJ I SPRAWDŹ DANE</button>
   </div>
 
   <div class="progress" id="progress">
@@ -202,6 +217,9 @@
     <!-- Walidacja sum -->
     <div id="validBox" style="display:none; margin-top:10px; padding:10px 12px; border-radius:4px; font-size:12px; line-height:1.6;"></div>
 
+    <!-- Walidacja stawek VAT (Sp×stawka ≈ PTU) -->
+    <div id="vatRateBox" style="display:none; margin-top:6px; padding:10px 12px; border-radius:4px; font-size:12px; line-height:1.7; background:#ffebee; border:1px solid #ef9a9a; color:#b71c1c;"></div>
+
     <!-- Komunikat faktura uproszczona -->
     <div id="uproszczonaBox" style="display:none; margin-top:6px; padding:8px 12px; border-radius:4px; font-size:11px;"></div>
 
@@ -221,6 +239,13 @@
     <label>Co jest nie tak? (opcjonalnie)</label>
     <textarea id="problemText" placeholder="np. zły numer, inne kwoty..."></textarea>
     <button class="send-problem-btn" onclick="wyslijZProblemem()">WYŚLIJ MIMO TO</button>
+  </div>
+
+  <div class="ocr-panel" id="rawOcrPanel" style="display:none;">
+    <button class="ocr-toggle" id="rawOcrToggle" onclick="toggleRawOcr()">📋 Pokaż surowy tekst OCR ▼</button>
+    <div id="rawOcrContent" style="display:none;">
+      <textarea class="ocr-textarea" id="rawOcrText" readonly onclick="this.select()"></textarea>
+    </div>
   </div>
 
   <div class="error-box" id="errorBox"></div>
@@ -272,7 +297,7 @@ let currentResult = null;
 
 function handleFile(file) {
   if (!file) return;
-  hideError(); hideEl('resultCard'); hideEl('confirmSection'); hideEl('problemSection');
+  hideError(); hideEl('resultCard'); hideEl('confirmSection'); hideEl('problemSection'); hideEl('rawOcrPanel');
   currentFile = file;
   const img = document.getElementById('previewImg');
   if (file.type.startsWith('image/')) {
@@ -283,12 +308,13 @@ function handleFile(file) {
   }
   document.getElementById('imgInfo').textContent = file.name + ' (' + Math.round(file.size/1024) + ' KB)';
   showEl('previewWrap');
+  skanuj();
 }
 
 async function skanuj() {
   if (!currentFile) return;
 
-  hideError(); hideEl('previewWrap'); hideEl('resultCard'); hideEl('confirmSection'); hideEl('problemSection');
+  hideError(); hideEl('previewWrap'); hideEl('resultCard'); hideEl('confirmSection'); hideEl('problemSection'); hideEl('rawOcrPanel');
   showProgress('Wysyłanie...', 'Trwa kompresja i upload zdjęcia');
 
   try {
@@ -319,6 +345,14 @@ async function skanuj() {
 
     currentResult = data;
     hideProgress();
+
+    // Panel surowego tekstu OCR
+    if (data.raw_ocr) {
+      document.getElementById('rawOcrText').value = data.raw_ocr;
+      showEl('rawOcrPanel');
+      document.getElementById('rawOcrContent').style.display = 'none';
+      document.getElementById('rawOcrToggle').textContent = '📋 Pokaż surowy tekst OCR ▼';
+    }
 
     // Informacja o pozostałych skanowaniach
     if (data.limit) {
@@ -364,6 +398,7 @@ function pokazWynik(data) {
       kaucjaRow.textContent = 'w tym VAT: ' + fmtPln(d.vat_lacznie) + ' PLN';
     } else { kaucjaRow.style.display = 'none'; }
     document.getElementById('validBox').style.display = 'none';
+    document.getElementById('vatRateBox').style.display = 'none';
     document.getElementById('uproszczonaBox').style.display = 'none';
     const warn = document.getElementById('warnBox');
     warn.textContent = '⚠️ Inny sklep — sprawdź dane ręcznie przed potwierdzeniem.';
@@ -440,6 +475,19 @@ function pokazWynik(data) {
           (nettoInfo ? '<br><small style="color:#888">' + nettoInfo.trim() + '</small>' : '');
       }
     } else { validBox.style.display = 'none'; }
+
+    // Walidacja stawek VAT: Sp_X * rate/(1+rate) ≈ PTU_X (±0.01 PLN)
+    const vatRateBox = document.getElementById('vatRateBox');
+    if (data.vat_rate_checks && data.vat_rate_checks.length > 0) {
+      const fails = data.vat_rate_checks.filter(c => !c.ok);
+      if (fails.length > 0) {
+        vatRateBox.style.display = 'block';
+        vatRateBox.innerHTML = fails.map(c => {
+          if (c.missing) return '❌ PTU ' + c.letter + ': BRAK (oczekiwane ' + c.expected.toFixed(2) + ' PLN od Sp=' + c.brutto.toFixed(2) + ')';
+          return '⚠ PTU ' + c.letter + ': ' + c.actual.toFixed(2) + ' PLN ≠ ' + c.expected.toFixed(2) + ' PLN (diff=' + c.diff.toFixed(2) + ')';
+        }).join('<br>');
+      } else { vatRateBox.style.display = 'none'; }
+    } else { vatRateBox.style.display = 'none'; }
 
     const upBox = document.getElementById('uproszczonaBox');
     if (d.faktura_uproszczona === true) {
@@ -536,10 +584,18 @@ function showProgress(label, step) { document.getElementById('progressLabel').te
 function hideProgress() { hideEl('progress'); }
 function showError(msg) { const b = document.getElementById('errorBox'); b.textContent = msg; b.style.display = 'block'; }
 function hideError() { const b = document.getElementById('errorBox'); b.style.display = 'none'; }
+function toggleRawOcr() {
+  const content = document.getElementById('rawOcrContent');
+  const btn = document.getElementById('rawOcrToggle');
+  const open = content.style.display === 'none';
+  content.style.display = open ? 'block' : 'none';
+  btn.textContent = open ? '📋 Ukryj tekst OCR ▲' : '📋 Pokaż surowy tekst OCR ▼';
+}
+
 function resetForm() {
   currentFile = null; currentResult = null;
   showEl('uploadCard'); hideEl('successCard'); hideEl('previewWrap');
-  hideEl('resultCard'); hideEl('confirmSection'); hideEl('problemSection');
+  hideEl('resultCard'); hideEl('confirmSection'); hideEl('problemSection'); hideEl('rawOcrPanel');
   hideError(); hideProgress();
   document.getElementById('previewImg').src = '';
   document.getElementById('problemText').value = '';
