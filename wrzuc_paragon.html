@@ -454,40 +454,47 @@ function pokazWynik(data) {
       kaucjaRow.textContent = '+ ' + fmtPln(d.kaucja) + ' PLN kaucja = ' + fmtPln(d.do_zaplaty) + ' PLN do zapłaty';
     } else { kaucjaRow.style.display = 'none'; }
 
+    // Indywidualne komunikaty walidacji (jeden per sprawdzenie)
     const validBox = document.getElementById('validBox');
-    if (data.walidacja) {
-      validBox.style.display = 'block';
-      if (data.walidacja.ok) {
-        validBox.style.background = '#e8f5e9'; validBox.style.color = '#2e7d32';
-        validBox.style.border = '1px solid #a5d6a7';
-        validBox.textContent = '✓ Suma kontrolna OK: Sp:(' + d.sp_str + ') = ' + fmtPln(data.walidacja.suma_sp) + ' PLN';
-      } else {
-        validBox.style.background = '#ffebee'; validBox.style.color = '#b71c1c';
-        validBox.style.border = '1px solid #ef9a9a';
-        let nettoInfo = '';
-        ['a','b','c'].forEach(k => {
-          if (d['netto_' + k] !== null && d['netto_' + k] !== undefined) {
-            nettoInfo += 'Netto ' + k.toUpperCase() + ': ' + fmtPln(d['netto_' + k]) + ' PLN  ';
-          }
-        });
-        validBox.innerHTML = '⚠ ROZBIEŻNOŚĆ: ' + data.walidacja.roznica + ' PLN<br>' +
-          'Sp:(' + d.sp_str + ') = ' + fmtPln(data.walidacja.suma_sp) + ' PLN vs SUMA PLN ' + fmtPln(d.suma_pln) + ' PLN' +
-          (nettoInfo ? '<br><small style="color:#888">' + nettoInfo.trim() + '</small>' : '');
-      }
-    } else { validBox.style.display = 'none'; }
+    document.getElementById('vatRateBox').style.display = 'none'; // zastąpiony przez validBox
 
-    // Walidacja stawek VAT: Sp_X * rate/(1+rate) ≈ PTU_X (±0.01 PLN)
-    const vatRateBox = document.getElementById('vatRateBox');
+    const checks = [];
+
+    // Sprawdzenie 1: suma Sp vs SUMA PLN
+    if (data.walidacja) {
+      const w = data.walidacja;
+      if (w.ok) {
+        checks.push({ ok: true, text: '✓ Suma Sp (' + d.sp_str + ') = ' + fmtPln(w.suma_sp) + ' PLN = SUMA PLN' });
+      } else {
+        checks.push({ ok: false, text: '✗ Suma Sp (' + fmtPln(w.suma_sp) + ') ≠ SUMA PLN (' + fmtPln(d.suma_pln) + ') — różnica ' + w.roznica + ' PLN' });
+      }
+    } else {
+      checks.push({ ok: false, text: '⚠ Suma PLN: nie udało się odczytać z paragonu' });
+    }
+
+    // Sprawdzenia 2–4: stawki PTU (A/B/C)
     if (data.vat_rate_checks && data.vat_rate_checks.length > 0) {
-      const fails = data.vat_rate_checks.filter(c => !c.ok);
-      if (fails.length > 0) {
-        vatRateBox.style.display = 'block';
-        vatRateBox.innerHTML = fails.map(c => {
-          if (c.missing) return '❌ PTU ' + c.letter + ': BRAK (oczekiwane ' + c.expected.toFixed(2) + ' PLN od Sp=' + c.brutto.toFixed(2) + ')';
-          return '⚠ PTU ' + c.letter + ': ' + c.actual.toFixed(2) + ' PLN ≠ ' + c.expected.toFixed(2) + ' PLN (diff=' + c.diff.toFixed(2) + ')';
-        }).join('<br>');
-      } else { vatRateBox.style.display = 'none'; }
-    } else { vatRateBox.style.display = 'none'; }
+      data.vat_rate_checks.forEach(c => {
+        if (c.ok) {
+          checks.push({ ok: true, text: '✓ PTU ' + c.letter + ': ' + c.actual.toFixed(2) + ' PLN (Sp=' + c.brutto.toFixed(2) + ') OK' });
+        } else if (c.missing) {
+          checks.push({ ok: false, text: '✗ PTU ' + c.letter + ': BRAK — oczekiwane ' + c.expected.toFixed(2) + ' PLN (Sp=' + c.brutto.toFixed(2) + ')' });
+        } else {
+          checks.push({ ok: false, text: '✗ PTU ' + c.letter + ': ' + c.actual.toFixed(2) + ' ≠ ' + c.expected.toFixed(2) + ' PLN (różnica=' + c.diff.toFixed(2) + ')' });
+        }
+      });
+    }
+
+    if (checks.length > 0) {
+      validBox.style.display = 'block';
+      const hasErr = checks.some(c => !c.ok);
+      validBox.style.background = hasErr ? '#fff8e1' : '#e8f5e9';
+      validBox.style.border = '1px solid ' + (hasErr ? '#ffe082' : '#a5d6a7');
+      validBox.style.color = '#333';
+      validBox.innerHTML = checks.map(c =>
+        '<div style="color:' + (c.ok ? '#2e7d32' : '#b71c1c') + '; padding:2px 0; font-size:12px; line-height:1.7;">' + c.text + '</div>'
+      ).join('');
+    } else { validBox.style.display = 'none'; }
 
     const upBox = document.getElementById('uproszczonaBox');
     if (d.faktura_uproszczona === true) {
