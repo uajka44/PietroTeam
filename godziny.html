@@ -134,6 +134,36 @@
     transition:all 0.15s;
   }
   .name-opt:hover { border-color:#f5a623; color:#f5a623; }
+
+  /* --- NAWIGACJA MIESIĄCA --- */
+  .month-nav {
+    max-width:420px; margin:26px auto 0; display:flex; align-items:center;
+    justify-content:space-between; gap:8px;
+    background:#1a1814; border:1px solid #2e2a22; border-radius:6px; padding:6px;
+  }
+  .mn-btn {
+    background:#0f0e0c; border:1px solid #2e2a22; border-radius:5px; color:#8a8070;
+    font-size:15px; padding:8px 16px; cursor:pointer; transition:all 0.15s;
+  }
+  .mn-btn:hover:not(:disabled) { border-color:#f5a623; color:#f5a623; }
+  .mn-btn:disabled { opacity:0.25; cursor:default; }
+  .mn-label {
+    font-family:'Bebas Neue',sans-serif; font-size:17px; letter-spacing:3px;
+    color:#e8e0d0; text-transform:uppercase;
+  }
+
+  /* --- EDYCJA --- */
+  .edit-btn {
+    background:none; border:1px solid #3e3a32; border-radius:4px; color:#5a5248;
+    font-size:13px; padding:4px 8px; cursor:pointer; flex-shrink:0; transition:all 0.15s;
+  }
+  .edit-btn:hover { border-color:#f5a623; color:#f5a623; }
+  .ed-lbl { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#5a5248; margin-bottom:5px; display:block; }
+  #edit-modal input[type="time"] {
+    background:#0f0e0c; border:1px solid #2e2a22; border-radius:4px; color:#e8e0d0;
+    font-family:'Courier Prime',monospace; font-size:16px; padding:10px; width:100%;
+  }
+  #edit-modal input[type="time"]::-webkit-calendar-picker-indicator { filter:invert(0.6); }
 </style>
 </head>
 <body>
@@ -199,6 +229,11 @@
 <button class="save-btn" id="saveBtn" onclick="zapisz()">ZAPISZ ZMIANĘ</button>
 
 <!-- HISTORIA -->
+<div class="month-nav" id="monthNav" style="display:none">
+  <button class="mn-btn" onclick="changeMonth(-1)">◀</button>
+  <div class="mn-label" id="monthLabel">—</div>
+  <button class="mn-btn" id="mnNext" onclick="changeMonth(1)">▶</button>
+</div>
 <div class="history-title" id="historyTitle" style="display:none">Ostatnie wpisy</div>
 <div class="history-list" id="historyList"></div>
 <button id="copyBtn" onclick="copyHours()" style="display:none;margin:14px auto 0;max-width:420px;width:100%;background:transparent;border:1px solid #2e2a22;border-radius:6px;color:#8a8070;font-family:'Courier Prime',monospace;font-size:13px;letter-spacing:2px;padding:13px;cursor:pointer;display:none;">
@@ -216,6 +251,27 @@
     <textarea id="delReason" placeholder="np. błędna godzina, wpisałam dwa razy…" style="width:100%;background:#0f0e0c;border:1px solid #2e2a22;border-radius:4px;color:#e8e0d0;font-family:'Courier Prime',monospace;font-size:13px;padding:10px;resize:none;min-height:80px;margin-bottom:10px;display:block;" oninput="this.style.borderColor='#2e2a22'"></textarea>
     <button onclick="confirmDel()" style="width:100%;background:#e05555;border:none;border-radius:5px;color:#fff;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;padding:12px;cursor:pointer;margin-bottom:8px;">USUŃ</button>
     <button onclick="closeDel()" style="width:100%;background:transparent;border:1px solid #2e2a22;border-radius:5px;color:#5a5248;font-family:'Courier Prime',monospace;font-size:12px;padding:10px;cursor:pointer;">Anuluj</button>
+  </div>
+</div>
+
+<!-- MODAL EDYCJI WPISU -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:900;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#141210;border:1px solid #f5a623;border-radius:10px;padding:24px;width:100%;max-width:340px;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:#f5a623;margin-bottom:14px;">Popraw wpis</div>
+
+    <label class="ed-lbl">Data</label>
+    <input type="date" id="edData" style="margin-bottom:12px;">
+
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <div style="flex:1"><label class="ed-lbl">Od</label><input type="time" id="edOd"></div>
+      <div style="flex:1"><label class="ed-lbl">Do</label><input type="time" id="edDo"></div>
+    </div>
+
+    <label class="ed-lbl">Notatka</label>
+    <textarea id="edNota" placeholder="opcjonalnie…" style="min-height:60px;margin-bottom:12px;"></textarea>
+
+    <button onclick="confirmEdit()" style="width:100%;background:#f5a623;border:none;border-radius:5px;color:#0f0e0c;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;padding:12px;cursor:pointer;margin-bottom:8px;">ZAPISZ POPRAWKĘ</button>
+    <button onclick="closeEdit()" style="width:100%;background:transparent;border:1px solid #2e2a22;border-radius:5px;color:#5a5248;font-family:'Courier Prime',monospace;font-size:12px;padding:10px;cursor:pointer;">Anuluj</button>
   </div>
 </div>
 
@@ -356,18 +412,42 @@ function fmtMin(min) {
 let _lastRows = [], _lastImie = '', _lastMiesiac = '';
 let _rowsMap = {}, _delId = null;
 
+// miesiąc aktualnie oglądany w historii
+let _viewY = new Date().getFullYear();
+let _viewM = new Date().getMonth();   // 0-11
+
+function changeMonth(delta) {
+  const d = new Date(_viewY, _viewM + delta, 1);
+  _viewY = d.getFullYear();
+  _viewM = d.getMonth();
+  loadHistory(localStorage.getItem('pietro_imie'));
+}
+
+function isCurrentMonth() {
+  const n = new Date();
+  return _viewY === n.getFullYear() && _viewM === n.getMonth();
+}
+
 async function loadHistory(imie) {
   if (!imie) return;
-  const now = new Date();
-  const monthFrom = `${now.getFullYear()}-${pad(now.getMonth()+1)}-01`;
-  const monthTo   = `${now.getFullYear()}-${pad(now.getMonth()+1)}-31`;
-  const url = `${SUPABASE_URL}/rest/v1/zmiany?select=id,data,od,do,notatka,usuniety&imie=eq.${encodeURIComponent(imie)}&data=gte.${monthFrom}&data=lte.${monthTo}&order=data.desc`;
+  // zakres: od 1. dnia oglądanego miesiąca (włącznie) do 1. dnia następnego (wyłącznie)
+  const monthFrom = `${_viewY}-${pad(_viewM+1)}-01`;
+  const next      = new Date(_viewY, _viewM + 1, 1);
+  const monthNext = `${next.getFullYear()}-${pad(next.getMonth()+1)}-01`;
+  const url = `${SUPABASE_URL}/rest/v1/zmiany?select=id,data,od,do,notatka,usuniety&imie=eq.${encodeURIComponent(imie)}&data=gte.${monthFrom}&data=lt.${monthNext}&order=data.desc`;
+
+  const nav   = document.getElementById('monthNav');
+  const title = document.getElementById('historyTitle');
+  const list  = document.getElementById('historyList');
+  nav.style.display = 'flex';
+  document.getElementById('monthLabel').textContent = MIESIACE_PL[_viewM] + ' ' + _viewY;
+  document.getElementById('mnNext').disabled = isCurrentMonth();
+
   try {
     const res = await fetch(url, { headers: HEADERS });
     const rows = await res.json();
 
-    const title = document.getElementById('historyTitle');
-    const list  = document.getElementById('historyList');
+    if (!Array.isArray(rows)) throw new Error(rows.message || 'zły format odpowiedzi');
 
     if (!rows.length) {
       title.style.display = 'block';
@@ -381,13 +461,13 @@ async function loadHistory(imie) {
     rows.forEach(r => _rowsMap[r.id] = r);
     _lastRows = rows.filter(r => !r.usuniety);
     _lastImie = imie;
-    _lastMiesiac = MIESIACE_PL[now.getMonth()] + ' ' + now.getFullYear();
+    _lastMiesiac = MIESIACE_PL[_viewM] + ' ' + _viewY;
 
-    const active = rows.filter(r => !r.usuniety);
+    const active = _lastRows;
     const totalMin = active.reduce((s,r) => s + calcMin(r.od, r.do), 0);
 
     title.style.display = 'block';
-    title.innerHTML = `${MIESIACE_PL[now.getMonth()]} &nbsp;·&nbsp; ${active.length} zmian &nbsp;·&nbsp; <span style="color:#f5a623">${fmtMin(totalMin)}</span>`;
+    title.innerHTML = `${MIESIACE_PL[_viewM]} &nbsp;·&nbsp; ${active.length} zmian &nbsp;·&nbsp; <span style="color:#f5a623">${fmtMin(totalMin)}</span>`;
 
     list.innerHTML = rows.map(r => {
       const d = new Date(r.data + 'T12:00:00');
@@ -403,12 +483,59 @@ async function loadHistory(imie) {
           ${noteHtml}
         </div>
         <div class="h-time">${r.od.slice(0,5)} – ${r.do.slice(0,5)}</div>
-        ${!del ? `<button class="del-btn" onclick="usunWpis('${r.id}')">🗑</button>` : ''}
+        ${!del ? `<button class="edit-btn" onclick="edytujWpis('${r.id}')">✏</button>
+        <button class="del-btn" onclick="usunWpis('${r.id}')">🗑</button>` : ''}
       </div>`;
     }).join('');
 
     document.getElementById('copyBtn').style.display = 'block';
-  } catch(e) { console.warn(e); }
+  } catch(e) {
+    console.warn(e);
+    title.style.display = 'block';
+    title.textContent = 'Błąd wczytywania: ' + e.message;
+    list.innerHTML = '';
+    document.getElementById('copyBtn').style.display = 'none';
+  }
+}
+
+// ─── EDYCJA WPISU ────────────────────────────
+let _editId = null;
+
+function edytujWpis(id) {
+  const r = _rowsMap[id];
+  if (!r) return;
+  _editId = id;
+  document.getElementById('edData').value = r.data;
+  document.getElementById('edOd').value   = r.od.slice(0,5);
+  document.getElementById('edDo').value   = r.do.slice(0,5);
+  document.getElementById('edNota').value = r.notatka || '';
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function closeEdit() {
+  document.getElementById('edit-modal').style.display = 'none';
+  _editId = null;
+}
+
+async function confirmEdit() {
+  const id = _editId;
+  if (!id) return;
+  const data  = document.getElementById('edData').value;
+  const od    = document.getElementById('edOd').value;
+  const doVal = document.getElementById('edDo').value;
+  const nota  = document.getElementById('edNota').value.trim();
+  if (!data || !od || !doVal) { showToast('Uzupełnij datę i godziny', 'err'); return; }
+  closeEdit();
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/zmiany?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: HEADERS,
+      body: JSON.stringify({ data, od, do: doVal, notatka: nota || null })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    showToast('✓ Poprawiono', 'ok');
+    loadHistory(localStorage.getItem('pietro_imie'));
+  } catch(e) { showToast('Błąd: ' + e.message, 'err'); }
 }
 
 function usunWpis(id) {
@@ -493,6 +620,9 @@ async function zapisz() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     showToast('✓ Zapisano!', 'ok');
     document.getElementById('notatka').value = '';
+    // pokaż miesiąc, do którego trafił wpis
+    const [ry, rm] = data.split('-').map(Number);
+    _viewY = ry; _viewM = rm - 1;
     loadHistory(imie);
   } catch(e) {
     showToast('Błąd: ' + e.message, 'err');
