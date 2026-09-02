@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Gratisy — Piętro Cafe</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: #0f0e0c; color: #e8e0d0;
+    font-family: 'Courier Prime', monospace;
+    min-height: 100vh; padding: 24px 16px 80px;
+  }
+
+  .logo { font-family:'Bebas Neue',sans-serif; font-size:28px; color:#f5a623; letter-spacing:5px; text-align:center; }
+  .sub  { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:#5a5248; text-align:center; margin-bottom:24px; }
+
+  .card {
+    background:#1a1814; border:1px solid #2e2a22; border-radius:8px;
+    padding:18px 16px; margin-bottom:12px; max-width:420px; margin-left:auto; margin-right:auto;
+  }
+  .card-title {
+    font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:3px;
+    color:#5a5248; margin-bottom:12px; text-transform:uppercase;
+  }
+
+  /* --- IMIĘ --- */
+  .name-row { display:flex; align-items:center; justify-content:space-between; }
+  .name-display { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:3px; color:#f5a623; }
+  .name-change { font-size:11px; letter-spacing:1px; cursor:pointer; border:none; background:none; color:#5a5248; text-decoration:underline; padding:4px; }
+  .name-change:hover { color:#f5a623; }
+
+  /* --- POLA --- */
+  .fld-lbl { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#5a5248; margin-bottom:5px; display:block; }
+  input[type="text"], textarea {
+    width:100%; background:#0f0e0c; border:1px solid #2e2a22; border-radius:4px;
+    color:#e8e0d0; font-family:'Courier Prime',monospace; font-size:15px;
+    padding:10px 12px; resize:none;
+  }
+  textarea { min-height:56px; font-size:13px; }
+  input[type="text"]:focus, textarea:focus { outline:none; border-color:#f5a623; }
+  #haslo { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:4px; color:#f5a623; text-transform:uppercase; }
+
+  .save-btn {
+    display:block; width:100%; max-width:420px; margin:0 auto;
+    background:#f5a623; color:#0f0e0c; border:none; border-radius:6px;
+    padding:18px; font-family:'Bebas Neue',sans-serif; font-size:22px;
+    letter-spacing:3px; cursor:pointer; transition:background 0.15s;
+  }
+  .save-btn:hover { background:#c4841c; }
+  .save-btn:disabled { background:#3e3530; color:#5a5248; cursor:default; }
+
+  /* --- TOAST --- */
+  .toast {
+    display:none; position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:#1a1814; border:1px solid #2e2a22; border-radius:6px;
+    padding:12px 20px; font-size:13px; color:#e8e0d0; z-index:500;
+    white-space:nowrap; letter-spacing:1px;
+  }
+  .toast.ok  { border-color:#4caf7d; color:#4caf7d; }
+  .toast.err { border-color:#e05555; color:#e05555; }
+
+  /* --- ZAKŁADKI --- */
+  .tabs {
+    max-width:420px; margin:26px auto 10px; display:grid; grid-template-columns:1fr 1fr;
+    gap:6px; background:#1a1814; border:1px solid #2e2a22; border-radius:6px; padding:6px;
+  }
+  .tab {
+    background:#0f0e0c; border:1px solid #2e2a22; border-radius:5px; color:#8a8070;
+    font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:2px;
+    padding:10px 6px; cursor:pointer; transition:all 0.15s;
+  }
+  .tab:hover { border-color:#f5a623; }
+  .tab.active { border-color:#f5a623; background:#211f1a; color:#f5a623; }
+
+  #search { max-width:420px; margin:0 auto 10px; display:block; }
+
+  /* --- LISTA KUPONÓW --- */
+  .k-list { max-width:420px; margin:0 auto; display:flex; flex-direction:column; gap:8px; }
+  .k-row {
+    background:#1a1814; border:1px solid #2e2a22; border-radius:6px; padding:13px 14px;
+  }
+  .k-row.done { opacity:0.55; border-color:#243a2e; }
+  .k-row.void { opacity:0.4; border-color:#3a2424; }
+  .k-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+  .k-klient { font-family:'Bebas Neue',sans-serif; font-size:19px; letter-spacing:2px; color:#e8e0d0; }
+  .k-haslo {
+    font-family:'Bebas Neue',sans-serif; font-size:17px; letter-spacing:3px; color:#f5a623;
+    border:1px dashed #4a3a1c; border-radius:4px; padding:3px 9px; flex-shrink:0; text-transform:uppercase;
+  }
+  .k-row.done .k-haslo, .k-row.void .k-haslo { color:#5a5248; border-color:#2e2a22; }
+  .k-gratis { font-size:13px; color:#c9c0b0; margin-top:7px; line-height:1.45; }
+  .k-nota { font-size:11px; color:#5a5248; margin-top:4px; }
+  .k-meta { font-size:10px; color:#5a5248; letter-spacing:1px; margin-top:8px; }
+  .k-meta b { color:#8a8070; font-weight:normal; }
+  .k-actions { display:flex; gap:6px; margin-top:10px; }
+  .btn-use {
+    flex:1; background:#4caf7d; border:none; border-radius:5px; color:#0f0e0c;
+    font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:2px; padding:11px; cursor:pointer;
+  }
+  .btn-use:hover { background:#3d9166; }
+  .btn-void {
+    background:transparent; border:1px solid #3e3a32; border-radius:5px; color:#5a5248;
+    font-size:13px; padding:8px 12px; cursor:pointer; transition:all 0.15s;
+  }
+  .btn-void:hover { border-color:#e05555; color:#e05555; }
+  .empty { text-align:center; color:#5a5248; font-size:12px; letter-spacing:1px; padding:22px 0; }
+
+  /* --- MODALE --- */
+  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:900; align-items:center; justify-content:center; padding:24px; }
+  .modal.open { display:flex; }
+  .modal-box { background:#141210; border:1px solid #2e2a22; border-radius:10px; padding:24px; width:100%; max-width:340px; }
+  .modal-box h2 { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:3px; color:#f5a623; margin-bottom:6px; }
+  .modal-box p  { font-size:12px; color:#5a5248; letter-spacing:1px; margin-bottom:16px; line-height:1.5; }
+  .m-btn-main { width:100%; border:none; border-radius:5px; font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:2px; padding:12px; cursor:pointer; margin-bottom:8px; }
+  .m-btn-cancel { width:100%; background:transparent; border:1px solid #2e2a22; border-radius:5px; color:#5a5248; font-family:'Courier Prime',monospace; font-size:12px; padding:10px; cursor:pointer; }
+
+  .name-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .name-opt {
+    border:1px solid #2e2a22; border-radius:6px; background:#0f0e0c;
+    padding:14px 10px; font-family:'Bebas Neue',sans-serif; font-size:18px;
+    letter-spacing:2px; color:#e8e0d0; cursor:pointer; text-align:center; transition:all 0.15s;
+  }
+  .name-opt:hover { border-color:#f5a623; color:#f5a623; }
+</style>
+</head>
+<body>
+
+<div class="logo">Piętro Cafe</div>
+<div class="sub">gratisy · kupony</div>
+
+<!-- PRACOWNIK -->
+<div class="card">
+  <div class="card-title">Pracownik</div>
+  <div class="name-row">
+    <div class="name-display" id="nameDisplay">—</div>
+    <button class="name-change" onclick="openNameModal()">zmień</button>
+  </div>
+</div>
+
+<!-- NOWY KUPON -->
+<div class="card">
+  <div class="card-title">Nowy kupon</div>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    <div>
+      <label class="fld-lbl" for="klient">Klient — imię (i nazwisko)</label>
+      <input type="text" id="klient" placeholder="np. Anna Kowalska" autocomplete="off">
+    </div>
+    <div>
+      <label class="fld-lbl" for="haslo">Hasło</label>
+      <input type="text" id="haslo" placeholder="np. LATTE" autocomplete="off">
+    </div>
+    <div>
+      <label class="fld-lbl" for="gratis">Co dostaje</label>
+      <input type="text" id="gratis" placeholder="np. kawa + ciasto" autocomplete="off">
+    </div>
+    <div>
+      <label class="fld-lbl" for="notatka">Notatka (opcjonalnie)</label>
+      <textarea id="notatka" placeholder="np. ważne do końca miesiąca"></textarea>
+    </div>
+  </div>
+</div>
+
+<button class="save-btn" id="saveBtn" onclick="zapisz()">DODAJ KUPON</button>
+
+<!-- LISTA -->
+<div class="tabs">
+  <button class="tab active" id="tabAktywne" onclick="setTab('aktywne')">Do realizacji</button>
+  <button class="tab" id="tabHistoria" onclick="setTab('historia')">Historia</button>
+</div>
+<input type="text" id="search" placeholder="szukaj: hasło lub imię…" autocomplete="off" oninput="render()">
+<div class="k-list" id="list"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL REALIZACJI -->
+<div class="modal" id="use-modal">
+  <div class="modal-box" style="border-color:#4caf7d;">
+    <h2 style="color:#4caf7d">Zrealizować kupon?</h2>
+    <p id="useInfo"></p>
+    <button class="m-btn-main" style="background:#4caf7d;color:#0f0e0c;" onclick="confirmUse()">TAK, WYDANE</button>
+    <button class="m-btn-cancel" onclick="closeUse()">Anuluj</button>
+  </div>
+</div>
+
+<!-- MODAL ANULOWANIA -->
+<div class="modal" id="void-modal">
+  <div class="modal-box" style="border-color:#e05555;">
+    <h2 style="color:#e05555">Anuluj kupon</h2>
+    <p>Podaj powód — właściciel to zobaczy.</p>
+    <textarea id="voidReason" placeholder="np. pomyłka, wpisane dwa razy…" style="margin-bottom:10px;" oninput="this.style.borderColor='#2e2a22'"></textarea>
+    <button class="m-btn-main" style="background:#e05555;color:#fff;" onclick="confirmVoid()">ANULUJ KUPON</button>
+    <button class="m-btn-cancel" onclick="closeVoid()">Wróć</button>
+  </div>
+</div>
+
+<!-- MODAL IMIENIA -->
+<div class="modal" id="name-modal">
+  <div class="modal-box">
+    <h2>Kto to?</h2>
+    <p>Wybierz swoje imię — zostanie zapamiętane na tym telefonie.</p>
+    <div class="name-grid" id="nameGrid"></div>
+    <div id="addNameWrap" style="display:none; margin-top:12px;">
+      <input id="newNameInput" type="text" placeholder="Wpisz imię…" style="margin-bottom:8px;">
+      <button onclick="confirmNewName()" class="m-btn-main" style="background:#f5a623;color:#0f0e0c;">ZATWIERDŹ</button>
+    </div>
+    <button onclick="toggleAddName()" id="addNameBtn"
+      style="width:100%;margin-top:10px;background:transparent;border:1px solid #2e2a22;border-radius:4px;color:#5a5248;font-family:'Courier Prime',monospace;font-size:12px;letter-spacing:1px;padding:10px;cursor:pointer;">
+      + Dodaj nową osobę
+    </button>
+    <button onclick="closeNameModal()"
+      style="width:100%;margin-top:8px;background:transparent;border:none;color:#3e3a32;font-family:'Courier Prime',monospace;font-size:12px;letter-spacing:1px;padding:8px;cursor:pointer;">
+      Anuluj
+    </button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  KONFIGURACJA — edytuj listę pracowników
+// ═══════════════════════════════════════════
+const NAMES = ['Justyna', 'Gaba', 'Weronika', 'Julia', 'Angelika'];
+
+const SUPABASE_URL = 'https://pzkvbtdpgcazkiwpxihp.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6a3ZidGRwZ2Nhemtpd3B4aWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjU4NzQsImV4cCI6MjA5NDEwMTg3NH0.2P7hSYht2T0p7wo4M8Wd3v43zOWtIlm68nHhhXUpH7U';
+const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
+
+function pad(n) { return String(n).padStart(2,'0'); }
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return pad(d.getDate()) + '.' + pad(d.getMonth()+1) + '.' + d.getFullYear() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+
+// ─── IMIĘ ────────────────────────────────────
+function openNameModal() { document.getElementById('name-modal').classList.add('open'); }
+function closeNameModal() {
+  document.getElementById('name-modal').classList.remove('open');
+  document.getElementById('addNameWrap').style.display = 'none';
+  document.getElementById('addNameBtn').textContent = '+ Dodaj nową osobę';
+}
+function toggleAddName() {
+  const wrap = document.getElementById('addNameWrap');
+  const btn  = document.getElementById('addNameBtn');
+  const open = wrap.style.display === 'block';
+  wrap.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? '+ Dodaj nową osobę' : '— Anuluj dodawanie';
+  if (!open) document.getElementById('newNameInput').focus();
+}
+function confirmNewName() {
+  const val = document.getElementById('newNameInput').value.trim();
+  if (!val) return;
+  document.getElementById('newNameInput').value = '';
+  selectName(val);
+}
+function selectName(name) {
+  localStorage.setItem('pietro_imie', name);
+  document.getElementById('nameDisplay').textContent = name;
+  closeNameModal();
+}
+function buildNameGrid() {
+  document.getElementById('nameGrid').innerHTML =
+    NAMES.map(n => `<button class="name-opt" onclick="selectName('${esc(n)}')">${esc(n)}</button>`).join('');
+}
+function kto() { return localStorage.getItem('pietro_imie'); }
+
+// ─── DANE ────────────────────────────────────
+let _kupony = [], _tab = 'aktywne', _useId = null, _voidId = null;
+
+function setTab(t) {
+  _tab = t;
+  document.getElementById('tabAktywne').classList.toggle('active', t === 'aktywne');
+  document.getElementById('tabHistoria').classList.toggle('active', t === 'historia');
+  render();
+}
+
+async function load() {
+  const url = `${SUPABASE_URL}/rest/v1/kupony?select=*&order=created_at.desc&limit=500`;
+  try {
+    const res = await fetch(url, { headers: HEADERS });
+    const rows = await res.json();
+    if (!Array.isArray(rows)) throw new Error(rows.message || 'zły format odpowiedzi');
+    _kupony = rows;
+    render();
+  } catch(e) {
+    document.getElementById('list').innerHTML =
+      `<div class="empty" style="color:#e05555">Błąd wczytywania: ${esc(e.message)}</div>`;
+  }
+}
+
+function render() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const list = document.getElementById('list');
+
+  let rows = _kupony.filter(k =>
+    _tab === 'aktywne' ? (!k.zrealizowany && !k.anulowany) : (k.zrealizowany || k.anulowany)
+  );
+  if (q) rows = rows.filter(k =>
+    (k.haslo || '').toLowerCase().includes(q) ||
+    (k.klient || '').toLowerCase().includes(q) ||
+    (k.gratis || '').toLowerCase().includes(q)
+  );
+
+  if (!rows.length) {
+    list.innerHTML = `<div class="empty">${q ? 'Nic nie znaleziono' : (_tab === 'aktywne' ? 'Brak kuponów do realizacji' : 'Historia jest pusta')}</div>`;
+    return;
+  }
+
+  list.innerHTML = rows.map(k => {
+    const cls = k.anulowany ? ' void' : (k.zrealizowany ? ' done' : '');
+    let meta = `dodał(a): <b>${esc(k.dodal)}</b> · ${fmtDate(k.created_at)}`;
+    if (k.zrealizowany) meta += `<br>✓ wydane przez <b>${esc(k.zrealizowal || '—')}</b> · ${k.zrealizowany_o ? fmtDate(k.zrealizowany_o) : ''}`;
+    if (k.anulowany)    meta += `<br>✕ anulowane przez <b>${esc(k.anulowal || '—')}</b>${k.powod_anulowania ? ' · ' + esc(k.powod_anulowania) : ''}`;
+
+    return `<div class="k-row${cls}">
+      <div class="k-top">
+        <div class="k-klient">${esc(k.klient)}</div>
+        <div class="k-haslo">${esc(k.haslo)}</div>
+      </div>
+      <div class="k-gratis">🎁 ${esc(k.gratis)}</div>
+      ${k.notatka ? `<div class="k-nota">${esc(k.notatka)}</div>` : ''}
+      <div class="k-meta">${meta}</div>
+      ${(!k.zrealizowany && !k.anulowany) ? `<div class="k-actions">
+        <button class="btn-use" onclick="zrealizuj('${k.id}')">ZREALIZUJ</button>
+        <button class="btn-void" onclick="anuluj('${k.id}')">🗑</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ─── DODANIE ─────────────────────────────────
+async function zapisz() {
+  const imie = kto();
+  if (!imie) { openNameModal(); return; }
+
+  const klient  = document.getElementById('klient').value.trim();
+  const haslo   = document.getElementById('haslo').value.trim();
+  const gratis  = document.getElementById('gratis').value.trim();
+  const notatka = document.getElementById('notatka').value.trim();
+
+  if (!klient) { showToast('Wpisz imię klienta', 'err'); return; }
+  if (!haslo)  { showToast('Wpisz hasło', 'err'); return; }
+  if (!gratis) { showToast('Wpisz, co dostaje', 'err'); return; }
+
+  const dubel = _kupony.find(k => !k.zrealizowany && !k.anulowany &&
+    (k.haslo || '').toLowerCase() === haslo.toLowerCase());
+  if (dubel && !confirm(`Hasło "${haslo}" ma już aktywny kupon (${dubel.klient}). Dodać mimo to?`)) return;
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = 'ZAPISYWANIE...';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/kupony`, {
+      method: 'POST',
+      headers: { ...HEADERS, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ klient, haslo, gratis, notatka: notatka || null, dodal: imie })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    showToast('✓ Kupon dodany!', 'ok');
+    document.getElementById('klient').value = '';
+    document.getElementById('haslo').value = '';
+    document.getElementById('gratis').value = '';
+    document.getElementById('notatka').value = '';
+    setTab('aktywne');
+    await load();
+  } catch(e) {
+    showToast('Błąd: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'DODAJ KUPON';
+  }
+}
+
+// ─── REALIZACJA ──────────────────────────────
+function zrealizuj(id) {
+  if (!kto()) { openNameModal(); return; }
+  const k = _kupony.find(x => x.id === id);
+  if (!k) return;
+  _useId = id;
+  document.getElementById('useInfo').innerHTML =
+    `<b style="color:#e8e0d0">${esc(k.klient)}</b> — hasło <b style="color:#f5a623">${esc(k.haslo)}</b><br>🎁 ${esc(k.gratis)}<br><br>Zapisze się jako wydane przez <b style="color:#e8e0d0">${esc(kto())}</b>.`;
+  document.getElementById('use-modal').classList.add('open');
+}
+function closeUse() { document.getElementById('use-modal').classList.remove('open'); _useId = null; }
+
+async function confirmUse() {
+  const id = _useId;
+  if (!id) return;
+  closeUse();
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/kupony?id=eq.${id}`, {
+      method: 'PATCH', headers: HEADERS,
+      body: JSON.stringify({ zrealizowany: true, zrealizowal: kto(), zrealizowany_o: new Date().toISOString() })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    showToast('✓ Kupon zrealizowany', 'ok');
+    await load();
+  } catch(e) { showToast('Błąd: ' + e.message, 'err'); }
+}
+
+// ─── ANULOWANIE ──────────────────────────────
+function anuluj(id) {
+  if (!kto()) { openNameModal(); return; }
+  _voidId = id;
+  const ta = document.getElementById('voidReason');
+  ta.value = ''; ta.style.borderColor = '#2e2a22';
+  document.getElementById('void-modal').classList.add('open');
+  setTimeout(() => ta.focus(), 150);
+}
+function closeVoid() { document.getElementById('void-modal').classList.remove('open'); _voidId = null; }
+
+async function confirmVoid() {
+  const ta = document.getElementById('voidReason');
+  const reason = ta.value.trim();
+  if (!reason) { ta.style.borderColor = '#e05555'; return; }
+  const id = _voidId;
+  closeVoid();
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/kupony?id=eq.${id}`, {
+      method: 'PATCH', headers: HEADERS,
+      body: JSON.stringify({ anulowany: true, anulowal: kto(), powod_anulowania: reason })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    showToast('Kupon anulowany', 'ok');
+    await load();
+  } catch(e) { showToast('Błąd: ' + e.message, 'err'); }
+}
+
+// ─── TOAST ───────────────────────────────────
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + (type||'');
+  t.style.display = 'block';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.style.display = 'none', 2800);
+}
+
+// ─── START ───────────────────────────────────
+buildNameGrid();
+const savedName = kto();
+if (savedName) document.getElementById('nameDisplay').textContent = savedName;
+else openNameModal();
+load();
+</script>
+<script src="nav.js"></script>
+</body>
+</html>
