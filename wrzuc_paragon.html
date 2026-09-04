@@ -49,6 +49,8 @@
   .result-row .val { text-align: right; font-weight: 700; word-break: break-word; }
   .result-row.big .lbl, .result-row.big .val { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; color: #1a1814; }
   .warn-box { background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 10px 12px; font-size: 12px; color: #856404; margin: 12px 0; line-height: 1.5; }
+  /* skan bezuzyteczny ksiegowo - musi sie roznic od zwyklego ostrzezenia */
+  .warn-box.krytyczny { background: #fdecea; border: 2px solid #e53935; color: #b71c1c; font-size: 13px; }
   .red-lbl { color: #1565c0 !important; font-weight: 700; }
   .red-val { color: #1565c0 !important; font-size: 15px !important; }
   .key-row { margin-bottom: 10px; }
@@ -490,6 +492,7 @@ function pokazWynik(data) {
     document.getElementById('uproszczonaBox').style.display = 'none';
     document.getElementById('nrBox').style.display = 'none';
     const warn = document.getElementById('warnBox');
+    warn.className = 'warn-box';  // reset po ewentualnym alarmie krytycznym
     warn.textContent = '⚠️ Inny sklep — sprawdź dane ręcznie przed potwierdzeniem.';
     warn.style.display = 'block';
     document.getElementById('dupBox').style.display = 'none';
@@ -577,8 +580,20 @@ function pokazWynik(data) {
 
     const checks = [];
 
-    // Sprawdzenie 1: suma Sp vs SUMA PLN
-    if (data.walidacja) {
+    // Sprawdzenie 0: czy w ogóle odczytano JAKIEKOLWIEK stawki VAT.
+    // vat_rate_checks z serwera pomija stawki, których nie ma, więc przy zerze
+    // stawek tablica jest pusta i pętla niżej nic by nie pokazała — zostałby
+    // tylko mylący komunikat "Suma Sp (0,00) ≠ SUMA PLN".
+    const maStawki = (data.vat_rate_checks && data.vat_rate_checks.length > 0)
+      || [d.brutto_a, d.brutto_b, d.brutto_c, d.vat_a, d.vat_b, d.vat_c]
+           .some(v => v !== null && v !== undefined);
+
+    if (!maStawki) {
+      const sumaTxt = (d.suma_pln !== null && d.suma_pln !== undefined)
+        ? ' — Suma PLN ' + parseFloat(d.suma_pln).toFixed(2) + ' zł nie do zweryfikowania' : '';
+      checks.push({ ok: false, text: '✗ NIE ODCZYTANO STAWEK VAT (Sp / PTU)' + sumaTxt });
+    } else if (data.walidacja) {
+      // Sprawdzenie 1: suma Sp vs SUMA PLN
       const w = data.walidacja;
       if (w.ok) {
         checks.push({ ok: true, text: '✓ Suma Sp (' + d.sp_str + ') = ' + fmtPln(w.suma_sp) + ' PLN = SUMA PLN' });
@@ -614,7 +629,12 @@ function pokazWynik(data) {
     } else { validBox.style.display = 'none'; }
 
     const upBox = document.getElementById('uproszczonaBox');
-    if (d.faktura_uproszczona === true) {
+    if (d.typ_dokumentu === 'faktura') {
+      upBox.style.display = 'block';
+      upBox.style.background = '#e8f5e9'; upBox.style.color = '#2e7d32';
+      upBox.style.border = '1px solid #a5d6a7';
+      upBox.textContent = '✓ Pełna faktura VAT — VAT do odliczenia niezależnie od kwoty';
+    } else if (d.faktura_uproszczona === true) {
       upBox.style.display = 'block';
       upBox.style.background = '#e8f5e9'; upBox.style.color = '#2e7d32';
       upBox.style.border = '1px solid #a5d6a7';
@@ -626,7 +646,26 @@ function pokazWynik(data) {
       upBox.textContent = '⚠ Kwota > 450 zł — nie jest fakturą uproszczoną';
     } else { upBox.style.display = 'none'; }
 
-    document.getElementById('warnBox').style.display = 'none';
+    // Skan bezuzyteczny ksiegowo = od razu duzy czerwony alarm, bo pracownik
+    // stoi jeszcze w sklepie i moze zrobic zdjecie od nowa.
+    // Kolejnosc od najbardziej konkretnej przyczyny.
+    const warnB = document.getElementById('warnBox');
+    if (data.tylko_niefiskalny === true) {
+      warnB.className = 'warn-box krytyczny';
+      warnB.innerHTML = '❌ <strong>TO WYDRUK NIEFISKALNY</strong><br>'
+        + 'Na zdjęciu nie ma faktury ani paragonu fiskalnego — to nie jest dokument księgowy.<br>'
+        + 'Zrób zdjęcie właściwej <strong>FAKTURY</strong> i wrzuć ponownie.';
+      warnB.style.display = 'block';
+    } else if (!maStawki) {
+      warnB.className = 'warn-box krytyczny';
+      warnB.innerHTML = '❌ <strong>NIE ODCZYTANO STAWEK VAT</strong><br>'
+        + 'Nie udało się odczytać rozbicia Sp / PTU — bez tego faktura jest bezużyteczna dla księgowości.<br>'
+        + 'Zrób <strong>ostrzejsze zdjęcie</strong> (cały paragon, dobre światło, bez zagięć) i wrzuć ponownie.';
+      warnB.style.display = 'block';
+    } else {
+      warnB.className = 'warn-box';
+      warnB.style.display = 'none';
+    }
   }
 
   showEl('resultCard');
@@ -670,7 +709,10 @@ async function zapiszStatus(status, notatka) {
   if (vaB !== null) ptuParts.push('B8%='  + vaB.toFixed(2).replace('.', ','));
   if (vaC !== null) ptuParts.push('C5%='  + vaC.toFixed(2).replace('.', ','));
   try {
-    await fetch(SUPABASE_URL + '/rest/v1/paragony?plik_url=eq.' + encodeURIComponent(currentResult.plik_url), {
+    const patchUrl = currentResult.paragon_id
+      ? SUPABASE_URL + '/rest/v1/paragony?id=eq.' + currentResult.paragon_id
+      : SUPABASE_URL + '/rest/v1/paragony?plik_url=eq.' + encodeURIComponent(currentResult.plik_url);
+    await fetch(patchUrl, {
       method: 'PATCH', headers,
       body: JSON.stringify({
         status,
