@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Magazyn – Piętro Cafe</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0ede8;--surface:#fff;--border:#ddd9d0;--border2:#b8b2a7;
+  --text:#1c1a17;--muted:#7a7469;
+  --green:#1a5f3f;--green-light:#e6f4ed;
+  --red:#b83232;--red-light:#fdecea;
+  --orange:#c05a00;--orange-light:#fff0e0;
+  --radius:12px;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;overscroll-behavior:none}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);color:var(--text);font-size:15px;
+  display:flex;flex-direction:column;min-height:100vh}
+
+header{background:var(--green);color:#fff;padding:14px 16px 0;
+  position:sticky;top:0;z-index:100}
+.hrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+header h1{font-size:16px;font-weight:600}
+.hdate{font-size:11px;opacity:.75;text-align:right;line-height:1.5}
+
+.tabs-l1{display:flex;overflow-x:auto;scrollbar-width:none;
+  border-bottom:1px solid rgba(255,255,255,.2)}
+.tabs-l1::-webkit-scrollbar{display:none}
+.tab-l1{flex-shrink:0;padding:10px 18px;border:none;background:none;cursor:pointer;
+  font-size:14px;font-weight:500;color:rgba(255,255,255,.65);
+  border-bottom:3px solid transparent;font-family:inherit;transition:all .15s}
+.tab-l1.active{color:#fff;border-bottom-color:#fff}
+
+.l2wrap{background:#fff;border-bottom:1px solid var(--border);
+  position:sticky;top:88px;z-index:90;display:none}
+.l2wrap.on{display:block}
+.tabs-l2{display:flex;overflow-x:auto;scrollbar-width:none;padding:0 12px}
+.tabs-l2::-webkit-scrollbar{display:none}
+.tab-l2{flex-shrink:0;padding:10px 14px;border:none;background:none;cursor:pointer;
+  font-size:13px;color:var(--muted);border-bottom:2px solid transparent;
+  font-family:inherit;transition:all .15s;white-space:nowrap}
+.tab-l2.active{color:var(--green);border-bottom-color:var(--green);font-weight:600}
+
+.name-bar{padding:14px 16px 0}
+.name-bar label{display:block;font-size:11px;font-weight:700;color:var(--muted);
+  letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}
+.name-bar input{width:100%;height:44px;border:1.5px solid var(--border2);
+  border-radius:var(--radius);padding:0 14px;font-size:15px;font-family:inherit;background:#fff}
+.name-bar input:focus{outline:none;border-color:var(--green);background:var(--green-light)}
+.name-bar input.ok{border-color:var(--green);background:var(--green-light)}
+
+.name-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);
+  z-index:200;align-items:center;justify-content:center;padding:24px}
+.name-overlay.on{display:flex}
+.name-box{background:#fff;border-radius:var(--radius);padding:24px;width:100%;max-width:360px;text-align:center}
+.name-box h2{font-size:18px;font-weight:600;margin-bottom:8px}
+.name-box p{font-size:14px;color:var(--muted);margin-bottom:16px}
+.name-box input{width:100%;height:48px;border:1.5px solid var(--border2);
+  border-radius:var(--radius);padding:0 14px;font-size:16px;font-family:inherit;
+  margin-bottom:12px;text-align:center}
+.name-box input:focus{outline:none;border-color:var(--green)}
+.name-box button{width:100%;height:48px;background:var(--green);color:#fff;
+  border:none;border-radius:var(--radius);font-size:16px;font-weight:600;font-family:inherit;cursor:pointer}
+
+.prog-wrap{padding:10px 16px 0}
+.prog-info{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px}
+.prog-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--green);border-radius:2px;transition:width .3s}
+
+main{flex:1;padding:10px 16px 80px}
+
+.section-head{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);padding:18px 0 8px;border-bottom:1px solid var(--border);margin-bottom:2px}
+
+.pcard{background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);margin:7px 0;padding:13px 13px 11px;transition:border-color .15s}
+.pcard.ok{border-color:var(--green);background:var(--green-light)}
+.pcard.zero{border-color:var(--red);background:var(--red-light)}
+.pcard.seasonal{border-color:var(--orange);background:var(--orange-light)}
+.pcard.off{opacity:.35;pointer-events:none}
+
+.ctop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px}
+.pname{font-size:14px;font-weight:500;line-height:1.35}
+.pmeta{display:flex;gap:5px;margin-top:3px;flex-wrap:wrap}
+.bunit{font-size:11px;color:var(--muted)}
+.bwinter{font-size:10px;font-weight:700;color:var(--orange);background:rgba(192,90,0,.1);padding:2px 6px;border-radius:4px}
+.bphase{font-size:10px;font-weight:700;color:#888;background:#f0ede8;padding:2px 6px;border-radius:4px}
+.cwho{font-size:11px;color:var(--muted);margin-top:3px}
+.saved-badge{font-size:11px;color:var(--green);margin-top:3px;font-weight:600}
+.cbtn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;line-height:1;padding:0 0 0 10px;flex-shrink:0}
+
+.cbot{display:flex;gap:8px;align-items:center}
+.qinput{flex:1;height:46px;border:1.5px solid var(--border2);border-radius:10px;
+  padding:0 12px;font-size:20px;font-weight:500;text-align:center;
+  font-family:inherit;background:#fff;-moz-appearance:textfield}
+.qinput::-webkit-outer-spin-button,.qinput::-webkit-inner-spin-button{-webkit-appearance:none}
+.qinput:focus{outline:none;border-color:var(--green)}
+.ok .qinput{border-color:var(--green)}
+.zero .qinput{border-color:var(--red)}
+.nbtn{height:46px;padding:0 12px;border:1.5px solid var(--border2);border-radius:10px;
+  background:#fff;cursor:pointer;font-size:13px;color:var(--muted);font-family:inherit;flex-shrink:0;white-space:nowrap}
+.nbtn.on{border-color:var(--green);color:var(--green)}
+.ntxt{width:100%;margin-top:8px;border:1.5px solid var(--border2);border-radius:10px;
+  padding:9px 12px;font-size:13px;font-family:inherit;resize:none;min-height:58px;display:none}
+.ntxt:focus{outline:none;border-color:var(--green)}
+.ntxt.on{display:block}
+
+.today-banner{background:#fffbe6;border:1px solid #f0d060;border-radius:10px;
+  padding:9px 12px;margin:10px 0 0;font-size:13px;display:flex;align-items:center;gap:8px}
+.sea-notice{background:var(--orange-light);border:1px solid rgba(192,90,0,.25);
+  border-radius:10px;padding:10px 14px;margin:10px 0 2px;font-size:13px;color:var(--orange)}
+
+.sbot{position:fixed;bottom:0;left:0;right:0;background:var(--bg);
+  padding:10px 16px;border-top:1px solid var(--border);
+  padding-bottom:calc(10px + var(--safe-bottom));
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:13px;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.dot.live{background:var(--green)}
+.spin{width:14px;height:14px;border:2px solid var(--border);
+  border-top-color:var(--green);border-radius:50%;animation:sp .6s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:#1c1a17;color:#fff;padding:10px 18px;border-radius:var(--radius);
+  font-size:14px;opacity:0;transition:all .25s;pointer-events:none;z-index:300;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--red)}
+.load{display:flex;align-items:center;justify-content:center;padding:50px 0;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hrow">
+    <div><h1>Sprawdzanie magazynu</h1>
+      <div style="font-size:12px;opacity:.7;margin-top:2px">Piętro Cafe</div></div>
+    <div class="hdate" id="hdate"></div>
+  </div>
+  <div class="tabs-l1">
+    <button class="tab-l1 active" data-l1="makro">Makro</button>
+    <button class="tab-l1" data-l1="syropy">Syropy</button>
+    <button class="tab-l1" data-l1="rozne">Różne</button>
+    <button class="tab-l1" data-l1="herbaty">Herbaty</button>
+  </div>
+</header>
+
+<div class="l2wrap on" id="l2wrap">
+  <div class="tabs-l2">
+    <button class="tab-l2 active" data-l2="Magazynek">Magazynek</button>
+    <button class="tab-l2" data-l2="Kuchnia">Kuchnia</button>
+    <button class="tab-l2" data-l2="Bar">Bar</button>
+    <button class="tab-l2" data-l2="Alkohole">Alkohole</button>
+  </div>
+</div>
+
+<div class="name-overlay on" id="overlay">
+  <div class="name-box">
+    <h2>Cześć! 👋</h2>
+    <p>Wpisz swoje imię żeby zacząć wpisywać stany</p>
+    <input type="text" id="overlay-input" placeholder="np. Angelika" maxlength="40" autocomplete="given-name">
+    <button onclick="confirmName()">Zaczynam ✓</button>
+  </div>
+</div>
+
+<div class="name-bar">
+  <label>Wypełnia</label>
+  <input type="text" id="wname" placeholder="wpisz imię..." maxlength="40" readonly>
+</div>
+<div class="prog-wrap">
+  <div class="prog-info">
+    <span>Zapisane w tej sekcji</span>
+    <span id="ptxt">0 z 0</span>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+</div>
+
+<main id="fbody"></main>
+
+<div class="sbot" id="sbot">
+  <div class="dot live" id="sdot"></div>
+  <span id="smsg">Gotowy — wpisuj stany</span>
+</div>
+
+<div class="toast" id="tst"></div>
+
+<script>
+const SB_URL='https://pzkvbtdpgcazkiwpxihp.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6a3ZidGRwZ2Nhemtpd3B4aWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjU4NzQsImV4cCI6MjA5NDEwMTg3NH0.2P7hSYht2T0p7wo4M8Wd3v43zOWtIlm68nHhhXUpH7U';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+
+let prods=[],today={},winter=false,l1='makro',l2='Magazynek';
+let worker='';
+let saveTimers={};
+
+const TODAY=new Date().toISOString().slice(0,10);
+const L1CATS={makro:null,syropy:['Syropy'],rozne:['Inne'],herbaty:['Herbaty']};
+
+function toast(m,err=false){
+  const e=document.getElementById('tst');
+  e.textContent=m;e.className='toast on'+(err?' err':'');
+  setTimeout(()=>e.className='toast',2500);
+}
+function setStatus(saving=false,msg=''){
+  const def=saving?'Zapisuję...':'Wszystko zapisane ✓';
+  const txt=msg||def;
+  if(saving){
+    document.getElementById('sbot').innerHTML='<div class="spin"></div><span>'+txt+'</span>';
+  } else {
+    document.getElementById('sbot').innerHTML='<div class="dot live"></div><span>'+txt+'</span>';
+  }
+}
+function setDate(){
+  const d=new Date();
+  document.getElementById('hdate').innerHTML=
+    d.toLocaleDateString('pl-PL',{weekday:'short',day:'numeric',month:'short'})
+    +'<br>'+d.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'});
+}
+function view(){
+  const cats=l1==='makro'?[l2]:L1CATS[l1];
+  return prods.filter(p=>cats&&cats.includes(p.kategoria));
+}
+
+function confirmName(){
+  const v=document.getElementById('overlay-input').value.trim();
+  if(!v){document.getElementById('overlay-input').focus();return;}
+  worker=v;
+  document.getElementById('wname').value=v;
+  document.getElementById('wname').classList.add('ok');
+  document.getElementById('overlay').classList.remove('on');
+  setStatus(false,'Gotowy — wpisuj stany');
+}
+document.getElementById('overlay-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter')confirmName();
+});
+document.getElementById('wname').addEventListener('click',()=>{
+  document.getElementById('overlay-input').value=worker;
+  document.getElementById('overlay').classList.add('on');
+  setTimeout(()=>document.getElementById('overlay-input').focus(),100);
+});
+
+async function init(){
+  setDate();setInterval(setDate,30000);
+  const{data:u}=await sb.from('magazyn_ustawienia').select('wartosc').eq('klucz','tryb_zimowy').single();
+  winter=u?.wartosc==='true';
+  const{data:p,error}=await sb.from('magazyn_produkty').select('*').eq('aktywny',true).order('kolejnosc');
+  if(error||!p?.length){
+    document.getElementById('fbody').innerHTML='<div class="load">Błąd połączenia — sprawdź internet</div>';
+    return;
+  }
+  prods=p;
+  const ids=p.map(x=>x.id);
+  const{data:s}=await sb.from('magazyn_stany')
+    .select('produkt_id,ilosc,notatka,pracownik,zapisano_o')
+    .in('produkt_id',ids)
+    .gte('zapisano_o',TODAY+'T00:00:00')
+    .order('zapisano_o',{ascending:false});
+  if(s)s.forEach(r=>{if(!today[r.produkt_id])today[r.produkt_id]=r;});
+  render();
+}
+
+function render(){
+  const ps=view();
+  const body=document.getElementById('fbody');
+  body.innerHTML='';
+  if(!ps.length){body.innerHTML='<div class="load">Brak produktów w tej sekcji.</div>';prog();return;}
+  const tc=ps.filter(p=>today[p.id]).length;
+  if(tc>0){
+    const b=document.createElement('div');b.className='today-banner';
+    b.innerHTML=`⚡ <strong>Dzisiaj wpisano ${tc} pozycji</strong> — widoczne poniżej. Możesz zmienić.`;
+    body.appendChild(b);
+  }
+  const hasSea=ps.some(p=>p.tylko_zima);
+  if(hasSea&&!winter){
+    const n=document.createElement('div');n.className='sea-notice';
+    n.innerHTML='❄️ <strong>Produkty sezonowe ukryte.</strong> Szef włączy je w sezonie zimowym.';
+    body.appendChild(n);
+  }
+  ps.forEach(p=>body.appendChild(buildCard(p)));
+  prog();
+}
+
+function buildCard(p){
+  const sv=today[p.id];
+  const disabled=p.wygaszany||(p.tylko_zima&&!winter);
+  const val=sv!=null?sv.ilosc:'';
+  const note=sv?.notatka||'';
+  const savedByOther=sv&&sv.pracownik&&sv.pracownik!==worker;
+
+  let cls='pcard';
+  if(disabled)cls+=' off';
+  else if(p.tylko_zima&&winter)cls+=' seasonal';
+  else if(sv!=null){
+    cls+=parseFloat(sv.ilosc)===0?' zero':' ok';
+  }
+
+  const d=document.createElement('div');
+  d.className=cls;d.id='c'+p.id;
+
+  let meta='';
+  if(p.jednostka)meta+=`<span class="bunit">${p.jednostka}</span>`;
+  if(p.tylko_zima)meta+=`<span class="bwinter">❄️ Tylko zima</span>`;
+  if(p.wygaszany)meta+=`<span class="bphase">Wygaszany</span>`;
+
+  let who='';
+  if(sv)who=`<div class="${savedByOther?'cwho':'saved-badge'}">${savedByOther?'Wpisał: '+sv.pracownik:'✓ Zapisano'}</div>`;
+
+  d.innerHTML=`
+    <div class="ctop">
+      <div>
+        <div class="pname">${p.nazwa}</div>
+        ${meta?`<div class="pmeta">${meta}</div>`:''}
+        ${who}
+      </div>
+      <button class="cbtn" onclick="clr(${p.id})">×</button>
+    </div>
+    <div class="cbot">
+      <input class="qinput" id="q${p.id}" type="number" min="0" step="0.1"
+        placeholder="-" inputmode="decimal" value="${val}"
+        oninput="onInput(this,${p.id})" onblur="saveNow(${p.id})">
+      <button class="nbtn${note?' on':''}" id="nb${p.id}" onclick="tnote(${p.id})">
+        ${note?'📝 uwaga':'+ uwaga'}
+      </button>
+    </div>
+    <textarea class="ntxt${note?' on':''}" id="nt${p.id}"
+      placeholder="np. opakowanie uszkodzone, kończy się termin..." rows="2"
+      onblur="saveNow(${p.id})">${note}</textarea>`;
+  return d;
+}
+
+function onInput(el,id){
+  const c=document.getElementById('c'+id);
+  c.classList.remove('ok','zero','seasonal');
+  if(el.value!=='')c.classList.add(parseFloat(el.value)===0?'zero':'ok');
+  prog();
+  clearTimeout(saveTimers[id]);
+  saveTimers[id]=setTimeout(()=>saveNow(id),800);
+}
+
+async function saveNow(id){
+  if(!worker)return;
+  const qel=document.getElementById('q'+id);
+  if(!qel||qel.value==='')return;
+
+  const ilosc=parseFloat(qel.value);
+  const notatka=(document.getElementById('nt'+id)?.value||'').trim();
+
+  const prev=today[id];
+  if(prev&&parseFloat(prev.ilosc)===ilosc&&(prev.notatka||'')===notatka)return;
+
+  clearTimeout(saveTimers[id]);
+  setStatus(true);
+
+  const{error}=await sb.from('magazyn_stany').insert([{
+    produkt_id:id,ilosc,pracownik:worker,notatka
+  }]);
+
+  if(error){setStatus(false,'Błąd zapisu!');toast('Błąd zapisu',true);return;}
+
+  today[id]={produkt_id:id,ilosc,notatka,pracownik:worker,zapisano_o:new Date().toISOString()};
+
+  const card=document.getElementById('c'+id);
+  if(card){
+    let who=card.querySelector('.cwho,.saved-badge');
+    if(!who){const ct=card.querySelector('.ctop > div');who=document.createElement('div');ct.appendChild(who);}
+    who.className='saved-badge';who.textContent='✓ Zapisano';
+  }
+  setStatus(false);
+  prog();
+}
+
+// Zapisz wszystko w bieżącej sekcji przed zmianą zakładki
+async function saveAll(){
+  if(!worker)return;
+  const ps=view().filter(p=>!p.wygaszany&&!(p.tylko_zima&&!winter));
+  await Promise.all(ps.map(p=>{
+    const qel=document.getElementById('q'+p.id);
+    if(!qel||qel.value==='')return Promise.resolve();
+    clearTimeout(saveTimers[p.id]);
+    return saveNow(p.id);
+  }));
+}
+
+function clr(id){
+  const q=document.getElementById('q'+id),n=document.getElementById('nt'+id),
+        b=document.getElementById('nb'+id),c=document.getElementById('c'+id);
+  q.value='';
+  if(n){n.value='';n.classList.remove('on');}
+  if(b){b.classList.remove('on');b.textContent='+ uwaga';}
+  c.classList.remove('ok','zero');
+  const who=c.querySelector('.cwho,.saved-badge');if(who)who.remove();
+  clearTimeout(saveTimers[id]);
+  prog();
+}
+
+function tnote(id){
+  const a=document.getElementById('nt'+id),b=document.getElementById('nb'+id);
+  const v=a.classList.toggle('on');
+  b.classList.toggle('on',v);
+  b.textContent=v?'📝 uwaga':'+ uwaga';
+  if(v)a.focus();
+}
+
+function prog(){
+  const ps=view().filter(p=>!p.wygaszany&&!(p.tylko_zima&&!winter));
+  const tot=ps.length,saved=ps.filter(p=>today[p.id]).length;
+  const pct=tot?Math.round(saved/tot*100):0;
+  document.getElementById('ptxt').textContent=saved+' z '+tot;
+  document.getElementById('pfill').style.width=pct+'%';
+}
+
+document.querySelectorAll('.tab-l1').forEach(t=>t.addEventListener('click',async()=>{
+  await saveAll();
+  l1=t.dataset.l1;
+  document.querySelectorAll('.tab-l1').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('l2wrap').classList.toggle('on',l1==='makro');
+  render();
+}));
+document.querySelectorAll('.tab-l2').forEach(t=>t.addEventListener('click',async()=>{
+  await saveAll();
+  l2=t.dataset.l2;
+  document.querySelectorAll('.tab-l2').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  render();
+}));
+
+init();
+</script>
+</body>
+</html>

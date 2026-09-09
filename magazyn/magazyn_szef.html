@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Magazyn – Piętro Cafe</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f6f3;--surface:#fff;--border:#e2e0d9;--border2:#ccc;
+  --text:#1a1916;--muted:#6b6a66;--accent:#1a5f3f;--accent-light:#e8f5ee;
+  --danger:#c0392b;--danger-light:#fdecea;--warn:#b8650a;--warn-light:#fef4e6;
+  --radius:10px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:15px;min-height:100vh}
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;position:sticky;top:0;z-index:100}
+.nav-brand{font-weight:600;font-size:16px;padding:14px 0;margin-right:24px;color:var(--accent)}
+.nav-tabs{display:flex}
+.nav-tab{padding:16px 18px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;font-family:inherit;transition:all .15s}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
+.nav-spacer{flex:1}
+.page{display:none;padding:24px 20px;max-width:980px;margin:0 auto}
+.page.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.card-title{font-weight:600;font-size:15px;margin-bottom:16px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:20px}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center}
+.stat-val{font-size:26px;font-weight:600}
+.stat-lbl{font-size:12px;color:var(--muted);margin-top:2px}
+.stat-box.warn .stat-val{color:var(--warn)}
+.stat-box.danger .stat-val{color:var(--danger)}
+.stat-box.ok .stat-val{color:var(--accent)}
+.stat-box.grey .stat-val{color:var(--muted)}
+.session-nav{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;flex-wrap:wrap}
+.date-label{flex:1;text-align:center}
+.date-main{font-size:16px;font-weight:600;text-transform:capitalize}
+.date-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.nav-arrow{width:38px;height:38px;border:1px solid var(--border);border-radius:8px;background:none;cursor:pointer;font-size:20px;color:var(--text);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.nav-arrow:hover:not(:disabled){background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.nav-arrow:disabled{opacity:.3;cursor:not-allowed}
+.session-dots{display:flex;gap:5px;align-items:center;flex-shrink:0}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .15s}
+.sdot.active{background:var(--accent);transform:scale(1.3)}
+.sdot:hover{background:var(--muted)}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border:1px solid var(--border);border-radius:20px;background:none;cursor:pointer;font-size:13px;color:var(--muted);font-family:inherit}
+.filter-btn:hover{border-color:var(--accent);color:var(--accent)}
+.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;padding:8px 12px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#faf9f7}
+.prod-name{font-weight:600;font-size:14px}
+.prod-cap{font-size:12px;color:var(--muted);font-weight:400;margin-left:4px;font-style:italic}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:12px;font-weight:500}
+.badge-ok{background:#e8f5ee;color:#155a32}
+.badge-low{background:var(--warn-light);color:#7a4208}
+.badge-out{background:var(--danger-light);color:#8b2020}
+.badge-ns{background:#f0ede8;color:#888}
+.state-val{font-size:15px;font-weight:600}
+.state-val.empty{color:var(--muted);font-weight:400;font-size:13px}
+.order-qty{font-weight:600;color:var(--accent)}
+.order-qty.none{color:var(--muted);font-weight:400}
+.order-list{display:flex;flex-direction:column}
+.order-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.order-item:last-child{border-bottom:none}
+.order-item-qty{font-size:18px;font-weight:600;color:var(--accent);white-space:nowrap}
+.settings-row{display:grid;grid-template-columns:1fr 90px 80px 80px 110px;gap:8px;align-items:start;padding:10px 0;border-bottom:1px solid var(--border)}
+.settings-row:last-child{border-bottom:none}
+.settings-header{display:grid;grid-template-columns:1fr 90px 80px 80px 110px;gap:8px;padding:6px 0 10px;border-bottom:2px solid var(--border);margin-bottom:2px}
+.settings-header span{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.s-input{height:34px;border:1px solid var(--border2);border-radius:7px;padding:0 8px;font-size:13px;width:100%;font-family:inherit;background:#fff}
+.s-input:focus{outline:none;border-color:var(--accent)}
+.btn-sm{height:32px;padding:0 10px;border:1px solid var(--border);border-radius:7px;background:none;cursor:pointer;font-size:12px;color:var(--muted);font-family:inherit}
+.btn-sm:hover{background:var(--danger-light);color:var(--danger);border-color:var(--danger)}
+.btn-save{height:32px;padding:0 12px;border:1px solid var(--accent);border-radius:7px;background:none;cursor:pointer;font-size:12px;color:var(--accent);font-family:inherit}
+.btn-save:hover{background:var(--accent-light)}
+.btn-add{height:38px;padding:0 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit}
+.btn-refresh{padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;font-size:13px;color:var(--text);font-family:inherit}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1916;color:#fff;padding:12px 20px;border-radius:var(--radius);font-size:14px;transition:transform .25s;z-index:999;opacity:0;white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast.success{background:var(--accent)}
+#toast.error{background:var(--danger)}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">Piętro Magazyn</span>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('boss',this)">Raport</button>
+    <button class="nav-tab" onclick="switchTab('order',this)">Lista zamówień</button>
+    <button class="nav-tab" onclick="switchTab('settings',this)">Ustawienia</button>
+  </div>
+  <span class="nav-spacer"></span>
+</nav>
+
+<div id="page-boss" class="page active">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <h1 style="font-size:20px;font-weight:600">Stan magazynu</h1>
+    <button class="btn-refresh" onclick="initBoss()">&#8635; Odśwież</button>
+  </div>
+  <div class="stats-grid" id="boss-stats"></div>
+  <div class="session-nav" id="session-nav" style="display:none">
+    <button class="nav-arrow" id="btn-prev" onclick="shiftSession(-1)">&#8249;</button>
+    <div class="date-label">
+      <div class="date-main" id="sess-date"></div>
+      <div class="date-sub" id="sess-sub"></div>
+    </div>
+    <div class="session-dots" id="sess-dots"></div>
+    <button class="nav-arrow" id="btn-next" onclick="shiftSession(+1)">&#8250;</button>
+  </div>
+  <div class="filter-bar" id="boss-filters"></div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Produkt</th><th>Stan</th><th>Kategoria</th>
+          <th>Min.</th><th>Cel</th><th>Status</th><th>Zamówić</th><th>Kto / kiedy</th>
+        </tr></thead>
+        <tbody id="boss-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="page-order" class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <h1 style="font-size:20px;font-weight:600">Lista zamówień</h1>
+    <button class="btn-refresh" onclick="loadOrderView()">&#8635; Odśwież</button>
+  </div>
+  <div id="order-content"></div>
+</div>
+
+<div id="page-settings" class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <h1 style="font-size:20px;font-weight:600">Produkty i progi zamówień</h1>
+    <button class="btn-add" onclick="showAdd()">+ Dodaj produkt</button>
+  </div>
+  <div id="add-form" style="display:none" class="card">
+    <div class="card-title">Nowy produkt</div>
+    <div style="display:grid;grid-template-columns:1fr 90px 90px 130px;gap:10px;margin-bottom:12px">
+      <input class="s-input" style="height:38px;text-align:left" id="new-nazwa" placeholder="Nazwa produktu">
+      <input class="s-input" style="height:38px;text-align:left" id="new-poj"   placeholder="1L, 2kg...">
+      <input class="s-input" style="height:38px;text-align:left" id="new-jedn"  placeholder="szt, kg...">
+      <select class="s-input" style="height:38px" id="new-kat">
+        <option>Magazynek</option><option>Kuchnia</option><option>Bar</option>
+        <option>Alkohole</option><option>Syropy</option><option>Inne</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-save" onclick="addProduct()">Zapisz</button>
+      <button class="btn-sm"   onclick="hideAdd()">Anuluj</button>
+    </div>
+  </div>
+  <div id="settings-content"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SB_URL='https://pzkvbtdpgcazkiwpxihp.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6a3ZidGRwZ2Nhemtpd3B4aWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjU4NzQsImV4cCI6MjA5NDEwMTg3NH0.2P7hSYht2T0p7wo4M8Wd3v43zOWtIlm68nHhhXUpH7U';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+
+let allProducts=[],sessionDates=[],sessionIdx=0,activeFilter='Wszystkie';
+
+function toast(msg,type=''){
+  const e=document.getElementById('toast');
+  e.textContent=msg;e.className='show '+type;
+  setTimeout(()=>e.className='',3000);
+}
+function switchTab(tab,btn){
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('page-'+tab).classList.add('active');
+  if(tab==='boss')initBoss();
+  if(tab==='order')loadOrderView();
+  if(tab==='settings')loadSettings();
+}
+function fmtDate(iso){
+  if(!iso)return'';
+  return new Date(iso+'T12:00:00').toLocaleDateString('pl-PL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+function fmtTime(iso){
+  if(!iso)return'';
+  return new Date(iso).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'});
+}
+
+async function initBoss(){
+  document.getElementById('boss-stats').innerHTML='<div class="empty">Ładowanie...</div>';
+  document.getElementById('boss-tbody').innerHTML='';
+  document.getElementById('session-nav').style.display='none';
+
+  const{data:prods,error}=await sb.from('magazyn_produkty').select('*').eq('aktywny',true).order('kolejnosc');
+  if(error||!prods?.length){document.getElementById('boss-stats').innerHTML='<div class="empty">Brak produktów</div>';return;}
+  allProducts=prods;
+
+  const{data:daty}=await sb.from('magazyn_stany').select('zapisano_o').order('zapisano_o',{ascending:false});
+  if(!daty?.length){document.getElementById('boss-stats').innerHTML='<div class="empty">Brak wpisanych stanów</div>';renderFilters();return;}
+
+  const seen=new Set();
+  sessionDates=[];
+  daty.forEach(r=>{const d=r.zapisano_o.slice(0,10);if(!seen.has(d)){seen.add(d);sessionDates.push(d);}});
+
+  sessionIdx=0;
+  renderFilters();
+  await renderSession();
+}
+
+function shiftSession(dir){
+  const ni=sessionIdx+dir;
+  if(ni<0||ni>=sessionDates.length)return;
+  sessionIdx=ni;renderSession();
+}
+function goSession(idx){sessionIdx=idx;renderSession();}
+
+async function renderSession(){
+  const date=sessionDates[sessionIdx];
+  document.getElementById('sess-date').textContent=fmtDate(date);
+  document.getElementById('sess-sub').textContent=
+    sessionIdx===0?'Najnowsza sesja':
+    sessionIdx===sessionDates.length-1?'Najstarsza sesja':
+    (sessionDates.length-1-sessionIdx)+' sesji wstecz';
+  document.getElementById('btn-prev').disabled=(sessionIdx>=sessionDates.length-1);
+  document.getElementById('btn-next').disabled=(sessionIdx<=0);
+  document.getElementById('session-nav').style.display='flex';
+
+  const MAX=9,total=sessionDates.length;
+  let s=Math.max(0,Math.min(sessionIdx-Math.floor(MAX/2),total-MAX));
+  const e=Math.min(total,s+MAX);s=Math.max(0,e-MAX);
+  let dots='';
+  for(let i=s;i<e;i++){
+    dots+='<div class="sdot'+(i===sessionIdx?' active':'')+'" onclick="goSession('+i+')" title="'+fmtDate(sessionDates[i])+'"></div>';
+  }
+  document.getElementById('sess-dots').innerHTML=dots;
+
+  const{data:stany}=await sb.from('magazyn_stany')
+    .select('produkt_id,ilosc,pracownik,zapisano_o')
+    .gte('zapisano_o',date+'T00:00:00').lte('zapisano_o',date+'T23:59:59')
+    .order('zapisano_o',{ascending:false});
+  const map={};
+  if(stany)stany.forEach(r=>{if(!map[r.produkt_id])map[r.produkt_id]=r;});
+  renderTable(map);
+}
+
+function renderTable(map){
+  let nOk=0,nLow=0,nOut=0,nNo=0;
+  const tbody=document.getElementById('boss-tbody');
+  tbody.innerHTML='';
+  allProducts.forEach(p=>{
+    const s=map[p.id];
+    const ilosc=s!=null?parseFloat(s.ilosc):null;
+    let status,badge,toOrder;
+    if(ilosc===null){status='—';badge='badge-ns';nNo++;toOrder='<span class="order-qty none">—</span>';}
+    else if(ilosc===0){status='Brak!';badge='badge-out';nOut++;toOrder='<span class="order-qty">'+(p.cel_stan??'?')+' '+(p.jednostka||'')+'</span>';}
+    else if(p.min_stan!==null&&ilosc<=p.min_stan){status='Za mało';badge='badge-low';nLow++;const q=p.cel_stan?Math.max(0,p.cel_stan-ilosc):'?';toOrder='<span class="order-qty">'+q+' '+(p.jednostka||'')+'</span>';}
+    else{status='OK';badge='badge-ok';nOk++;toOrder='<span class="order-qty none">–</span>';}
+
+    const stateCell=ilosc!==null
+      ?'<span class="state-val">'+ilosc+' <span style="font-size:12px;font-weight:400;color:var(--muted)">'+(p.jednostka||'')+'</span></span>'
+      :'<span class="state-val empty">—</span>';
+    const who=s?'<span style="font-size:13px">'+(s.pracownik||'?')+'</span><br><span style="font-size:11px;color:var(--muted)">'+fmtTime(s.zapisano_o)+'</span>':'—';
+    const cap=p.pojemnosc?'<span class="prod-cap">'+p.pojemnosc+'</span>':'';
+
+    const tr=document.createElement('tr');
+    tr.dataset.cat=p.kategoria;
+    tr.innerHTML=
+      '<td><span class="prod-name">'+p.nazwa+'</span>'+cap+'</td>'+
+      '<td>'+stateCell+'</td>'+
+      '<td style="color:var(--muted);font-size:13px">'+p.kategoria+'</td>'+
+      '<td style="color:var(--muted)">'+(p.min_stan??'—')+'</td>'+
+      '<td style="color:var(--muted)">'+(p.cel_stan??'—')+'</td>'+
+      '<td><span class="badge '+badge+'">'+status+'</span></td>'+
+      '<td>'+toOrder+'</td>'+
+      '<td>'+who+'</td>';
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('boss-stats').innerHTML=
+    '<div class="stat-box ok"><div class="stat-val">'+nOk+'</div><div class="stat-lbl">OK</div></div>'+
+    '<div class="stat-box warn"><div class="stat-val">'+nLow+'</div><div class="stat-lbl">Za mało</div></div>'+
+    '<div class="stat-box danger"><div class="stat-val">'+nOut+'</div><div class="stat-lbl">Brak!</div></div>'+
+    '<div class="stat-box grey"><div class="stat-val">'+nNo+'</div><div class="stat-lbl">Nie sprawdz.</div></div>'+
+    '<div class="stat-box"><div class="stat-val">'+allProducts.length+'</div><div class="stat-lbl">Produktów</div></div>';
+  applyFilter();
+}
+
+function renderFilters(){
+  const cats=['Wszystkie',...new Set(allProducts.map(p=>p.kategoria))];
+  document.getElementById('boss-filters').innerHTML=cats.map(c=>
+    '<button class="filter-btn'+(c===activeFilter?' active':'')+"\" onclick=\"setFilter('"+c+"')\">"+c+'</button>'
+  ).join('');
+}
+function setFilter(cat){
+  activeFilter=cat;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.textContent===cat));
+  applyFilter();
+}
+function applyFilter(){
+  document.querySelectorAll('#boss-tbody tr').forEach(tr=>{
+    tr.style.display=(activeFilter==='Wszystkie'||tr.dataset.cat===activeFilter)?'':'none';
+  });
+}
+
+async function loadOrderView(){
+  const el=document.getElementById('order-content');
+  el.innerHTML='<div class="empty">Ładowanie...</div>';
+  const{data:prods}=await sb.from('magazyn_produkty').select('*').eq('aktywny',true).order('kolejnosc');
+  if(!prods?.length){el.innerHTML='<div class="empty">Brak produktów.</div>';return;}
+  const{data:stany}=await sb.from('magazyn_stany')
+    .select('produkt_id,ilosc,zapisano_o').in('produkt_id',prods.map(p=>p.id))
+    .order('zapisano_o',{ascending:false});
+  const latest={};
+  if(stany)stany.forEach(r=>{if(!latest[r.produkt_id])latest[r.produkt_id]=r;});
+  const toOrder=prods.filter(p=>{
+    const s=latest[p.id];const ilosc=s?parseFloat(s.ilosc):null;
+    return ilosc!==null&&p.min_stan!==null&&ilosc<=p.min_stan;
+  }).map(p=>{const ilosc=parseFloat(latest[p.id].ilosc);return{...p,stan:ilosc,zamowic:p.cel_stan?Math.max(0,p.cel_stan-ilosc):null};});
+
+  if(!toOrder.length){
+    el.innerHTML='<div class="card" style="text-align:center;padding:40px"><div style="font-size:40px;margin-bottom:12px">✓</div><div style="font-size:16px;font-weight:500;color:var(--accent)">Wszystko na stanie!</div></div>';return;
+  }
+  const cats=[...new Set(toOrder.map(p=>p.kategoria))];
+  let html='<div style="margin-bottom:16px;font-size:14px;color:var(--muted)">Do zamówienia: <strong style="color:var(--text)">'+toOrder.length+' pozycji</strong></div>';
+  cats.forEach(cat=>{
+    const items=toOrder.filter(p=>p.kategoria===cat);
+    html+='<div class="card" style="margin-bottom:16px"><div class="card-title">'+cat+' <span style="font-weight:400;color:var(--muted);font-size:13px">('+items.length+')</span></div><div class="order-list">';
+    items.forEach(p=>{
+      const qty=p.zamowic!==null?p.zamowic+' '+(p.jednostka||''):'? (ustaw cel)';
+      const cap=p.pojemnosc?' <span style="font-size:12px;color:var(--muted);font-style:italic">'+p.pojemnosc+'</span>':'';
+      html+='<div class="order-item"><div><div style="font-weight:500;font-size:14px">'+p.nazwa+cap+'</div><div style="font-size:13px;color:var(--muted);margin-top:2px">Jest: '+p.stan+' · Min: '+p.min_stan+' · Cel: '+(p.cel_stan??'—')+'</div></div><div class="order-item-qty">'+qty+'</div></div>';
+    });
+    html+='</div></div>';
+  });
+  el.innerHTML=html;
+}
+
+async function loadSettings(){
+  const el=document.getElementById('settings-content');
+  el.innerHTML='<div class="empty">Ładowanie...</div>';
+  const{data,error}=await sb.from('magazyn_produkty').select('*').order('kolejnosc');
+  if(error){el.innerHTML='<div class="empty">Błąd.</div>';return;}
+  const cats=[...new Set(data.map(p=>p.kategoria))];
+  let html='';
+  cats.forEach(cat=>{
+    html+='<div class="card" style="margin-bottom:16px"><div class="card-title">'+cat+'</div>';
+    html+='<div class="settings-header"><span>Nazwa produktu</span><span>Pojemność</span><span>Min.</span><span>Cel</span><span></span></div>';
+    data.filter(p=>p.kategoria===cat).forEach(p=>{
+      const n=(p.nazwa||'').replace(/"/g,'&quot;'),pj=(p.pojemnosc||'');
+      const rowStyle=p.aktywny?'':'background:#fff0f0;border-radius:6px;opacity:.7';
+      const statusHtml=p.aktywny
+        ?'<div style="font-size:11px;color:var(--muted);margin-top:3px">aktywny</div>'
+        :'<div style="font-size:11px;font-weight:700;color:var(--danger);margin-top:3px">● UKRYTY</div>';
+      html+='<div class="settings-row" style="'+rowStyle+'">';
+      html+='<div><input class="s-input" style="text-align:left" id="sn-'+p.id+'" value="'+n+'" placeholder="nazwa" onblur="saveRow('+p.id+',true)">'+statusHtml+'</div>';
+      html+='<input class="s-input" style="text-align:left" id="sp-'+p.id+'" value="'+pj+'" placeholder="1L, 2kg..." onblur="saveRow('+p.id+',true)">';
+      html+='<input class="s-input" style="text-align:center" id="sm-'+p.id+'" value="'+(p.min_stan??'')+'" placeholder="—" type="number" min="0" step="0.1" onblur="saveRow('+p.id+',true)">';
+      html+='<input class="s-input" style="text-align:center" id="sc-'+p.id+'" value="'+(p.cel_stan??'')+'" placeholder="—" type="number" min="0" step="0.1" onblur="saveRow('+p.id+',true)">';
+      html+='<div style="display:flex;gap:4px;flex-wrap:wrap;padding-top:2px"><button class="btn-save" onclick="saveRow('+p.id+')">Zapisz</button><button class="btn-sm" onclick="toggleActive('+p.id+','+p.aktywny+')">'+(p.aktywny?'Ukryj':'Pokaż')+'</button>'+(p.wygaszany?'<button class="btn-sm" style="color:var(--warn);border-color:var(--warn)" onclick="toggleWygaszany('+p.id+',true)">↩ Przywróć</button>':'<button class="btn-sm" onclick="toggleWygaszany('+p.id+',false)">⊘ Wygaś</button>')+'</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+async function saveRow(id, silent=false){
+  const nazwa=document.getElementById('sn-'+id).value.trim();
+  const poj=document.getElementById('sp-'+id).value.trim();
+  const min=document.getElementById('sm-'+id).value;
+  const cel=document.getElementById('sc-'+id).value;
+  if(!nazwa){toast('Nazwa nie może być pusta','error');return;}
+  const{error}=await sb.from('magazyn_produkty').update({
+    nazwa,pojemnosc:poj,
+    min_stan:min===''?null:parseFloat(min),
+    cel_stan:cel===''?null:parseFloat(cel)
+  }).eq('id',id);
+  if(error)toast('Błąd zapisu','error');
+  else if(!silent)toast('Zapisano ✓','success');
+}
+
+async function toggleWygaszany(id, cur){
+  const newVal = !cur;
+  const{data}=await sb.from('magazyn_produkty').select('kolejnosc').eq('id',id).single();
+  const newKolejnosc = (data?.kolejnosc||0) + (newVal ? 800 : -800);
+  const{error}=await sb.from('magazyn_produkty')
+    .update({wygaszany:newVal, kolejnosc:newKolejnosc}).eq('id',id);
+  if(error)toast('Błąd','error');
+  else{toast(newVal?'Wygaszono — produkt na dole listy':'Przywrócono produkt','success');loadSettings();}
+}
+
+async function toggleActive(id,cur){
+  const{error}=await sb.from('magazyn_produkty').update({aktywny:!cur}).eq('id',id);
+  if(error)toast('Błąd','error');
+  else{toast(cur?'Produkt ukryty':'Produkt aktywny','success');loadSettings();}
+}
+
+function showAdd(){document.getElementById('add-form').style.display='block';}
+function hideAdd(){document.getElementById('add-form').style.display='none';}
+
+async function addProduct(){
+  const nazwa=document.getElementById('new-nazwa').value.trim();
+  const poj=document.getElementById('new-poj').value.trim();
+  const jedn=document.getElementById('new-jedn').value.trim();
+  const kat=document.getElementById('new-kat').value;
+  if(!nazwa){toast('Wpisz nazwę produktu','error');return;}
+  const{error}=await sb.from('magazyn_produkty').insert([{nazwa,pojemnosc:poj,jednostka:jedn,kategoria:kat}]);
+  if(error){toast('Błąd: '+error.message,'error');return;}
+  toast('Dodano: '+nazwa,'success');
+  ['new-nazwa','new-poj','new-jedn'].forEach(i=>document.getElementById(i).value='');
+  hideAdd();loadSettings();
+}
+
+initBoss();
+</script>
+</body>
+</html>
