@@ -284,6 +284,7 @@
     <div id="uproszczonaBox" style="display:none; margin-top:6px; padding:8px 12px; border-radius:4px; font-size:11px;"></div>
 
     <div id="warnBox" class="warn-box" style="display:none"></div>
+    <div id="dupInfo" class="warn-box" style="display:none"></div>
   </div>
 
   <div id="nrBox" class="nr-warn"></div>
@@ -362,7 +363,8 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let currentFile = null;
 let currentResult = null;
 let _kategoria = null;  // null = nie wybrano; 'kawiarnia'→DB null, 'ciasta'
-let _forceReplace = false;
+let _oczekujacyZapis = null;  // {status, uwaga} — zapis czekający na decyzję w oknie duplikatu
+let _zapisWToku = false;
 
 function handleFile(file) {
   if (!file) return;
@@ -398,7 +400,7 @@ async function skanuj() {
     const formData = new FormData();
     const fileName = 'paragon_' + Date.now() + (currentFile.type === 'application/pdf' ? '.pdf' : '.jpg');
     formData.append('file', fileToSend instanceof Blob ? new File([fileToSend], fileName, {type: 'image/jpeg'}) : fileToSend, fileName);
-    formData.append('force_replace', _forceReplace ? 'true' : 'false');
+    formData.append('tryb', 'skan');   // tylko odczyt — do bazy zapisuje dopiero przycisk TAK / WYŚLIJ MIMO TO
 
     const resp = await fetch(FN_URL, { method: 'POST', body: formData });
     const data = await resp.json();
@@ -415,23 +417,8 @@ async function skanuj() {
 
     currentResult = data;
     hideProgress();
-
-    // Duplikat — pokaż dane + modal potwierdzenia zamiast auto-nadpisywania
-    if (data.duplicate_detected) {
-      if (data.raw_ocr) {
-        document.getElementById('rawOcrText').value = data.raw_ocr;
-        showEl('rawOcrPanel');
-        document.getElementById('rawOcrContent').style.display = 'none';
-        document.getElementById('rawOcrToggle').textContent = '📋 Pokaż surowy tekst OCR ▼';
-      }
-      pokazWynik(data);
-      const d = data.dane || {};
-      document.getElementById('dupModalMsg').textContent =
-        'Faktura ' + (d.numer_faktury || '') + ' już istnieje w bazie. Czy nadpisać ją nową wersją?';
-      document.getElementById('dupModal').classList.add('open');
-      showEl('previewWrap');
-      return;
-    }
+    // Skan niczego nie zapisuje. Duplikat pokazuje się tylko jako ostrzeżenie
+    // w wyniku (pokazWynik) — o nadpisaniu pracownik decyduje dopiero przy zapisie.
 
     // Panel surowego tekstu OCR
     if (data.raw_ocr) {
@@ -495,7 +482,6 @@ function pokazWynik(data) {
     warn.className = 'warn-box';  // reset po ewentualnym alarmie krytycznym
     warn.textContent = '⚠️ Inny sklep — sprawdź dane ręcznie przed potwierdzeniem.';
     warn.style.display = 'block';
-    document.getElementById('dupBox').style.display = 'none';
 
   } else {
     // ─── PARSER WŁASNY (Biedronka / Kaufland / ...) ──────────
@@ -668,6 +654,18 @@ function pokazWynik(data) {
     }
   }
 
+  // Ostrzeżenie o duplikacie — nic jeszcze nie jest zapisane.
+  const dupInfo = document.getElementById('dupInfo');
+  if (dupInfo) {
+    if (data.duplikat_id) {
+      dupInfo.innerHTML = '⚠️ <strong>TEN PARAGON JEST JUŻ W BAZIE</strong><br>'
+        + 'Ktoś zapisał go wcześniej. Jeśli klikniesz TAK, zapytam jeszcze, czy nadpisać zapisaną wersję.';
+      dupInfo.style.display = 'block';
+    } else {
+      dupInfo.style.display = 'none';
+    }
+  }
+
   showEl('resultCard');
   showEl('confirmSection');
 }
@@ -678,58 +676,100 @@ async function potwierdz(ok) {
     document.getElementById('katRequired').style.display = 'block';
     return;
   }
-  hideEl('confirmSection');
-  if (ok) { await zapiszStatus('potwierdzony', ''); showSuccess(true); }
-  else { showEl('problemSection'); }
+  if (ok) { await zapisz('potwierdzony', ''); }
+  else { hideEl('confirmSection'); showEl('problemSection'); }
 }
 
 async function wyslijZProblemem() {
-  const notatka = document.getElementById('problemText').value.trim();
-  await zapiszStatus('problem', notatka);
-  showSuccess(false);
+  const uwaga = document.getElementById('problemText').value.trim();
+  await zapisz('problem', uwaga);
 }
 
-async function zapiszStatus(status, notatka) {
-  if (!currentResult || !currentResult.plik_url) return;
-  const headers = {
-    'Authorization': 'Bearer ' + SUPABASE_KEY,
-    'apikey': SUPABASE_KEY,
-    'Content-Type': 'application/json',
-    'Prefer': 'return=minimal',
-  };
+// Pola poprawione przez pracownika na ekranie wyniku.
+// NIP-y i Sp/PTU tylko przy sklepach z własnym parserem — przy „innym sklepie"
+// te pola są ukryte i mogą trzymać wartości z poprzedniego skanu.
+function zbierzEdycje(custom) {
   const gv = id => (document.getElementById(id)?.value || '').trim();
-  const gn = id => { const v = parseFloat(document.getElementById(id)?.value); return isNaN(v) ? null : v; };
-  const brA = gn('rBruttoA'), brB = gn('rBruttoB'), brC = gn('rBruttoC');
-  const vaA = gn('rVatA'),    vaB = gn('rVatB'),    vaC = gn('rVatC');
-  const spParts = [], ptuParts = [];
-  if (brA !== null) spParts.push('A=' + brA.toFixed(2).replace('.', ','));
-  if (brB !== null) spParts.push('B=' + brB.toFixed(2).replace('.', ','));
-  if (brC !== null) spParts.push('C=' + brC.toFixed(2).replace('.', ','));
-  if (vaA !== null) ptuParts.push('A23%=' + vaA.toFixed(2).replace('.', ','));
-  if (vaB !== null) ptuParts.push('B8%='  + vaB.toFixed(2).replace('.', ','));
-  if (vaC !== null) ptuParts.push('C5%='  + vaC.toFixed(2).replace('.', ','));
+  const gn = id => {
+    const v = parseFloat(String(document.getElementById(id)?.value || '').replace(',', '.'));
+    return isNaN(v) ? null : v;
+  };
+  const e = {
+    numer_faktury:  gv('rNr'),
+    data_dokumentu: gv('rData'),
+    kwota_brutto:   gn('rSuma'),
+  };
+  if (custom) {
+    e.nip_sprzedawcy = gv('rNipS');
+    e.nip_nabywcy    = gv('rNipN');
+    e.brutto_a = gn('rBruttoA'); e.brutto_b = gn('rBruttoB'); e.brutto_c = gn('rBruttoC');
+    e.vat_a    = gn('rVatA');    e.vat_b    = gn('rVatB');    e.vat_c    = gn('rVatC');
+  }
+  return e;
+}
+
+// ZAPIS DO BAZY — wyłącznie tutaj, po kliknięciu TAK albo WYŚLIJ MIMO TO.
+// Wcześniej paragon zapisywał się już w chwili skanu, a ten przycisk tylko go
+// poprawiał — i to nieskutecznie: wysyłał kolumny brutto_a/b/c, których w tabeli
+// nie ma, więc baza odrzucała całą zmianę, a strona i tak pokazywała „Wysłano!".
+async function zapisz(status, uwaga, wymus) {
+  if (_zapisWToku) return;
+  if (!currentResult || !currentResult.plik_url) {
+    showError('Brak zeskanowanego paragonu — zrób zdjęcie jeszcze raz.');
+    return;
+  }
+  _zapisWToku = true;
+  hideError();
+  showProgress('Zapisywanie...', 'Wysyłam paragon do bazy');
+
+  const dane = currentResult.dane || {};
+  const custom = Object.prototype.hasOwnProperty.call(dane, 'suma_pln');
+  const payload = {
+    plik_url:       currentResult.plik_url,
+    plik_nazwa:     currentResult.plik_nazwa || null,
+    dostawca:       currentResult.dostawca || null,
+    dane:           dane,
+    raw_items_text: currentResult.raw_items_text || null,
+    raw_snippet:    currentResult.raw_snippet || null,
+    status:         status,
+    kategoria:      _kategoria === 'kawiarnia' ? null : _kategoria,
+    uwaga:          uwaga || null,
+    edycje:         zbierzEdycje(custom),
+    force_replace:  !!wymus,
+  };
+
   try {
-    const patchUrl = currentResult.paragon_id
-      ? SUPABASE_URL + '/rest/v1/paragony?id=eq.' + currentResult.paragon_id
-      : SUPABASE_URL + '/rest/v1/paragony?plik_url=eq.' + encodeURIComponent(currentResult.plik_url);
-    await fetch(patchUrl, {
-      method: 'PATCH', headers,
-      body: JSON.stringify({
-        status,
-        kategoria: _kategoria === 'kawiarnia' ? null : _kategoria,
-        numer_faktury: gv('rNr') || null,
-        data_dokumentu: gv('rData') || null,
-        nip_sprzedawcy: gv('rNipS') || null,
-        nip_nabywcy: gv('rNipN') || null,
-        kwota_brutto: gn('rSuma'),
-        brutto_a: brA, brutto_b: brB, brutto_c: brC,
-        vat_a: vaA, vat_b: vaB, vat_c: vaC,
-        netto_a: (brA !== null && vaA !== null) ? Math.round((brA - vaA)*100)/100 : null,
-        netto_b: (brB !== null && vaB !== null) ? Math.round((brB - vaB)*100)/100 : null,
-        netto_c: (brC !== null && vaC !== null) ? Math.round((brC - vaC)*100)/100 : null,
-      }),
-    });
-  } catch (e) { console.warn(e); }
+    const fd = new FormData();
+    fd.append('tryb', 'zapisz');
+    fd.append('payload', JSON.stringify(payload));
+    const resp = await fetch(FN_URL, { method: 'POST', body: fd });
+    let data = {};
+    try { data = await resp.json(); } catch (_) {}
+    hideProgress();
+
+    if (data.duplicate_detected) {
+      _oczekujacyZapis = { status: status, uwaga: uwaga };
+      const nr = (document.getElementById('rNr')?.value || '').trim();
+      document.getElementById('dupModalMsg').textContent =
+        'Paragon ' + nr + ' jest już w bazie. Nadpisać zapisaną wersję tym, co widzisz na ekranie?';
+      document.getElementById('dupModal').classList.add('open');
+      return;
+    }
+    if (!resp.ok || data.error || !data.paragon_id) {
+      throw new Error(data.error || ('Błąd serwera ' + resp.status));
+    }
+
+    currentResult.paragon_id = data.paragon_id;
+    currentResult.replaced = !!data.replaced;
+    hideEl('confirmSection'); hideEl('problemSection');
+    showSuccess(status === 'potwierdzony');
+  } catch (err) {
+    hideProgress();
+    showError('❌ NIE ZAPISANO — paragonu nie ma w bazie.\n' + err.message + '\nSpróbuj jeszcze raz.');
+    if (status === 'problem') showEl('problemSection'); else showEl('confirmSection');
+  } finally {
+    _zapisWToku = false;
+  }
 }
 
 function showSuccess(ok) {
@@ -787,12 +827,13 @@ function toggleVatEditWP() {
 
 function dupConfirm() {
   document.getElementById('dupModal').classList.remove('open');
-  _forceReplace = true;
-  skanuj();
+  const z = _oczekujacyZapis;
+  _oczekujacyZapis = null;
+  if (z) zapisz(z.status, z.uwaga, true);   // nadpisanie tylko za wyraźną zgodą
 }
 function dupCancel() {
   document.getElementById('dupModal').classList.remove('open');
-  _forceReplace = false;
+  _oczekujacyZapis = null;                  // nic nie zapisujemy
 }
 
 function setKategoria(val) {
@@ -804,7 +845,7 @@ function setKategoria(val) {
 
 function resetKategoria() {
   _kategoria = null;
-  _forceReplace = false;
+  _oczekujacyZapis = null;
   document.getElementById('btnKawiarnia').className = 'kat-btn';
   document.getElementById('btnCiasta').className    = 'kat-btn';
   document.getElementById('katRequired').style.display = 'none';

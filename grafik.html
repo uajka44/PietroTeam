@@ -83,6 +83,11 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  .sheet-info {
+    max-width: 420px; margin: 14px auto 0; text-align: center;
+    font-size: 10px; letter-spacing: 2px; color: #2e2a22;
+  }
+
   /* --- SETUP --- */
 </style>
 </head>
@@ -101,18 +106,24 @@
 </div>
 
 <script>
-const MIESIACE_ARKUSZ = ['styczeń','luty','marzec','kwiecień','maj','czerwiec',
-                         'lipiec','sierpień','wrzesień','październik','listopad','grudzień'];
+const MIESIACE_DIA = ['styczeń','luty','marzec','kwiecień','maj','czerwiec',
+                      'lipiec','sierpień','wrzesień','październik','listopad','grudzień'];
+const MIESIACE_NODIA = ['styczen','luty','marzec','kwiecien','maj','czerwiec',
+                        'lipiec','sierpien','wrzesien','pazdziernik','listopad','grudzien'];
 const MIESIACE_DISPLAY = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec',
                           'Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
 const DNI = ['Nd','Pn','Wt','Śr','Cz','Pt','Sb'];
+// nazwy dni z kolumny B — służą do sprawdzenia, czy trafiliśmy w dobry arkusz
+const DNI_PELNE = { 'niedziela':0, 'poniedziałek':1, 'wtorek':2, 'środa':3,
+                    'czwartek':4, 'piątek':5, 'sobota':6 };
 
 const SHEET_ID = '1oT_PYdf-UnFosZ_AlVaN3d-qsMogRUs-O3gyfCMwWXM';
 
 let currentYear  = new Date().getFullYear();
 let currentMonth = new Date().getMonth();
+let _req = 0;   // licznik żądań — chroni przed wyścigiem przy szybkim klikaniu strzałkami
 
-// ─── NAWIGACJA ────────────────────────────────
+// ─── NAWIGACJA ────────────────────────
 function changeMonth(delta) {
   currentMonth += delta;
   if (currentMonth > 11) { currentMonth = 0; currentYear++; }
@@ -120,61 +131,154 @@ function changeMonth(delta) {
   loadMonth(currentYear, currentMonth);
 }
 
-// ─── ŁADOWANIE ───────────────────────────────
+// ─── SZUKANIE ZAKŁADKI ───────────────
+// Zakładki są nazywane różnie: "wrzesien 26" (bez ogonków), "Sierpień 25" (z wielkiej),
+// "Grudzień2025" (bez spacji, pełny rok), " wrzesień 25" (ze spacją na początku)…
+// Google przy nietrafionej nazwie NIE zgłasza błędu — po cichu zwraca pierwszą zakładkę
+// skoroszytu. Dlatego próbujemy wariantów nazwy i za każdym razem sprawdzamy, co przyszło.
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function sheetCandidates(year, month) {
+  const lata = [String(year).slice(2), String(year)];
+  const bazy = [MIESIACE_NODIA[month], MIESIACE_DIA[month]];
+  const out = [];
+  [' ', ''].forEach(sep => lata.forEach(y => bazy.forEach(b => {
+    out.push(b + sep + y);
+    out.push(cap(b) + sep + y);
+  })));
+  return [...new Set(out.concat(out.map(n => ' ' + n)))];
+}
+
+const TAB_CACHE_KEY = 'pietro_grafik_zakladki';
+function cachedTab(year, month) {
+  try { return (JSON.parse(localStorage.getItem(TAB_CACHE_KEY)) || {})[year + '-' + month] || null; }
+  catch(e) { return null; }
+}
+function cacheTab(year, month, name) {
+  try {
+    const m = JSON.parse(localStorage.getItem(TAB_CACHE_KEY)) || {};
+    m[year + '-' + month] = name;
+    localStorage.setItem(TAB_CACHE_KEY, JSON.stringify(m));
+  } catch(e) {}
+}
+
+async function fetchSheet(name) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const csv = await res.text();
+  if (csv.includes('Workbook not found') || csv.trim().length < 5) return null;
+  return parseCSV(csv);
+}
+
+// Wyciąga dni z wierszy: kolA = data, kolB = dzień tygodnia, kolC = zm1, kolD = zm2.
+// Starsze arkusze mają w kolumnie A format DD/MM, nowsze MM/DD — stąd przełącznik `dmy`.
+function extractDays(rows, year, month, dmy) {
+  const days = [];
+  rows.forEach(row => {
+    if (!row[0]) return;
+    const raw = String(row[0]).trim();
+    let d = null;
+    const m1 = raw.match(/^(\d{1,2})\/(\d{1,2})$/);
+    const m2 = raw.match(/^(\d{1,2})\.(\d{1,2})\.?$/); // 01.09 — zawsze DD.MM
+    if (m1) {
+      const a = parseInt(m1[1]), b = parseInt(m1[2]);
+      d = dmy ? new Date(year, b-1, a) : new Date(year, a-1, b);
+    }
+    else if (m2) d = new Date(year, parseInt(m2[2])-1, parseInt(m2[1]));
+    else d = new Date(raw);
+    if (!d || isNaN(d)) return;
+    if (d.getMonth() !== month) return;
+    days.push({
+      date: d,
+      dow:  String(row[1]||'').trim().toLowerCase(),
+      zm1:  String(row[2]||'').trim(),
+      zm2:  String(row[3]||'').trim()
+    });
+  });
+  return days;
+}
+
+// Ile dni tygodnia z kolumny B zgadza się z kalendarzem
+function zgodnoscDni(days) {
+  let sprawdzone = 0, zgodne = 0;
+  days.forEach(d => {
+    if (DNI_PELNE[d.dow] !== undefined) { sprawdzone++; if (DNI_PELNE[d.dow] === d.date.getDay()) zgodne++; }
+  });
+  return { sprawdzone, zgodne };
+}
+
+// Sprawdza, czy to naprawdę ten miesiąc i ten rok. Google przy nietrafionej nazwie
+// podstawia pierwszą zakładkę skoroszytu, więc bez tej kontroli pokazalibyśmy cudze dane.
+// Przy okazji wybiera właściwy format daty (DD/MM albo MM/DD).
+function validateDays(rows, year, month) {
+  let best = null;
+  [false, true].forEach(dmy => {
+    const days = extractDays(rows, year, month, dmy);
+    if (days.length < 5) return;
+    const { sprawdzone, zgodne } = zgodnoscDni(days);
+    if (sprawdzone >= 3 && zgodne < sprawdzone * 0.8) return;
+    const ocena = sprawdzone ? zgodne / sprawdzone : 0.5;
+    if (!best || days.length > best.days.length ||
+        (days.length === best.days.length && ocena > best.ocena)) {
+      best = { days, ocena };
+    }
+  });
+  return best ? best.days : null;
+}
+
+// ─── ŁADOWANIE ──────────────────────
 async function loadMonth(year, month) {
+  const reqId = ++_req;
   const label = MIESIACE_DISPLAY[month] + ' ' + year;
   document.getElementById('monthLabel').textContent = label;
   const content = document.getElementById('content');
   content.innerHTML = `<div class="state-box"><div class="spinner"></div><br>Ładowanie…</div>`;
 
-  const shortYear = String(year).slice(2);
-  const sheetName = MIESIACE_ARKUSZ[month] + ' ' + shortYear;
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+  const znana = cachedTab(year, month);
+  const listy = znana ? [[znana], ...chunk(sheetCandidates(year, month), 4)]
+                      : chunk(sheetCandidates(year, month), 4);
 
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const csv = await res.text();
-    if (csv.includes('Workbook not found') || csv.trim().length < 5) {
-      content.innerHTML = `<div class="state-box">Brak grafiku dla: <strong>${label}</strong></div>`;
-      return;
-    }
-    const rows = parseCSV(csv);
-    render(rows, year, month);
-  } catch(e) {
-    content.innerHTML = `<div class="state-box">Błąd połączenia.<br><small>${e.message}</small></div>`;
+  let trafienie = null, blad = null;
+  for (const partia of listy) {
+    const wyniki = await Promise.all(partia.map(async nazwa => {
+      try {
+        const rows = await fetchSheet(nazwa);
+        return rows ? { nazwa, days: validateDays(rows, year, month) } : null;
+      } catch(e) { blad = e; return null; }
+    }));
+    if (reqId !== _req) return;                 // użytkownik przeszedł do innego miesiąca
+    trafienie = wyniki.find(w => w && w.days);
+    if (trafienie) break;
   }
+
+  if (reqId !== _req) return;
+
+  if (!trafienie) {
+    content.innerHTML = blad
+      ? `<div class="state-box">Błąd połączenia.<br><small>${blad.message}</small></div>`
+      : `<div class="state-box">Brak grafiku dla: <strong>${label}</strong>
+           <br><br><small>Szukam zakładki o nazwie w stylu
+           <strong>${MIESIACE_NODIA[month]} ${String(year).slice(2)}</strong>,
+           z datami tego miesiąca w kolumnie A<br>i dniami tygodnia w kolumnie B.</small></div>`;
+    return;
+  }
+
+  cacheTab(year, month, trafienie.nazwa);
+  render(trafienie.days, year, month, trafienie.nazwa);
+}
+
+function chunk(arr, n) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n));
+  return out;
 }
 
 // ─── RENDER ──────────────────────────────────
-function render(rows, year, month) {
+function render(days, year, month, nazwaZakladki) {
   const myName  = (localStorage.getItem('pietro_imie') || '').toLowerCase();
   const today   = new Date();
   const todayStr = `${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
-
-  // Parsuj wiersze: kolA=data (MM/DD lub tekst), kolC=zm1, kolD=zm2
-  const days = [];
-  rows.forEach(row => {
-    if (!row[0]) return;
-    const raw = String(row[0]).trim();
-    // obsłuż format MM/DD lub DD.MM lub datę ISO
-    let d = null;
-    const m1 = raw.match(/^(\d{1,2})\/(\d{1,2})$/);   // 07/01
-    const m2 = raw.match(/^(\d{1,2})\.(\d{1,2})\.?$/); // 01.07
-    if (m1) d = new Date(year, parseInt(m1[1])-1, parseInt(m1[2]));
-    else if (m2) d = new Date(year, parseInt(m2[2])-1, parseInt(m2[1]));
-    else { d = new Date(raw); }
-    if (!d || isNaN(d)) return;
-    // Upewnij się że to właściwy miesiąc
-    if (d.getMonth() !== month) return;
-    days.push({ date: d, zm1: String(row[2]||'').trim(), zm2: String(row[3]||'').trim() });
-  });
-
-  if (!days.length) {
-    document.getElementById('content').innerHTML =
-      `<div class="state-box">Brak danych dla tego miesiąca.</div>`;
-    return;
-  }
 
   // Stałe kolory per imię — zmień tutaj jeśli chcesz inny kolor dla danej osoby
   const NAME_MAP = {
@@ -243,7 +347,14 @@ function render(rows, year, month) {
     </div>`;
   }).join('');
 
-  document.getElementById('content').innerHTML = `<div class="day-list">${html}</div>`;
+  // Zakładka może już istnieć, ale być jeszcze pusta (kolumny zmian nieuzupełnione)
+  const pusty = days.every(d => !d.zm1 && !d.zm2);
+  const info = pusty
+    ? `<div class="state-box" style="margin:0 auto 14px">Grafik na ten miesiąc nie jest jeszcze uzupełniony.</div>`
+    : '';
+  const stopka = `<div class="sheet-info">arkusz: ${nazwaZakladki}</div>`;
+
+  document.getElementById('content').innerHTML = info + `<div class="day-list">${html}</div>` + stopka;
 
   const todayCard = document.getElementById('today-card');
   if (todayCard) {
