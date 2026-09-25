@@ -86,6 +86,13 @@ tr:hover td{background:#faf9f7}
 #toast.success{background:var(--accent)}
 #toast.error{background:var(--danger)}
 .empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px}
+.inl{height:30px;border:1px solid transparent;border-radius:6px;padding:0 6px;font-size:13px;font-family:inherit;background:transparent;color:var(--text);transition:border-color .15s,background .15s}
+tr:hover .inl,.inl:hover{border-color:var(--border2);background:#fff}
+.inl:focus{outline:none;border-color:var(--accent);background:#fff}
+.inl.num{width:72px;text-align:center}
+.inl.cap{display:block;width:130px;height:26px;margin-top:3px;font-size:12px;font-style:italic;color:var(--muted)}
+.inl.saved{border-color:var(--accent);background:var(--accent-light)}
+.inl.err{border-color:var(--danger);background:var(--danger-light)}
 </style>
 </head>
 <body>
@@ -250,46 +257,82 @@ async function renderSession(){
   renderTable(map);
 }
 
+let currentMap={};
+
+function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+function rowState(p,s){
+  const ilosc=s!=null?parseFloat(s.ilosc):null;
+  if(ilosc===null)return{key:'ns',status:'—',badge:'badge-ns',toOrder:'<span class="order-qty none">—</span>'};
+  if(ilosc===0)return{key:'out',status:'Brak!',badge:'badge-out',toOrder:'<span class="order-qty">'+(p.cel_stan??'?')+' '+(p.jednostka||'')+'</span>'};
+  if(p.min_stan!==null&&ilosc<=p.min_stan){const q=p.cel_stan?Math.max(0,p.cel_stan-ilosc):'?';return{key:'low',status:'Za mało',badge:'badge-low',toOrder:'<span class="order-qty">'+q+' '+(p.jednostka||'')+'</span>'};}
+  return{key:'ok',status:'OK',badge:'badge-ok',toOrder:'<span class="order-qty none">–</span>'};
+}
+
 function renderTable(map){
-  let nOk=0,nLow=0,nOut=0,nNo=0;
+  currentMap=map;
   const tbody=document.getElementById('boss-tbody');
   tbody.innerHTML='';
   allProducts.forEach(p=>{
     const s=map[p.id];
     const ilosc=s!=null?parseFloat(s.ilosc):null;
-    let status,badge,toOrder;
-    if(ilosc===null){status='—';badge='badge-ns';nNo++;toOrder='<span class="order-qty none">—</span>';}
-    else if(ilosc===0){status='Brak!';badge='badge-out';nOut++;toOrder='<span class="order-qty">'+(p.cel_stan??'?')+' '+(p.jednostka||'')+'</span>';}
-    else if(p.min_stan!==null&&ilosc<=p.min_stan){status='Za mało';badge='badge-low';nLow++;const q=p.cel_stan?Math.max(0,p.cel_stan-ilosc):'?';toOrder='<span class="order-qty">'+q+' '+(p.jednostka||'')+'</span>';}
-    else{status='OK';badge='badge-ok';nOk++;toOrder='<span class="order-qty none">–</span>';}
+    const st=rowState(p,s);
 
     const stateCell=ilosc!==null
       ?'<span class="state-val">'+ilosc+' <span style="font-size:12px;font-weight:400;color:var(--muted)">'+(p.jednostka||'')+'</span></span>'
       :'<span class="state-val empty">—</span>';
     const who=s?'<span style="font-size:13px">'+(s.pracownik||'?')+'</span><br><span style="font-size:11px;color:var(--muted)">'+fmtTime(s.zapisano_o)+'</span>':'—';
-    const cap=p.pojemnosc?'<span class="prod-cap">'+p.pojemnosc+'</span>':'';
 
     const tr=document.createElement('tr');
     tr.dataset.cat=p.kategoria;
+    tr.dataset.id=p.id;
     tr.innerHTML=
-      '<td><span class="prod-name">'+p.nazwa+'</span>'+cap+'</td>'+
+      '<td><span class="prod-name">'+p.nazwa+'</span>'+
+        '<input class="inl cap" data-f="pojemnosc" value="'+esc(p.pojemnosc)+'" placeholder="pojemność…" onchange="inlineSave('+p.id+',this)"></td>'+
       '<td>'+stateCell+'</td>'+
       '<td style="color:var(--muted);font-size:13px">'+p.kategoria+'</td>'+
-      '<td style="color:var(--muted)">'+(p.min_stan??'—')+'</td>'+
-      '<td style="color:var(--muted)">'+(p.cel_stan??'—')+'</td>'+
-      '<td><span class="badge '+badge+'">'+status+'</span></td>'+
-      '<td>'+toOrder+'</td>'+
+      '<td><input class="inl num" type="number" min="0" step="0.1" data-f="min_stan" value="'+esc(p.min_stan)+'" placeholder="—" onchange="inlineSave('+p.id+',this)"></td>'+
+      '<td><input class="inl num" type="number" min="0" step="0.1" data-f="cel_stan" value="'+esc(p.cel_stan)+'" placeholder="—" onchange="inlineSave('+p.id+',this)"></td>'+
+      '<td class="c-status"><span class="badge '+st.badge+'">'+st.status+'</span></td>'+
+      '<td class="c-order">'+st.toOrder+'</td>'+
       '<td>'+who+'</td>';
     tbody.appendChild(tr);
   });
+  renderStats();
+  applyFilter();
+}
 
+async function inlineSave(id,el){
+  const f=el.dataset.f;
+  const raw=el.value.trim();
+  const val=f==='pojemnosc'?raw:(raw===''?null:parseFloat(raw.replace(',','.')));
+  if(f!=='pojemnosc'&&val!==null&&isNaN(val)){el.classList.add('err');toast('Niepoprawna liczba','error');return;}
+  el.classList.remove('saved','err');
+  const{error}=await sb.from('magazyn_produkty').update({[f]:val}).eq('id',id);
+  if(error){el.classList.add('err');toast('Błąd zapisu','error');return;}
+  el.classList.add('saved');setTimeout(()=>el.classList.remove('saved'),1200);
+  const p=allProducts.find(x=>x.id===id);
+  if(!p)return;
+  p[f]=val;
+  const tr=el.closest('tr');
+  const st=rowState(p,currentMap[id]);
+  tr.querySelector('.c-status').innerHTML='<span class="badge '+st.badge+'">'+st.status+'</span>';
+  tr.querySelector('.c-order').innerHTML=st.toOrder;
+  renderStats();
+}
+
+function renderStats(){
+  let nOk=0,nLow=0,nOut=0,nNo=0;
+  allProducts.forEach(p=>{
+    const k=rowState(p,currentMap[p.id]).key;
+    if(k==='ok')nOk++;else if(k==='low')nLow++;else if(k==='out')nOut++;else nNo++;
+  });
   document.getElementById('boss-stats').innerHTML=
     '<div class="stat-box ok"><div class="stat-val">'+nOk+'</div><div class="stat-lbl">OK</div></div>'+
     '<div class="stat-box warn"><div class="stat-val">'+nLow+'</div><div class="stat-lbl">Za mało</div></div>'+
     '<div class="stat-box danger"><div class="stat-val">'+nOut+'</div><div class="stat-lbl">Brak!</div></div>'+
     '<div class="stat-box grey"><div class="stat-val">'+nNo+'</div><div class="stat-lbl">Nie sprawdz.</div></div>'+
     '<div class="stat-box"><div class="stat-val">'+allProducts.length+'</div><div class="stat-lbl">Produktów</div></div>';
-  applyFilter();
 }
 
 function renderFilters(){
