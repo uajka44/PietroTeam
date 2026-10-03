@@ -162,8 +162,9 @@ function cacheTab(year, month, name) {
   } catch(e) {}
 }
 
-async function fetchSheet(name) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`;
+async function fetchSheet(name, range) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(name)}`
+            + (range ? '&range=' + encodeURIComponent(range) : '');
   const res = await fetch(url);
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const csv = await res.text();
@@ -263,6 +264,17 @@ async function loadMonth(year, month) {
            z datami tego miesiąca w kolumnie A<br>i dniami tygodnia w kolumnie B.</small></div>`;
     return;
   }
+
+  // Pod grafikiem są podsumowania liczbowe w tych samych kolumnach co zmiany. Gdy imion
+  // jest mniej niż liczb (początek miesiąca), Google uznaje kolumnę za liczbową i imiona
+  // przychodzą puste. Dlatego pobieramy jeszcze raz sam zakres z dniami.
+  try {
+    const dniWMiesiacu = new Date(year, month + 1, 0).getDate();
+    const rows = await fetchSheet(trafienie.nazwa, 'A1:D' + (dniWMiesiacu + 1));
+    if (reqId !== _req) return;
+    const days = rows && validateDays(rows, year, month);
+    if (days && days.length >= trafienie.days.length) trafienie.days = days;
+  } catch(e) {}
 
   cacheTab(year, month, trafienie.nazwa);
   render(trafienie.days, year, month, trafienie.nazwa);
