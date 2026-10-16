@@ -147,7 +147,10 @@ tr:hover .inl,.inl:hover{border-color:var(--border2);background:#fff}
 <div id="page-settings" class="page">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
     <h1 style="font-size:20px;font-weight:600">Produkty i progi zamówień</h1>
-    <button class="btn-add" onclick="showAdd()">+ Dodaj produkt</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn-refresh" id="btn-nieaktywne" onclick="toggleNieaktywne()">Pokaż nieaktywne</button>
+      <button class="btn-add" onclick="showAdd()">+ Dodaj produkt</button>
+    </div>
   </div>
   <div id="add-form" style="display:none" class="card">
     <div class="card-title">Nowy produkt</div>
@@ -385,6 +388,19 @@ async function loadOrderView(){
   el.innerHTML=html;
 }
 
+let showNieaktywne=false;
+
+function toggleNieaktywne(){
+  showNieaktywne=!showNieaktywne;
+  document.getElementById('btn-nieaktywne').textContent=showNieaktywne?'Ukryj nieaktywne':'Pokaż nieaktywne';
+  document.querySelectorAll('.row-nieaktywny').forEach(el=>{
+    el.style.display=showNieaktywne?'':'none';
+  });
+  document.querySelectorAll('.sep-nieaktywne').forEach(el=>{
+    el.style.display=showNieaktywne?'':'none';
+  });
+}
+
 async function loadSettings(){
   const el=document.getElementById('settings-content');
   el.innerHTML='<div class="empty">Ładowanie...</div>';
@@ -393,15 +409,22 @@ async function loadSettings(){
   const cats=[...new Set(data.map(p=>p.kategoria))];
   let html='';
   cats.forEach(cat=>{
+    const aktywne=data.filter(p=>p.kategoria===cat&&p.aktywny);
+    const nieaktywne=data.filter(p=>p.kategoria===cat&&!p.aktywny);
     html+='<div class="card" style="margin-bottom:16px"><div class="card-title">'+cat+'</div>';
     html+='<div class="settings-header"><span>Nazwa produktu</span><span>Pojemność</span><span>Min.</span><span>Cel</span><span></span></div>';
-    data.filter(p=>p.kategoria===cat).forEach(p=>{
+    [...aktywne,...nieaktywne].forEach(p=>{
       const n=(p.nazwa||'').replace(/"/g,'&quot;'),pj=(p.pojemnosc||'');
       const rowStyle=p.aktywny?'':'background:#fff0f0;border-radius:6px;opacity:.7';
+      const rowClass='settings-row'+(p.aktywny?'':' row-nieaktywny');
+      const rowDisplay=p.aktywny?'':' style="display:none;'+rowStyle+'"';
       const statusHtml=p.aktywny
         ?'<div style="font-size:11px;color:var(--muted);margin-top:3px">aktywny</div>'
         :'<div style="font-size:11px;font-weight:700;color:var(--danger);margin-top:3px">● UKRYTY</div>';
-      html+='<div class="settings-row" style="'+rowStyle+'">';
+      if(!p.aktywny&&aktywne.length>0&&data.filter(x=>x.kategoria===cat&&!x.aktywny)[0]?.id===p.id){
+        html+='<div class="sep-nieaktywne" style="display:none;border-top:2px dashed var(--border);margin:6px 0;font-size:11px;color:var(--muted);padding-top:6px;font-weight:600;letter-spacing:.05em">— NIEAKTYWNE —</div>';
+      }
+      html+='<div class="'+rowClass+'"'+(p.aktywny?' style="'+rowStyle+'"':rowDisplay)+'>';
       html+='<div><input class="s-input" style="text-align:left" id="sn-'+p.id+'" value="'+n+'" placeholder="nazwa" onblur="saveRow('+p.id+',true)">'+statusHtml+'</div>';
       html+='<input class="s-input" style="text-align:left" id="sp-'+p.id+'" value="'+pj+'" placeholder="1L, 2kg..." onblur="saveRow('+p.id+',true)">';
       html+='<input class="s-input" style="text-align:center" id="sm-'+p.id+'" value="'+(p.min_stan??'')+'" placeholder="—" type="number" min="0" step="0.1" onblur="saveRow('+p.id+',true)">';
