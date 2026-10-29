@@ -246,7 +246,31 @@ const DRINKS = [
 {id:149,name:"Piwo Imbirowo-Miodowe (bezalk.)",category:"grzance",icon:"🍺",tags:["piwo bezalkoholowe","imbir","miód","grzane"],variants:[{label:null,ingredients:["Kufel z rączką 500ml","Piwo Tyskie 0%","30ml soku imbirowego","10ml miodu","2 połówki pomarańczy z goździkami","3 plasterki imbiru","3 kawałki cynamonu","Szczypta kardamonu"],steps:["Wlewamy piwo do kufla, dodajemy wszystkie składniki.","Przelewamy do garnka i podgrzewamy, nie mieszając.","Po podgrzaniu wlewamy do kufla. Podajemy ze słomką."]}]},
 {id:150,name:"Wino Grzane Bezalkoholowe",category:"grzance",icon:"🍷",tags:["wino bezalkoholowe","anyż","cynamon","grzane"],variants:[{label:null,ingredients:["Naczynie","60ml wino białe BEZALKOHOLOWE","150ml wino czerwone BEZALKOHOLOWE","20ml soku z dzikiej róży (zamiennie syrop żurawinowy)","1 gwiazdka anyżu","3 owoce jałowca","4 goździki","1/2 laski cynamonu (połamana na 3-4 kawałki)"],steps:["Do naczynia wrzucamy wszystkie przyprawy.","Podgrzać wino do 70°C, dodać sok z dzikiej róży, wlać do naczynia.","Posypać 3 przetarciami Kamis lub przyprawą piernikową."]}]},
 {id:152,name:"Piwo Grzane Piętro Cafe",category:"grzance",icon:"🔥",tags:["piwo lane","dzika róża","imbir","cynamon","grzane"],variants:[{label:null,ingredients:["Kufel z rączką 500ml","Piwo lane","25ml soku z dzikiej róży (zamiennie syrop żurawinowy)","2 cienkie plastry imbiru","Plaster pomarańczy","5 goździków","1 poszarpana laska cynamonu","1 szczypta kardamonu"],steps:["Nalewamy piwo do kufla, dodajemy: pomarańczę (5 goździków), kardamon, cynamon, imbir, 25ml soku z dzikiej róży.","Wszystko do garnka i podgrzewamy NIE MIESZAJĄC.","Po podgrzaniu wlewamy do kufla, posypujemy Kamis lub przyprawą piernikową. Podajemy ze słomką."]}]},
-{id:153,name:"Wino Grzane Piętro Cafe",category:"grzance",icon:"🍷",tags:["wino","anyż","cynamon","jałowiec","grzane"],variants:[{label:null,ingredients:["Kubek 240ml","60ml wina białego","150ml wina czerwonego","20ml soku z dzikiej róży (zamiennie syrop żurawinowy)","1 gwiazdka anyżu","3 owoce jałowca","4 goździki","1/2 laski cynamonu (połamana na 3-4 kawałki)"],steps:["Do naczynia wrzucamy wszystkie przyprawy.","Podgrzać wino do 70°C, dodać sok z dzikiej róży, wlać do naczynia.","Posypać 3 przetarciami Kamis lub przyprawą piernikową."]}]},
+{id:153,name:"Wino Grzane Piętro Cafe",category:"grzance",icon:"🍷",tags:["wino","anyż","cynamon","jałowiec","pomarańcza","grzane","ekspres","dysza"],variants:[
+  {label:"Nowy (z ekspresu)",ingredientsLabel:"Co ma być przygotowane przy ekspresie",
+   ingredients:[
+    "Butelka bazy z lodówki (sprawdź datę, maks. 5 dni)",
+    "Osobny dzbanek TYLKO do wina, oznaczony, nigdy do mleka. Na dzbanku zaznaczony poziom 200ml (marker albo taśma)",
+    "Baristyczny termometr z klipsem (tarczowy, do 100°C), przypięty do dzbanka do wina",
+    "Szklanka żaroodporna z uszkiem 250–300ml",
+    "Dekoracje w pojemniku: plasterki pomarańczy (cienkie, ok. 0,5cm, kroimy rano, w lodówce, maks. 2 dni), laski cynamonu, goździki, anyż gwiazdkowy"],
+   steps:[
+    "Rozgrzej szklankę: nalej gorącej wody z ekspresu, odczekaj chwilę, wylej.",
+    "Włóż do szklanki dekorację: 1 laskę cynamonu i plasterek pomarańczy z 3 wbitymi goździkami. Gorące wino puści z nich aromat.",
+    "Wstrząśnij butelką i nalej bazę do dzbanka do wina do kreski 200ml.",
+    "Krótko przedmuchaj dyszę parą (nad tacką).",
+    "Zanurz końcówkę dyszy GŁĘBOKO w winie (nie przy powierzchni, nie robimy piany) i odkręć parę.",
+    "Kończ grzanie, gdy termometr pokaże 65°C. Termometr pokazuje z opóźnieniem, wino samo dojdzie do ok. 70°C. NIGDY powyżej 75°C. Grzanie trwa ok. 20–30 sekund.",
+    "NAJPIERW wyjmij dzbanek, DOPIERO POTEM zakręć parę. Zakręcenie pary w płynie zasysa wino do środka dyszy.",
+    "Od razu przetrzyj dyszę wilgotną ściereczką i daj krótki strzał pary.",
+    "Zalej dekorację w szklance gorącym winem.",
+    "Połóż 1 gwiazdkę anyżu na powierzchni. Jeśli chcesz plasterek na brzegu szklanki, zakładasz go dopiero teraz.",
+    "Podaj na spodku lub podkładce z serwetką, bo szklanka jest gorąca."],
+   notes:{title:"Czyszczenie",intro:"Po każdym grzańcu dysza ma być przetarta i przedmuchana, wtedy następne mleko nie złapie posmaku wina.",items:[
+    "<b>Po każdej porcji:</b> przetrzyj dyszę i daj strzał pary (krok 8), a dzbanek do wina od razu wypłucz gorącą wodą.",
+    "<b>Na koniec dnia:</b> odkręć końcówkę dyszy i namocz ją w gorącej wodzie ze środkiem do czyszczenia spieniacza (tym samym co do mleka). Sprawdź, czy otworki są drożne. Dzbanek do wina umyj z płynem.",
+    "<b>Jeśli z dyszy przy przedmuchu leci coś różowego</b>, końcówka idzie do namoczenia OD RAZU, nie na koniec dnia."]}},
+  {label:"Stary przepis",ingredients:["Kubek 240ml","210ml wina czerwonego","20ml soku z dzikiej róży (zamiennie syrop żurawinowy)","1 gwiazdka anyżu","3 owoce jałowca","4 goździki","1/2 laski cynamonu (połamana na 3-4 kawałki)"],steps:["Do naczynia wrzucamy wszystkie przyprawy.","Podgrzać wino do 70°C, dodać sok z dzikiej róży, wlać do naczynia.","Posypać 3 przetarciami Kamis lub przyprawą piernikową."]}]},
 {id:154,name:"Grzany Cydr",category:"grzance",icon:"🍎",tags:["cydr","apple pie","anyż","cynamon","grzane"],variants:[{label:null,ingredients:["Kufel 500ml (gruby)","500ml cydru","10ml syropu Monin Apple Pie","2 kawałki poszarpanego cynamonu","1 gwiazdka anyżu","4–5 goździków","4–5 kawałków jabłka"],steps:["Wlewamy cydr do garnka, wrzucamy wszystkie składniki.","Podgrzewamy do 70°C.","Przelewamy do kufla. Podajemy ze słomką."]}]},
 {id:155,name:"Grzany Aperol",category:"grzance",icon:"🍊",tags:["aperol","prosecco","jabłkowy","pomarańcza","grzany"],variants:[{label:null,ingredients:["Mała prążkowana szklanka","100ml soku jabłkowego","100ml Prosecco","40ml Aperolu","10ml syropu pomarańczowego","4 krople Angostura Bitters","1 grubszy plasterek pomarańczy","Słomka"],steps:["Wszystko poza pomarańczą podgrzewamy do 70°C.","Dodajemy plasterek pomarańczy.","Podajemy ze słomką."]}]}
 ,{id:156,name:"Zimowa Opowieść",category:"herbaty",icon:"❄️",tags:["zielona","rozmaryn","cynamon","anyż","żurawina"],variants:[{label:null,ingredients:["Filiżanka 500ml z talerzykiem","1 płaska łyżeczka zielonej herbaty w koszyczku","2 plasterki imbiru","Gałązka świeżego rozmarynu","Cała laska cynamonu","1 gwiazdka anyżu","4 kawałki suszonej żurawiny","1 plasterek suszonego jabłka","Woda 70°C","Miód lub cukier","Łyżeczka"],steps:["Do kubka wrzucamy: imbir, rozmaryn, laskę cynamonu, gwiazdkę anyżu, suszoną żurawinę, plasterek jabłka.","Zalewamy wodą 70°C.","Na kubek biały talerzyk z miodem/cukrem, łyżeczką i koszyczkiem zielonej herbaty. Plasterek cytryny i pomarańczy z goździkami."]}]}
@@ -291,8 +315,9 @@ function renderDetail(drink){
   const v=drink.variants[currentVariant];
   const img=v.image||drink.image||null;
   document.getElementById('detailBody').innerHTML=`
-    <div><div class="section-label">Składniki</div><div class="ingredients-box">${v.ingredients.map(ing=>`<div class="ingredient-item"><div class="ingredient-dot"></div><span>${ing}</span></div>`).join('')}</div></div>
+    <div><div class="section-label">${v.ingredientsLabel||'Składniki'}</div><div class="ingredients-box">${v.ingredients.map(ing=>`<div class="ingredient-item"><div class="ingredient-dot"></div><span>${ing}</span></div>`).join('')}</div></div>
     <div><div class="steps-label-row"><div class="section-label">Przygotowanie</div><button class="steps-play-btn" id="stepsPlayBtn" onclick="toggleStepsTTS()">▶ Czytaj kroki</button></div><div class="steps-list">${v.steps.map((s,i)=>`<div class="step-item"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('')}</div></div>
+    ${v.notes?`<div><div class="section-label">${v.notes.title}</div><div class="ingredients-box">${v.notes.intro?`<div class="ingredient-item"><span>${v.notes.intro}</span></div>`:''}${v.notes.items.map(n=>`<div class="ingredient-item"><div class="ingredient-dot"></div><span>${n}</span></div>`).join('')}</div></div>`:''}
     ${img?`<div class="photo-wrap"><img class="drink-photo" src="${img}" alt="" loading="lazy"></div>`:''}  `;
 }
 function setVariant(idx){stopTTS();currentVariant=idx;renderDetail(DRINKS.find(d=>d.id===currentDrinkId));}
