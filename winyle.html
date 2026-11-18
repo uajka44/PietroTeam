@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Winyle Piętro Cafe</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one narrow column — header with progress disc, toolbar, the shelf list, then the "dopisz" form. */
+:root{
+  --bg:#f3f4f1; --surface:#ffffff; --line:#dfe2dc; --fg:#1a1e1c; --muted:#646b66;
+  --accent:#2a46c4; --accent-soft:#e6eafb; --ok:#1f7a4a; --ok-soft:#e2f2e8; --warn:#9a5b00; --warn-soft:#fbefd9; --danger:#b3261e;
+  --groove:#2b2f2d; --label:#2a46c4;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Inter", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121514; --surface:#1a1e1c; --line:#2c312e; --fg:#e8ebe8; --muted:#9aa29d;
+  --accent:#93a6ff; --accent-soft:#252d52; --ok:#6fd39b; --ok-soft:#173226; --warn:#f0b65a; --warn-soft:#3a2c13; --danger:#ff8a80;
+  --groove:#0a0b0b; --label:#93a6ff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121514; --surface:#1a1e1c; --line:#2c312e; --fg:#e8ebe8; --muted:#9aa29d;
+  --accent:#93a6ff; --accent-soft:#252d52; --ok:#6fd39b; --ok-soft:#173226; --warn:#f0b65a; --warn-soft:#3a2c13; --danger:#ff8a80;
+  --groove:#0a0b0b; --label:#93a6ff; color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
+.wrap{max-width:860px;margin:0 auto;padding-block:28px 64px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));
+  display:flex;flex-direction:column;gap:20px}
+h1,h2{font-family:var(--f-display);text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,5vw,38px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:20px;font-weight:700}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* header */
+.head{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.disc{width:92px;height:92px;flex:none;border-radius:50%;position:relative;
+  background:conic-gradient(var(--ok) calc(var(--p,0)*1%), var(--groove) 0);}
+.disc::before{content:"";position:absolute;inset:6px;border-radius:50%;
+  background:repeating-radial-gradient(circle, var(--groove) 0 2px, color-mix(in srgb, var(--groove) 80%, #fff) 2px 3px);}
+.disc::after{content:"";position:absolute;inset:32px;border-radius:50%;background:var(--label);
+  box-shadow:inset 0 0 0 9px var(--label), inset 0 0 0 11px var(--bg)}
+.head-text{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.stats{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-variant-numeric:tabular-nums}
+.stats b{color:var(--fg);font-weight:600}
+.status{font-size:13px;color:var(--muted);min-height:1.2em}
+.status.err{color:var(--danger)}
+
+.jump{background:var(--accent);color:var(--surface);border:0;border-radius:12px;padding:12px 18px;font-weight:600;font-size:15px;cursor:pointer;flex:none}
+.jump:hover{filter:brightness(1.08)}
+@media (max-width:620px){.jump{width:100%}}
+.add.flash{box-shadow:0 0 0 3px var(--accent)}
+@media (prefers-reduced-motion:no-preference){.add{transition:box-shadow .4s}}
+.banner{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:14px}
+
+/* toolbar */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;position:sticky;top:env(safe-area-inset-top,0px);
+  background:var(--bg);padding-block:10px;z-index:5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.search{flex:1 1 220px;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:14px;font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.ghost{border:1px solid var(--line);background:transparent;border-radius:10px;padding:8px 12px;cursor:pointer;font-size:14px}
+.ghost:hover{background:var(--surface)}
+
+/* list */
+.shelf{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{display:grid;grid-template-columns:auto 44px minmax(0,1fr) minmax(0,240px);gap:12px;align-items:center;
+  padding:10px 14px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row.done{background:color-mix(in srgb, var(--ok-soft) 55%, transparent)}
+.cb{appearance:none;width:26px;height:26px;border:2px solid var(--muted);border-radius:7px;cursor:pointer;display:grid;place-items:center;margin:0;background:var(--surface)}
+.cb:checked{background:var(--ok);border-color:var(--ok)}
+.cb:checked::after{content:"";width:7px;height:13px;border:solid var(--surface);border-width:0 3px 3px 0;transform:translateY(-2px) rotate(45deg)}
+.cb:disabled{cursor:default;opacity:.6}
+.nr{font-family:var(--f-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.name{min-width:0;display:flex;flex-direction:column}
+.artist{font-weight:600;overflow-wrap:anywhere}
+.title{color:var(--muted);overflow-wrap:anywhere}
+.tag{display:inline-block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;
+  background:var(--accent-soft);color:var(--accent);border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:2px}
+.row.verify{background:var(--warn-soft);box-shadow:inset 5px 0 0 var(--warn)}
+.tag.check{background:var(--warn);color:var(--surface)}
+.hint{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:4px;font-size:13px;color:var(--warn);font-weight:500}
+.hint button{font-size:12px;font-weight:600;border:1px solid var(--warn);color:var(--warn);background:transparent;border-radius:6px;padding:2px 8px;cursor:pointer}
+.hint button:hover{background:var(--warn);color:var(--surface)}
+.chip.warnchip{border-color:var(--warn);color:var(--warn);font-weight:600}
+.chip.warnchip[aria-pressed="true"]{background:var(--warn);color:var(--surface);border-color:var(--warn)}
+.note{width:100%;box-sizing:border-box;border:1px solid transparent;background:transparent;border-radius:8px;padding:7px 9px;font-size:14px;resize:none;min-height:36px}
+.note::placeholder{color:var(--muted);opacity:.7}
+.note:hover{border-color:var(--line)}
+.note:focus{border-color:var(--accent);background:var(--bg)}
+.note.has{background:var(--warn-soft);color:var(--fg)}
+.rm{grid-column:3 / -1;justify-self:start;font-size:13px;color:var(--danger);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
+.rm-confirm{grid-column:3 / -1;display:flex;gap:8px;align-items:center;font-size:13px;flex-wrap:wrap}
+.rm-confirm button{font-size:13px;border-radius:7px;padding:4px 10px;cursor:pointer;border:1px solid var(--line);background:var(--surface)}
+.rm-confirm .yes{background:var(--danger);color:#fff;border-color:var(--danger)}
+.empty{padding:28px 18px;color:var(--muted);text-align:center}
+@media (max-width:620px){
+  .row{grid-template-columns:auto 34px minmax(0,1fr);row-gap:6px}
+  .note{grid-column:3 / -1}
+  .head .disc{width:72px;height:72px}.disc::after{inset:25px}
+}
+
+/* add form */
+.add{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.add p{margin:0;color:var(--muted);max-width:62ch}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fields .full{grid-column:1 / -1}
+@media (max-width:620px){.fields{grid-template-columns:1fr}}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);font-weight:500}
+.add input,.add textarea{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:15px;color:var(--fg)}
+.primary{align-self:flex-start;background:var(--accent);color:var(--surface);border:0;border-radius:10px;padding:10px 18px;font-weight:600;cursor:pointer}
+.primary:disabled{opacity:.5;cursor:default}
+.formmsg{font-size:14px;min-height:1.2em;color:var(--ok)}
+.formmsg.err{color:var(--danger)}
+@media (prefers-reduced-motion:no-preference){.row{transition:background-color .2s}}
+/* miejsce na przycisk menu z nav.js (prawy górny róg) */
+.wrap{padding-top:64px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="head">
+    <div class="disc" id="disc" role="img" aria-label="Postęp sprawdzania"></div>
+    <div class="head-text">
+      <span class="eyebrow">Piętro Cafe · inwentaryzacja płyt</span>
+      <h1>Winyle w kawiarni</h1>
+      <div class="stats" id="stats"><span>Wczytuję listę…</span></div>
+      <div class="status" id="status" aria-live="polite"></div>
+    </div>
+    <button class="jump" id="jump" type="button">+ Dopisz winyl spoza listy</button>
+  </header>
+
+  <div class="toolbar">
+    <input class="search" id="q" type="search" placeholder="Szukaj wykonawcy lub tytułu…" aria-label="Szukaj">
+    <div class="chips" id="chips">
+      <button class="chip" data-f="all" aria-pressed="true">Wszystkie</button>
+      <button class="chip" data-f="todo" aria-pressed="false">Niesprawdzone</button>
+      <button class="chip" data-f="done" aria-pressed="false">Są na półce</button>
+      <button class="chip" data-f="notes" aria-pressed="false">Z uwagami</button>
+      <button class="chip" data-f="added" aria-pressed="false">Dopisane</button>
+      <button class="chip warnchip" data-f="verify" aria-pressed="false">⚠ Do sprawdzenia nazwy</button>
+    </div>
+    <button class="ghost" id="copy" type="button">Kopiuj listę braków</button>
+  </div>
+
+  <section class="shelf" id="shelf" aria-label="Lista winyli">
+    <div class="empty" id="empty">Wczytuję winyle z bazy. Za chwilę pojawią się tu wszystkie płyty z listy.</div>
+  </section>
+
+  <section class="add" id="addbox">
+    <h2>Dopisz winyl spoza listy</h2>
+    <p>Płyta stoi w kawiarni, a nie ma jej na liście? Wpisz ją tutaj. Trafi na listę z oznaczeniem „dopisany” i od razu będzie zaznaczona jako obecna.</p>
+    <form id="addform" class="fields" autocomplete="off">
+      <label>Wykonawca<input id="a-artist" required maxlength="200" placeholder="np. Miles Davis"></label>
+      <label>Tytuł płyty<input id="a-title" maxlength="200" placeholder="np. Kind of Blue"></label>
+      <label class="full">Uwagi (opcjonalnie)<textarea id="a-note" rows="2" maxlength="1000" placeholder="np. stan okładki, gdzie stoi"></textarea></label>
+      <div class="full" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+        <button class="primary" id="a-btn" type="submit">Dopisz winyl</button>
+        <span class="formmsg" id="formmsg" aria-live="polite"></span>
+      </div>
+    </form>
+  </section>
+</div>
+
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const shelf = $('#shelf'), emptyEl = $('#empty'), statusEl = $('#status');
+  const docs = new Map();       // id -> data
+  const rows = new Map();       // id -> {el, cb, note, ...}
+  let db = null, canWrite = true, filter = 'all', query = '';
+  const timers = new Map();
+
+  function setStatus(t, err){ statusEl.textContent = t || ''; statusEl.classList.toggle('err', !!err); }
+  let savedTimer;
+  function saved(){ setStatus('Zapisano'); clearTimeout(savedTimer); savedTimer = setTimeout(()=>setStatus(''), 2000); }
+  function fail(e){ setStatus('Nie udało się zapisać. Sprawdź internet i spróbuj jeszcze raz.', true); console.error(e); }
+
+  const norm = s => (s||'').toLocaleLowerCase('pl').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ł/g,'l');
+
+  // Alfabetycznie po wykonawcy (jak w sklepie płytowym: "The" na początku pomijane), potem po tytule.
+  const coll = new Intl.Collator('pl', {sensitivity:'base', numeric:true});
+  const sortName = s => (s||'').trim().replace(/^the\s+/i,'');
+  function cmpDocs(a,b){ return coll.compare(sortName(a.artist), sortName(b.artist)) || coll.compare(a.title||'', b.title||'') || (a.nr||9999)-(b.nr||9999); }
+  function cmp(a,b){ return cmpDocs(a[1], b[1]); }
+
+  function makeRow(id){
+    const el = document.createElement('div'); el.className = 'row';
+    const cb = document.createElement('input'); cb.type='checkbox'; cb.className='cb'; cb.id='cb-'+id;
+    const nr = document.createElement('span'); nr.className='nr';
+    const name = document.createElement('label'); name.className='name'; name.htmlFor = cb.id;
+    const artist = document.createElement('span'); artist.className='artist';
+    const title = document.createElement('span'); title.className='title';
+    name.append(artist, title);
+    const note = document.createElement('textarea'); note.className='note'; note.rows=1; note.id='note-'+id;
+    note.placeholder='Dodaj uwagę…'; note.maxLength=1000; note.setAttribute('aria-label','Uwagi');
+    el.append(cb, nr, name, note);
+    const r = {el, cb, nr, name, artist, title, note, rm:null, hint:null};
+
+    cb.addEventListener('change', async ()=>{
+      if(!db) return;
+      const checked = cb.checked;
+      el.classList.toggle('done', checked);
+      setStatus('Zapisywanie…');
+      try{ await db.doc('winyle/'+id).update({checked, checkedAt: checked ? new Date().toISOString() : null}); saved(); }
+      catch(e){ cb.checked = !checked; el.classList.toggle('done', !checked); fail(e); }
+    });
+    const flush = async ()=>{
+      clearTimeout(timers.get(id)); timers.delete(id);
+      const v = note.value.trim(); const d = docs.get(id);
+      if(!db || !d || (d.note||'') === v) return;
+      setStatus('Zapisywanie…');
+      try{ await db.doc('winyle/'+id).update({note: v}); saved(); } catch(e){ fail(e); }
+    };
+    note.addEventListener('input', ()=>{ autosize(note); note.classList.toggle('has', !!note.value.trim()); clearTimeout(timers.get(id)); timers.set(id, setTimeout(flush, 900)); });
+    note.addEventListener('blur', flush);
+    rows.set(id, r);
+    return r;
+  }
+  function autosize(t){ t.style.height='auto'; t.style.height = Math.max(36, t.scrollHeight+2)+'px'; }
+
+  function addRemove(r, id){
+    if(r.rm) return;
+    const btn = document.createElement('button'); btn.type='button'; btn.className='rm'; btn.textContent='Usuń z listy';
+    btn.addEventListener('click', ()=>{
+      const box = document.createElement('div'); box.className='rm-confirm';
+      box.innerHTML = '<span>Na pewno usunąć ten dopisany winyl?</span>';
+      const yes = document.createElement('button'); yes.type='button'; yes.className='yes'; yes.textContent='Usuń';
+      const no = document.createElement('button'); no.type='button'; no.textContent='Anuluj';
+      box.append(yes, no); btn.replaceWith(box);
+      no.onclick = ()=> box.replaceWith(btn);
+      yes.onclick = async ()=>{ try{ await db.doc('winyle/'+id).delete(); saved(); } catch(e){ fail(e); box.replaceWith(btn); } };
+    });
+    r.rm = btn; r.el.append(btn);
+  }
+
+  function fill(r, id, d){
+    r.cb.checked = !!d.checked; r.el.classList.toggle('done', !!d.checked);
+    r.cb.disabled = !canWrite; r.note.readOnly = !canWrite;
+    r.nr.textContent = d.source === 'lista' ? String(d.nr).padStart(3,'0') : '+';
+    r.artist.textContent = d.artist || '(bez nazwy)';
+    if(d.source !== 'lista' && !r.artist.querySelector('.tag')){ const t=document.createElement('span'); t.className='tag'; t.textContent='dopisany'; r.artist.append(t); }
+    if(d.verify){ const t=document.createElement('span'); t.className='tag check'; t.textContent='⚠ do sprawdzenia'; r.artist.append(t); }
+    r.title.textContent = d.title || ''; r.title.hidden = !d.title;
+    r.el.classList.toggle('verify', !!d.verify);
+    if(d.verify){
+      if(!r.hint){
+        r.hint = document.createElement('span'); r.hint.className='hint';
+        r.hintText = document.createElement('span');
+        const ok = document.createElement('button'); ok.type='button'; ok.textContent='Sprawdzone, usuń oznaczenie';
+        ok.addEventListener('click', async ()=>{ if(!db) return; ok.disabled=true; setStatus('Zapisywanie…');
+          try{ await db.doc('winyle/'+id).update({verify:false}); saved(); }catch(e){ fail(e); ok.disabled=false; } });
+        r.hintOk = ok; r.hint.append(r.hintText, ok); r.name.append(r.hint);
+      }
+      r.hintText.textContent = d.verifyHint || 'Sprawdź na okładce wykonawcę i tytuł. Poprawną nazwę wpisz w uwagach.';
+      r.hintOk.hidden = !canWrite; r.hintOk.disabled = false;
+    } else if(r.hint){ r.hint.remove(); r.hint = null; }
+    if(document.activeElement !== r.note && !timers.has(id)){ r.note.value = d.note || ''; }
+    r.note.classList.toggle('has', !!(r.note.value||'').trim());
+    if(r.note.value) requestAnimationFrame(()=>autosize(r.note));
+    if(d.source !== 'lista' && canWrite) addRemove(r, id);
+  }
+
+  function matches(d){
+    if(filter==='todo' && d.checked) return false;
+    if(filter==='done' && !d.checked) return false;
+    if(filter==='notes' && !(d.note||'').trim()) return false;
+    if(filter==='added' && d.source==='lista') return false;
+    if(filter==='verify' && !d.verify) return false;
+    if(query){ const h = norm((d.artist||'')+' '+(d.title||'')+' '+(d.note||'')+' '+(d.nr||'')); if(!h.includes(query)) return false; }
+    return true;
+  }
+
+  function render(){
+    const sorted = [...docs.entries()].sort(cmp);
+    // remove gone
+    for(const [id, r] of rows){ if(!docs.has(id)){ r.el.remove(); rows.delete(id); } }
+    let prev = null, shown = 0;
+    for(const [id, d] of sorted){
+      const r = rows.get(id) || makeRow(id);
+      fill(r, id, d);
+      const expectedNext = prev ? prev.nextSibling : shelf.firstChild;
+      if(r.el !== expectedNext) shelf.insertBefore(r.el, expectedNext);
+      r.el.hidden = !matches(d); if(!r.el.hidden) shown++;
+      prev = r.el;
+    }
+    shelf.appendChild(emptyEl);
+    emptyEl.hidden = shown > 0;
+    if(!shown) emptyEl.textContent = docs.size ? 'Nic nie pasuje do wyszukiwania lub filtra.' : 'Lista jest pusta. Dopisz pierwszy winyl formularzem poniżej.';
+    stats();
+  }
+
+  function stats(){
+    const all = [...docs.values()], list = all.filter(d=>d.source==='lista');
+    const done = list.filter(d=>d.checked).length, added = all.length-list.length;
+    const notes = all.filter(d=>(d.note||'').trim()).length;
+    const p = list.length ? Math.round(done/list.length*100) : 0;
+    $('#disc').style.setProperty('--p', p);
+    $('#disc').setAttribute('aria-label', `Sprawdzono ${p}% listy`);
+    $('#stats').innerHTML = `<span><b>${done}</b> z <b>${list.length}</b> z listy jest na półce (${p}%)</span><span><b>${list.length-done}</b> niesprawdzonych</span><span><b>${added}</b> dopisanych</span><span><b>${notes}</b> z uwagami</span>`;
+    const verify = all.filter(d=>d.verify).length;
+    if(verify) $('#stats').insertAdjacentHTML('beforeend', `<span style="color:var(--warn)"><b style="color:var(--warn)">${verify}</b> do sprawdzenia nazwy</span>`);
+    const c = {all: all.length, todo: list.length-done + all.filter(d=>d.source!=='lista'&&!d.checked).length, done: all.filter(d=>d.checked).length, notes, added, verify};
+    document.querySelectorAll('.chip').forEach(b=>{ const base=b.dataset.label||(b.dataset.label=b.textContent); b.textContent = `${base} · ${c[b.dataset.f]}`; });
+  }
+
+  // toolbar
+  $('#chips').addEventListener('click', e=>{ const b=e.target.closest('.chip'); if(!b) return; filter=b.dataset.f;
+    document.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed', x===b)); render(); });
+  let qt; $('#q').addEventListener('input', e=>{ clearTimeout(qt); qt=setTimeout(()=>{ query = norm(e.target.value.trim()); render(); },120); });
+
+  $('#copy').addEventListener('click', ()=>{
+    const miss = [...docs.values()].filter(d=>d.source==='lista' && !d.checked).sort(cmpDocs)
+      .map(d=>`${d.nr}. ${d.artist}${d.title?' – '+d.title:''}${d.note?' ('+d.note+')':''}`);
+    const text = miss.length ? 'Brakujące / niesprawdzone winyle ('+miss.length+'):\n'+miss.join('\n') : 'Wszystkie winyle z listy są na półce.';
+    const done = ()=>setStatus(`Skopiowano listę braków (${miss.length})`);
+    try{ navigator.clipboard.writeText(text).then(done, ()=>fallbackCopy(text, done)); } catch(e){ fallbackCopy(text, done); }
+  });
+  function fallbackCopy(text, done){
+    const t=document.createElement('textarea'); t.value=text; document.body.append(t); t.select();
+    try{ document.execCommand('copy'); done(); } catch(e){ setStatus('Nie udało się skopiować.', true); } t.remove();
+  }
+
+  $('#jump').addEventListener('click', ()=>{
+    const box = $('#addbox');
+    const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    box.scrollIntoView({behavior: smooth ? 'smooth' : 'auto', block: 'center'});
+    setTimeout(()=>{ $('#a-artist').focus({preventScroll:true}); }, smooth ? 450 : 0);
+    box.classList.add('flash'); setTimeout(()=>box.classList.remove('flash'), 1400);
+  });
+
+  // add form
+  $('#addform').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const msg = $('#formmsg'); msg.classList.remove('err');
+    if(!db || !canWrite){ msg.textContent='Nie możesz dopisywać z tym linkiem.'; msg.classList.add('err'); return; }
+    const artist = $('#a-artist').value.trim(), title = $('#a-title').value.trim(), note = $('#a-note').value.trim();
+    if(!artist){ msg.textContent='Wpisz przynajmniej wykonawcę albo nazwę płyty.'; msg.classList.add('err'); return; }
+    $('#a-btn').disabled = true;
+    try{
+      await db.collection('winyle').add({nr:null, artist, title, note, checked:true, source:'dopisany', addedAt:new Date().toISOString(), checkedAt:new Date().toISOString()});
+      e.target.reset(); msg.textContent = `Dopisano: ${artist}${title?' – '+title:''}`;
+    }catch(err){ msg.textContent='Nie udało się dopisać. Spróbuj jeszcze raz.'; msg.classList.add('err'); console.error(err); }
+    $('#a-btn').disabled = false;
+  });
+
+  // ── Supabase: tabela public.winyle (zapis bez logowania, kluczem publicznym) ──
+  const SB_URL = 'https://pzkvbtdpgcazkiwpxihp.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6a3ZidGRwZ2Nhemtpd3B4aWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjU4NzQsImV4cCI6MjA5NDEwMTg3NH0.2P7hSYht2T0p7wo4M8Wd3v43zOWtIlm68nHhhXUpH7U';
+  const API = SB_URL + '/rest/v1/winyle';
+  const H = {apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json'};
+  const toDoc = r => ({nr: r.nr, artist: r.artist, title: r.title, checked: r.checked, checkedAt: r.checked_at, note: r.note,
+    source: r.source, verify: r.verify, verifyHint: r.verify_hint, addedAt: r.added_at});
+  const toRow = d => { const m = {checked:'checked', checkedAt:'checked_at', note:'note', verify:'verify', artist:'artist', title:'title', source:'source'};
+    const o = {}; for(const k in d){ if(m[k]) o[m[k]] = d[k]; } return o; };
+  async function req(url, opts){ const res = await fetch(url, opts); if(!res.ok) throw new Error(res.status + ' ' + await res.text()); return res.status === 204 ? null : res.json(); }
+  async function load(){
+    const data = await req(API + '?select=*', {headers: H, cache: 'no-store'});
+    docs.clear(); data.forEach(r => docs.set(r.id, toDoc(r))); render();
+  }
+  // ten sam interfejs, którego używa reszta strony
+  db = {
+    doc(path){ const id = path.split('/')[1]; return {
+      async update(d){ const rows = await req(API + '?id=eq.' + encodeURIComponent(id), {method:'PATCH', headers:{...H, Prefer:'return=representation'}, body: JSON.stringify(toRow(d))});
+        if(rows && rows[0]){ docs.set(id, toDoc(rows[0])); render(); } },
+      async delete(){ await req(API + '?id=eq.' + encodeURIComponent(id), {method:'DELETE', headers: H}); docs.delete(id); render(); }
+    }; },
+    collection(){ return {
+      async add(d){ const rows = await req(API, {method:'POST', headers:{...H, Prefer:'return=representation'}, body: JSON.stringify(toRow(d))});
+        if(rows && rows[0]){ docs.set(rows[0].id, toDoc(rows[0])); render(); } }
+    }; }
+  };
+
+  // wczytanie i odświeżanie co 10 s (żeby widzieć zaznaczenia innych osób)
+  (async ()=>{
+    try{ await load(); }
+    catch(e){ console.error(e); emptyEl.textContent = 'Nie mogę połączyć się z bazą. Sprawdź internet i odśwież stronę.'; $('#stats').textContent = ''; }
+    let busy = false;
+    const refresh = async ()=>{ if(busy || document.hidden) return; busy = true;
+      try{ await load(); if(statusEl.classList.contains('err')) setStatus(''); }
+      catch(e){ setStatus('Brak połączenia z bazą. Zmiany innych osób mogą nie być widoczne.', true); }
+      busy = false; };
+    setInterval(refresh, 10000);
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) refresh(); });
+  })();
+})();
+</script>
+<script src="nav.js"></script>
+</body>
+</html>
