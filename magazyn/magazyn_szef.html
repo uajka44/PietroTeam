@@ -69,9 +69,9 @@ tr:hover td{background:#faf9f7}
 .order-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
 .order-item:last-child{border-bottom:none}
 .order-item-qty{font-size:18px;font-weight:600;color:var(--accent);white-space:nowrap}
-.settings-row{display:grid;grid-template-columns:1fr 90px 80px 80px 110px;gap:8px;align-items:start;padding:10px 0;border-bottom:1px solid var(--border)}
+.settings-row{display:grid;grid-template-columns:1fr 90px 80px 80px 80px 110px;gap:8px;align-items:start;padding:10px 0;border-bottom:1px solid var(--border)}
 .settings-row:last-child{border-bottom:none}
-.settings-header{display:grid;grid-template-columns:1fr 90px 80px 80px 110px;gap:8px;padding:6px 0 10px;border-bottom:2px solid var(--border);margin-bottom:2px}
+.settings-header{display:grid;grid-template-columns:1fr 90px 80px 80px 80px 110px;gap:8px;padding:6px 0 10px;border-bottom:2px solid var(--border);margin-bottom:2px}
 .settings-header span{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .s-input{height:34px;border:1px solid var(--border2);border-radius:7px;padding:0 8px;font-size:13px;width:100%;font-family:inherit;background:#fff}
 .s-input:focus{outline:none;border-color:var(--accent)}
@@ -93,6 +93,19 @@ tr:hover .inl,.inl:hover{border-color:var(--border2);background:#fff}
 .inl.cap{display:block;width:130px;height:26px;margin-top:3px;font-size:12px;font-style:italic;color:var(--muted)}
 .inl.saved{border-color:var(--accent);background:var(--accent-light)}
 .inl.err{border-color:var(--danger);background:var(--danger-light)}
+.btn-edit{width:32px;height:32px;border:1px solid var(--border);border-radius:7px;background:none;cursor:pointer;font-size:15px;color:var(--muted);display:inline-flex;align-items:center;justify-content:center}
+.btn-edit:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+.num-val{font-size:14px}
+.num-val.empty{color:var(--muted)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:500;padding:16px}
+.modal-bg.show{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius);padding:20px;width:100%;max-width:420px;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.modal-title{font-weight:600;font-size:16px;margin-bottom:16px}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.modal-grid label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.modal-grid label.full{grid-column:1/-1}
+.modal-grid .s-input{height:38px;text-transform:none;letter-spacing:0;font-weight:400;color:var(--text)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -128,7 +141,7 @@ tr:hover .inl,.inl:hover{border-color:var(--border2);background:#fff}
       <table>
         <thead><tr>
           <th>Produkt</th><th>Stan</th><th>Kategoria</th>
-          <th>Min.</th><th>Cel</th><th>Status</th><th>Zamówić</th><th>Kto / kiedy</th>
+          <th>Min.</th><th>Cel</th><th>Status</th><th>Zamówić</th><th>Kto / kiedy</th><th></th>
         </tr></thead>
         <tbody id="boss-tbody"></tbody>
       </table>
@@ -168,7 +181,26 @@ tr:hover .inl,.inl:hover{border-color:var(--border2);background:#fff}
       <button class="btn-sm"   onclick="hideAdd()">Anuluj</button>
     </div>
   </div>
+  <div class="filter-bar" id="settings-filters"></div>
   <div id="settings-content"></div>
+</div>
+
+<div class="modal-bg" id="edit-modal" onclick="if(event.target===this)closeEdit()">
+  <div class="modal">
+    <div class="modal-title">Edytuj produkt</div>
+    <div class="modal-grid">
+      <label class="full">Nazwa<input class="s-input" id="ed-nazwa"></label>
+      <label>Pojemność<input class="s-input" id="ed-poj" placeholder="1L, 2kg..."></label>
+      <label>Jednostka<input class="s-input" id="ed-jedn" placeholder="szt, 0.7L..."></label>
+      <label class="full">Kategoria<select class="s-input" id="ed-kat"></select></label>
+      <label>Min.<input class="s-input" id="ed-min" type="number" min="0" step="0.1" placeholder="—"></label>
+      <label>Cel<input class="s-input" id="ed-cel" type="number" min="0" step="0.1" placeholder="—"></label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeEdit()">Anuluj</button>
+      <button class="btn-add" onclick="saveEdit()">Zapisz</button>
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -294,11 +326,12 @@ function renderTable(map){
         '<input class="inl cap" data-f="pojemnosc" value="'+esc(p.pojemnosc)+'" placeholder="pojemność…" onchange="inlineSave('+p.id+',this)"></td>'+
       '<td>'+stateCell+'</td>'+
       '<td style="color:var(--muted);font-size:13px">'+p.kategoria+'</td>'+
-      '<td><input class="inl num" type="number" min="0" step="0.1" data-f="min_stan" value="'+esc(p.min_stan)+'" placeholder="—" onchange="inlineSave('+p.id+',this)"></td>'+
-      '<td><input class="inl num" type="number" min="0" step="0.1" data-f="cel_stan" value="'+esc(p.cel_stan)+'" placeholder="—" onchange="inlineSave('+p.id+',this)"></td>'+
+      '<td>'+numCell(p.min_stan)+'</td>'+
+      '<td>'+numCell(p.cel_stan)+'</td>'+
       '<td class="c-status"><span class="badge '+st.badge+'">'+st.status+'</span></td>'+
       '<td class="c-order">'+st.toOrder+'</td>'+
-      '<td>'+who+'</td>';
+      '<td>'+who+'</td>'+
+      '<td><button class="btn-edit" title="Edytuj produkt" onclick="openEdit('+p.id+')">&#9998;</button></td>';
     tbody.appendChild(tr);
   });
   renderStats();
@@ -324,6 +357,57 @@ async function inlineSave(id,el){
   renderStats();
 }
 
+function numCell(v){
+  return v===null||v===undefined?'<span class="num-val empty">—</span>':'<span class="num-val">'+parseFloat(v)+'</span>';
+}
+
+const KATEGORIE=['Magazynek','Kuchnia','Bar','Alkohole','Syropy','Inne'];
+let editId=null;
+
+function openEdit(id){
+  const p=allProducts.find(x=>x.id===id);
+  if(!p)return;
+  editId=id;
+  document.getElementById('ed-nazwa').value=p.nazwa||'';
+  document.getElementById('ed-poj').value=p.pojemnosc||'';
+  document.getElementById('ed-jedn').value=p.jednostka||'';
+  document.getElementById('ed-min').value=p.min_stan??'';
+  document.getElementById('ed-cel').value=p.cel_stan??'';
+  const cats=[...new Set([...KATEGORIE,...allProducts.map(x=>x.kategoria).filter(Boolean)])];
+  document.getElementById('ed-kat').innerHTML=cats.map(c=>'<option'+(c===p.kategoria?' selected':'')+'>'+esc(c)+'</option>').join('');
+  document.getElementById('edit-modal').classList.add('show');
+  document.getElementById('ed-nazwa').focus();
+}
+function closeEdit(){
+  document.getElementById('edit-modal').classList.remove('show');
+  editId=null;
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&editId!==null)closeEdit();});
+
+async function saveEdit(){
+  if(editId===null)return;
+  const nazwa=document.getElementById('ed-nazwa').value.trim();
+  if(!nazwa){toast('Nazwa nie może być pusta','error');return;}
+  const num=id=>{const r=document.getElementById(id).value.trim().replace(',','.');return r===''?null:parseFloat(r);};
+  const min=num('ed-min'),cel=num('ed-cel');
+  if((min!==null&&isNaN(min))||(cel!==null&&isNaN(cel))){toast('Niepoprawna liczba','error');return;}
+  const upd={
+    nazwa,
+    pojemnosc:document.getElementById('ed-poj').value.trim(),
+    jednostka:document.getElementById('ed-jedn').value.trim(),
+    kategoria:document.getElementById('ed-kat').value,
+    min_stan:min,cel_stan:cel
+  };
+  const{error}=await sb.from('magazyn_produkty').update(upd).eq('id',editId);
+  if(error){toast('Błąd zapisu','error');return;}
+  const p=allProducts.find(x=>x.id===editId);
+  if(p)Object.assign(p,upd);
+  closeEdit();
+  toast('Zapisano ✓','success');
+  renderFilters();
+  renderTable(currentMap);
+}
+
 function renderStats(){
   let nOk=0,nLow=0,nOut=0,nNo=0;
   allProducts.forEach(p=>{
@@ -346,7 +430,7 @@ function renderFilters(){
 }
 function setFilter(cat){
   activeFilter=cat;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.textContent===cat));
+  document.querySelectorAll('#boss-filters .filter-btn').forEach(b=>b.classList.toggle('active',b.textContent===cat));
   applyFilter();
 }
 function applyFilter(){
@@ -411,8 +495,8 @@ async function loadSettings(){
   cats.forEach(cat=>{
     const aktywne=data.filter(p=>p.kategoria===cat&&p.aktywny);
     const nieaktywne=data.filter(p=>p.kategoria===cat&&!p.aktywny);
-    html+='<div class="card" style="margin-bottom:16px"><div class="card-title">'+cat+'</div>';
-    html+='<div class="settings-header"><span>Nazwa produktu</span><span>Pojemność</span><span>Min.</span><span>Cel</span><span></span></div>';
+    html+='<div class="card settings-cat" data-cat="'+esc(cat)+'" style="margin-bottom:16px"><div class="card-title">'+cat+'</div>';
+    html+='<div class="settings-header"><span>Nazwa produktu</span><span>Pojemność</span><span>Jednostka</span><span>Min.</span><span>Cel</span><span></span></div>';
     [...aktywne,...nieaktywne].forEach(p=>{
       const n=(p.nazwa||'').replace(/"/g,'&quot;'),pj=(p.pojemnosc||'');
       const rowStyle=p.aktywny?'':'background:#fff0f0;border-radius:6px;opacity:.7';
@@ -427,6 +511,7 @@ async function loadSettings(){
       html+='<div class="'+rowClass+'"'+(p.aktywny?' style="'+rowStyle+'"':rowDisplay)+'>';
       html+='<div><input class="s-input" style="text-align:left" id="sn-'+p.id+'" value="'+n+'" placeholder="nazwa" onblur="saveRow('+p.id+',true)">'+statusHtml+'</div>';
       html+='<input class="s-input" style="text-align:left" id="sp-'+p.id+'" value="'+pj+'" placeholder="1L, 2kg..." onblur="saveRow('+p.id+',true)">';
+      html+='<input class="s-input" style="text-align:left" id="sj-'+p.id+'" value="'+esc(p.jednostka)+'" placeholder="szt, 0.7L..." onblur="saveRow('+p.id+',true)">';
       html+='<input class="s-input" style="text-align:center" id="sm-'+p.id+'" value="'+(p.min_stan??'')+'" placeholder="—" type="number" min="0" step="0.1" onblur="saveRow('+p.id+',true)">';
       html+='<input class="s-input" style="text-align:center" id="sc-'+p.id+'" value="'+(p.cel_stan??'')+'" placeholder="—" type="number" min="0" step="0.1" onblur="saveRow('+p.id+',true)">';
       html+='<div style="display:flex;gap:4px;flex-wrap:wrap;padding-top:2px"><button class="btn-save" onclick="saveRow('+p.id+')">Zapisz</button><button class="btn-sm" onclick="toggleActive('+p.id+','+p.aktywny+')">'+(p.aktywny?'Ukryj':'Pokaż')+'</button>'+(p.wygaszany?'<button class="btn-sm" style="color:var(--warn);border-color:var(--warn)" onclick="toggleWygaszany('+p.id+',true)">↩ Przywróć</button>':'<button class="btn-sm" onclick="toggleWygaszany('+p.id+',false)">⊘ Wygaś</button>')+'</div>';
@@ -435,16 +520,35 @@ async function loadSettings(){
     html+='</div>';
   });
   el.innerHTML=html;
+  if(!cats.includes(settingsFilter))settingsFilter='Wszystkie';
+  document.getElementById('settings-filters').innerHTML=['Wszystkie',...cats].map(c=>
+    '<button class="filter-btn'+(c===settingsFilter?' active':'')+'" data-cat="'+esc(c)+'" onclick="setSettingsFilter(this.dataset.cat)">'+esc(c)+'</button>'
+  ).join('');
+  applySettingsFilter();
+  if(showNieaktywne)document.querySelectorAll('.row-nieaktywny,.sep-nieaktywne').forEach(e=>e.style.display='');
+}
+
+let settingsFilter='Wszystkie';
+function setSettingsFilter(cat){
+  settingsFilter=cat;
+  document.querySelectorAll('#settings-filters .filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.cat===cat));
+  applySettingsFilter();
+}
+function applySettingsFilter(){
+  document.querySelectorAll('#settings-content .settings-cat').forEach(c=>{
+    c.style.display=(settingsFilter==='Wszystkie'||c.dataset.cat===settingsFilter)?'':'none';
+  });
 }
 
 async function saveRow(id, silent=false){
   const nazwa=document.getElementById('sn-'+id).value.trim();
   const poj=document.getElementById('sp-'+id).value.trim();
+  const jedn=document.getElementById('sj-'+id).value.trim();
   const min=document.getElementById('sm-'+id).value;
   const cel=document.getElementById('sc-'+id).value;
   if(!nazwa){toast('Nazwa nie może być pusta','error');return;}
   const{error}=await sb.from('magazyn_produkty').update({
-    nazwa,pojemnosc:poj,
+    nazwa,pojemnosc:poj,jednostka:jedn,
     min_stan:min===''?null:parseFloat(min),
     cel_stan:cel===''?null:parseFloat(cel)
   }).eq('id',id);
